@@ -23,7 +23,7 @@ The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.j
 <img src="./doc/Peguy3DScreenshot.png">
 </div>
 
-[Péguy Vectors](https://github.com/Killfaeh/Peguy3D)
+[Péguy 3D](https://github.com/Killfaeh/Peguy3D)
 
 <div align="center">
 <img src="./doc/PeguyColliderScreenshot.png">
