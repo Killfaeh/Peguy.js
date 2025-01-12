@@ -46,4 +46,4 @@ The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.j
 <img src="./doc/PeguyDiffuserScreenshot.png">
 </div></br>
 
-Péguy Diffuser is an image editor powered by Stable Diffusion.
+Péguy Diffuser is an image editor powered by Stable Diffusion. (Work in progress)
