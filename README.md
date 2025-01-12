@@ -5,7 +5,7 @@ It provides a set of ready-to-use components and allows you to create your own.
 
 The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.js/wiki).
 
-## Examples of project developped with Péguy.js
+## Examples of projects developped with Péguy.js
 
 <div align="center">
 <img src="./doc/PeguyEditorScreenshot.png">
