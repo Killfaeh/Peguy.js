@@ -8,5 +8,7 @@ The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.j
 ## Examples of project developped with Péguy.js
 
 <div align="center">
-<img src="./doc/Examples.svg"></br>
+<img src="./doc/PeguyEditorScreenshot.png">
 </div>
+
+<a title="Péguy Editor" href="https://github.com/Killfaeh/PeguyEditor" >Péguy Editor</a>
