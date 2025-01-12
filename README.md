@@ -35,7 +35,7 @@ The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.j
 <img src="./doc/HarryMUDScreenshot.png">
 </div>
 
-[Harry MUD](https://github.com/Killfaeh/Harry MUD)
+[Harry MUD](https://github.com/Killfaeh/HarryMUD)
 
 <div align="center">
 <img src="./doc/PeguyDiffuserScreenshot.png">
