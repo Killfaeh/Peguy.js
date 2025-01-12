@@ -7,4 +7,8 @@ It provides a set of ready-to-use components and allows you to create your own.
 
 ## Examples
 
+<div align="center">
+<img src="./doc/Examples.svg"></br>
+</div>
+
 ## Installation
