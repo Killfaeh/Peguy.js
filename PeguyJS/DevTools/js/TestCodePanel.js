@@ -37,13 +37,13 @@ function TestCodePanel()
     this.displayError = function($error)
 	{
 		console.log($error);
-        console.log("POUET ! Une Erreur ! ");
+        //console.log("POUET ! Une Erreur ! ");
 		errorConsole.getById('errorConsole').innerHTML = $error.stack;
 	};
 
 	this.emptyError = function()
 	{
-        console.log("Je vide la console d'erreur.");
+        //console.log("Je vide la console d'erreur.");
 		errorConsole.getById('errorConsole').innerHTML = "";
 	};
 
