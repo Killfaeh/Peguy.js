@@ -1,6 +1,6 @@
 var PEGUY = 
 {
-	version: '20241206-1', 
+	version: '20250117-1', 
 	url: window.location.href,
 	mode: 'classic',
 	language: navigator.language || navigator.userLanguage,
