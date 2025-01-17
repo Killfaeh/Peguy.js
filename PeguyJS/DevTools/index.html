@@ -84,6 +84,7 @@
 									var tab = new Tab('<span>' + $fileList[i].name + '</span>', createClassPanel);
 									tabManager.addTab(tab);
 								}
+								/*
 								else if (jsonObject.type === 'formPanel')
 								{
 									var createFormPanel = new CreateFormPanel();
@@ -91,6 +92,7 @@
 									var tab = new Tab('<span>' + $fileList[i].name + '</span>', createFormPanel);
 									tabManager.addTab(tab);
 								}
+								//*/
 								else if (jsonObject.type === 'canvas2dClass')
 								{
 									var createClassPanel = new CreateCanvas2DClassPanel();
@@ -224,7 +226,7 @@
 					menuBarNewItem.addElement(menurBarCreateGUIComponentItem);
 
 					// Create form panel
-					
+					/*
 					var menurBarCreateFormItem = new MenuItem("Form panel");
 					
 					menurBarCreateFormItem.onAction = function()
@@ -236,6 +238,7 @@
 					};
 					
 					menuBarNewItem.addElement(menurBarCreateFormItem);
+					//*/
 					
 					// Create Canvas 2D component
 					
