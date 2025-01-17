@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 
-	<!-- ########################## -->
-	<!-- Javascript code test area. -->
-	<!-- ########################## -->
+	<!-- ############################### -->
+	<!-- Javascript code test interface. -->
+	<!-- ############################### -->
 
 	<head id="head" >
 		<meta charset="utf-8" />
@@ -15,7 +15,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name=“viewport” content=”initial-scale=1, viewport-fit=cover”>
 
-		<title>Test Frame</title>
+		<title>Sandbox</title>
 
 		<!-- Style of the HTML page displayed during the framework loading, can be adapted as required. -->
 		<style>
@@ -36,6 +36,23 @@
 				text-align: center;
 				font-family: Arial;
 			}
+			
+			.panel
+			{
+				position: absolute;
+				left: 7px;
+				right: 7px;
+				top: 7px;
+				bottom: 7px;
+				
+				padding: 10px;
+				border-radius: 5px;
+				border: solid 1px rgb(223, 223, 223);
+				background-color: rgb(255, 255, 255);
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				
+				overflow: auto;
+			}
 
 		</style>
 
@@ -48,6 +65,7 @@
 
 	<!-- DOM root, “main” id required. -->
 	<body id="main" >
+
 		<!-- Main screen area, the “screen” id is required. -->
 		<div id="screen">
 			<!-- Here you write the HTML you want for the loading screen. -->
@@ -60,41 +78,43 @@
 		<script type='text/javascript' >
 
 			// You can declare some functions and global variables here.
-            var execCode = function($code)
+            var testCodePanel;
+
+            var displayError = function($error)
             {
-                utils.execCode($code);
+                testCodePanel.displayError($error);
             };
+
+            var emptyError = function()
+            {
+                testCodePanel.emptyError();
+            };
+
+			var execTestCode = function()
+			{
+				if (utils.isset(testCodePanel))
+					testCodePanel.exec();
+			};
 
 			// Loader instantiation
 			// The variable must be called “Loader”.
 			// The first parameter specifies the position of the styles folder. 
 			// The second parameter specifies the style to be loaded.
-            var Loader = new Loader('../../', 'Default');
+			var Loader = new Loader('../../', 'Default');
 
 			// Loading optional library modules.
             Loader.addModules(['kanban', 'contentEditable', 'codeEditor', 'math', 'charts', 'nodes', 'canvas2D', 'canvas3D']); // All available modules
-			
+
 			// Redefining the this.onload function
 			// It will be triggered when the framework and the additional resources declared above are loaded.
 			Loader.onload = function()
-            {
+			{
 				// Application code
 				// Usually a simple entry point
-
-                document.getElementById('screen').removeAllChildren();
-
-                utils.displayExecCodeError = function($error)
-                {
-                    window.parent.displayError($error)
-                };
-
-                utils.emptyExecCodeError = function()
-                {
-                    window.parent.emptyError()
-                };
-
-				window.parent.execTestCode();
-            };
+				testCodePanel = new TestCodePanel();
+				PEGUY.emptyScreen();
+				PEGUY.appendToScreen(testCodePanel);
+			};
 
 			// The framework is loaded when the HTML page hosting the application has finished loading.
 			window.onload = function() { Loader.load(); };
