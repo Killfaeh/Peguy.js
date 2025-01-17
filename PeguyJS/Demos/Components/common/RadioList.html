@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<!-- ############################### -->
+	<!-- Javascript code test interface. -->
+	<!-- ############################### -->
+
+	<head id="head" >
+		<meta charset="utf-8" />
+
+		<!-- Disable annoying native mobile behaviors -->
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1" />
+		<meta name="viewport" content="width=device-width, maximum-scale=1" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name=“viewport” content=”initial-scale=1, viewport-fit=cover”>
+
+		<title>RadioList</title>
+
+		<!-- Style of the HTML page displayed during the framework loading, can be adapted as required. -->
+		<style>
+
+			#main, #screen
+			{
+				position: absolute;
+				left: 0px;
+				right: 0px;
+				top: 0px;
+				bottom: 0px;
+
+				overflow: hidden;
+
+				margin: 0px;
+				padding: 0px;
+
+				text-align: center;
+				font-family: Arial;
+			}
+			
+			.panel
+			{
+				position: absolute;
+				left: 7px;
+				right: 7px;
+				top: 7px;
+				bottom: 7px;
+				
+				padding: 10px;
+				border-radius: 5px;
+				border: solid 1px rgb(223, 223, 223);
+				background-color: rgb(255, 255, 255);
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				
+				overflow: auto;
+			}
+
+		</style>
+
+		<!-- Loading the syntax highlighting library. -->
+        <link type="text/css" rel="stylesheet" media="all" href="../../../DevTools/js/highlight/styles/vs.min.css"></link>
+        <script src="../../../DevTools/js/highlight/highlight.min.js"></script>
+        <script>if (typeof hljs !== 'undefined') { hljs.initHighlightingOnLoad(); }</script>
+
+	</head>
+
+	<!-- DOM root, “main” id required. -->
+	<body id="main" >
+
+		<!-- Main screen area, the “screen” id is required. -->
+		<div id="screen">
+			<!-- Here you write the HTML you want for the loading screen. -->
+			<p>Loading...</p>
+		</div>
+
+		<!-- Load the Loader that initializes the framework. -->
+		<script src='../../../Loader.js?token=0' ></script>
+
+		<script type='text/javascript' >
+
+			// You can declare some functions and global variables here.
+            var testCodePanel;
+
+            var displayError = function($error)
+            {
+                testCodePanel.displayError($error);
+            };
+
+            var emptyError = function()
+            {
+                testCodePanel.emptyError();
+            };
+
+			var execTestCode = function()
+			{
+				if (utils.isset(testCodePanel))
+					testCodePanel.exec();
+			};
+
+			// Loader instantiation
+			// The variable must be called “Loader”.
+			// The first parameter specifies the position of the styles folder. 
+			// The second parameter specifies the style to be loaded.
+			var Loader = new Loader('../../../../', 'Default');
+
+			// Loading optional library modules.
+            Loader.addModules(['kanban', 'contentEditable', 'codeEditor', 'math', 'charts', 'nodes', 'canvas2D', 'canvas3D']); // All available modules
+
+			// Redefining the this.onload function
+			// It will be triggered when the framework and the additional resources declared above are loaded.
+			Loader.onload = function()
+			{
+				// Application code
+				// Usually a simple entry point
+
+				var code =	"PEGUY.emptyScreen();\n\n"
+
+							+ "// Somewhere to display the user choice.\n\n"
+							+ "var userChoiceConsole = new Component('<p style=\"text-align: center;\" ></p>');\n"
+							+ "PEGUY.appendToScreen(userChoiceConsole);\n\n"
+
+							+ "// Create the options list.\n\n"
+							+ "var radioListOptions = [];\n\n"
+						
+							+ "for (var i = 0; i < 6; i++)\n"
+							+ "{\n"
+								+ "\tvar checked = false;\n\n"
+								+ "\tradioListOptions.push({ label: \"Option \" + i, value: i, checked: checked });\n"
+							+ "}\n\n"
+							
+							+ "// Create the radio list.\n\n"
+							+ "var currentValue = 1;\n"
+							+ "var nbColumns = 2;\n"
+							+ "var htmlSupport = false; // Define if HTML is supported in the labels\n\n"
+							+ "var radioList = new RadioList('radioList', radioListOptions, currentValue, nbColumns, htmlSupport);\n\n"
+
+							+ "// Define the events triggered by the radio list.\n\n"
+							+ "radioList.onChange = function()\n"
+							+ "{\n"
+								+ "\tvar value = radioList.getCurrentValue();\n\n"
+								+ "\tuserChoiceConsole.innerHTML = 'You choose ' + value;\n"
+							+ "};\n\n"
+
+							+ "PEGUY.appendToScreen(radioList);\n\n"
+							
+							+ "// Check one option\n"
+							+ "radioList.setCurrentValue(3);\n\n";
+
+				testCodePanel = new TestCodePanel(code);
+
+				PEGUY.emptyScreen();
+				PEGUY.appendToScreen(testCodePanel);
+			};
+
+			// The framework is loaded when the HTML page hosting the application has finished loading.
+			window.onload = function() { Loader.load(); };
+
+		</script>
+
+	</body>
+</html>
