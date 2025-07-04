@@ -136,10 +136,10 @@ function Demo01()
 	rect1.setX(-3.0);
 	rect1.setY(3.0);
 
-	var polygonVertices = [{x: -0.5, y: 0.25}, {x: 0.0, y: 0.0}, {x: 0.5, y: -0.5}, {x: 0.75, y: 0.0}, {x: 0.5, y: 0.5}];
+	//var polygonVertices = [{x: -0.5, y: 0.25}, {x: 0.0, y: 0.0}, {x: 0.5, y: -0.5}, {x: 0.75, y: 0.0}, {x: 0.5, y: 0.5}];
+	var polygonVertices = [[-0.5, 0.25], [0.0, 0.0], [0.5, -0.5], [0.75, 0.0], [0.5, 0.5]];
 
-	//var polygon = new GLPolygon([{x: 0.5, y: 0.5}, {x: 0.75, y: 0.0}, {x: 0.5, y: -0.5}, {x: 0.0, y: 0.0}, {x: -0.5, y: 0.25}]);
-	var polygon = new GLPolygon(polygonVertices);
+	var polygon = new GLPolygon(polygonVertices, 'z', true);
 	polygon.setMaterial(redMaterial);
 	//polygon.debug();
 	polygon.setVertexShaderName('vertex-material');
