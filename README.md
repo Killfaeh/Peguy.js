@@ -42,8 +42,9 @@ The documentation is available on the [Wiki](https://github.com/Killfaeh/Peguy.j
 [Harry MUD](https://github.com/Killfaeh/HarryMUD) is an interface to connect to your favorite MUDs. 
 </br></br>
 
-<div align="center">
+<!--<div align="center">
 <img src="./doc/PeguyDiffuserScreenshot.png">
 </div></br>
 
-Péguy Diffuser is an image editor powered by Stable Diffusion. (Work in progress)
+Péguy Diffuser is an image editor powered by Stable Diffusion. (Work in progress)-->
+
