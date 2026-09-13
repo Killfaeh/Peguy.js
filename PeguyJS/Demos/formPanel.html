@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+	<html>		
+		<head>
+			<meta charset="utf-8" />
+			
+			<!-- Disable annoying native mobile behaviors -->
+			<meta name="viewport" content="width=device-width, initial-scale=1" />
+			<meta name="viewport" content="width=device-width, minimum-scale=1" />
+			<meta name="viewport" content="width=device-width, maximum-scale=1" />
+			<meta name="apple-mobile-web-app-capable" content="yes" />
+			<meta name=“viewport” content=”initial-scale=1, viewport-fit=cover”>
+			
+			<title>Form Panel</title>
+			
+			<!-- Style of the HTML page displayed during the framework loading, can be adapted as required. -->
+			<style>
+				
+				#main, #screen
+				{
+					position: absolute;
+					left: 0px;
+					right: 0px;
+					top: 0px;
+					bottom: 0px;
+					
+					overflow: auto;
+					
+					margin: 0px;
+					padding: 0px;
+					
+					text-align: center;
+					font-family: Arial;
+					
+					background-color: rgb(255, 255, 255);
+				}
+				
+			</style>
+			
+		</head>
+		
+		<!-- DOM root, “main” id required. -->
+		<body id="main">
+	
+			<!-- Main screen area, the “screen” id is required. -->
+			<div id="screen" >
+				<!-- Here you write the HTML you want for the loading screen. -->
+				<p>Loading...</p>
+			</div>
+			
+			<!-- Load the Loader that initializes the framework. -->
+			<script src='../Loader.js?token=0' ></script>
+			
+			<script type="text/javascript" >
+
+				// You can declare some functions and global variables here.
+				var hljs = null;
+	
+				// Loader instantiation
+				// The variable must be called “Loader”.
+				// The first parameter specifies the position of the styles folder. 
+				// The second parameter specifies the style to be loaded.
+				var Loader = new Loader('../../', 'Default');
+				
+				// Loading optional library modules.
+				Loader.addModules(['codeEditor']);
+				
+				// Redefining the this.onload function
+				// It will be triggered when the framework and the additional resources declared above are loaded.
+				Loader.onload = function()
+				{ 
+					const config = [
+						{ "name": "field1", "label": "Field 1", "default": "blablabla", "type": "text", "templateVariable": "FIELD1" },
+						{ "name": "field2", "label": "Field 2", "default": "blabla\nblabla", "type": "textArea", "templateVariable": "FIELD2" },
+						{ "name": "field3", "label": "Field 3", "default": 2.5, "type": "number", "templateVariable": "FIELD3" },
+						{ "name": "field4", "label": "Field 4", "default": false, "type": "CheckBox", "templateVariable": "FIELD4" },
+						{ "name": "field5", "label": "Field 5", "type": "ComboBox", "templateVariable": "FIELD5",
+							"options": [
+								{ "name": "Option 1", "value": 1 },
+								{ "name": "Option 2", "value": 2 }
+							]
+						},
+						{ "name": "field6", "label": "Field 6", "type": "AutoComplete", "default": "Truc", "templateVariable": "FIELD6", 
+							"options": [ "Machin", "Truc" ]
+						},
+						{ "name": "field7", "label": "Field 7", "type": "LabelList", "templateVariable": "FIELD7", "template": "\"{{LABEL}}\", " },
+						{ "name": "field8", "label": "Field 8", "type": "AutoCompleteKeyValue", "templateVariable": "FIELD8",
+							"options": [
+								{ "key": "Machin", "value": "machin" },
+								{ "key": "Truc", "value": "truc" }
+							]
+						},
+						{
+							"name": "field9", "label": "Field 9", "type": "ListBox", "templateVariable": "FIELD9", "template": "\t\t\"{{SUBFIELD1}}\": \"{{SUBFIELD2}}\",\n",
+							"inputList": [
+								{ "name": "subField1", "label": "Sub Field 1", "default": "Machin", "type": "text", "templateVariable": "SUBFIELD1" },
+								{ "name": "subField2", "label": "Sub Field 2", "default": 30, "type": "number", "templateVariable": "SUBFIELD2" }
+							]
+						},
+						{ "name": "field10", "label": "Field 10", "type": "CodeEditor", "language": "javascript", "default": "", "templateVariable": "FIELD10" },
+					];
+
+					const data =
+					{
+						field1: "Coucou ! ",
+						field2: "Coucou ! \nCoucou ! ",
+						field3: 12.3,
+						field4: true,
+						field5: 2,
+						field6: 'Truc',
+						field7: ['label1', 'label2'],
+						field8: 'truc',
+						field9: [
+							{ subField1: "Pouet", subField2: 10 },
+							{ subField1: "Coin coin", subField2: 20 }
+						],
+						field10: "console.log('Coucou ! ');"
+					};
+
+					
+					const panel = new FormPanel(config);
+					panel.setTemplate('{\n\t\"{{FIELD1}}\", \n\t\"{{FIELD2}}\", \n\t{{FIELD3}}, \n\t{{FIELD4}}, \n\t{{FIELD5}}, \n\t\"{{FIELD6}}\", \n\t[ {{FIELD7}}], \n\t\"{{FIELD8}}\", \n\t[\n{{FIELD9}}\t], \n\t\"{{FIELD10}}\" \n}');
+					panel.loadFromJSON(data);
+					const button = new Button('Get data from panel');
+
+					button.onAction = function()
+					{
+						const dataToSave = panel.getJSON();
+						console.log(dataToSave);
+						const generatedCode = panel.getCode();
+						console.log(generatedCode);
+						
+						dataToSave.parse(
+						{
+							onOpenArray: function($array) { console.log('On open array', $array); },
+							onCloseArray: function($array) { console.log('On close array', $array); },
+							onOpenObject: function($object) { console.log('On open object', $object); },
+							onCloseObject: function($object) { console.log('On close object', $object); },
+							onValue: function($value) { console.log('On value', $value); },
+							onKeyValue: function($key, $value) { console.log('On key/value', $key, $value); },
+						});
+					};
+
+					document.getElementById('screen').innerHTML = '';
+					document.getElementById('screen').appendChild(button);
+					document.getElementById('screen').appendChild(panel);
+				};
+				
+				// The framework is loaded when the HTML page hosting the application has finished loading.
+				window.onload = function() { Loader.load(); }; 
+	
+			</script>
+			
+		</body>
+	</html>

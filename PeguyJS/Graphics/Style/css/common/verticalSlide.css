@@ -1,0 +1,23 @@
+.verticalSlide
+{
+	position: absolute;
+	height: 20px;
+	left: 0px;
+	right: 0px;
+	z-index: 100;
+	white-space: nowrap;
+	text-align: center;
+	cursor: col-resize;
+}
+
+.verticalSlide *
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.verticalSlide .slideButton
+{
+	width: 5px;
+	height: 5px;
+}

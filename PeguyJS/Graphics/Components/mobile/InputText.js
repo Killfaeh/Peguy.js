@@ -21,6 +21,10 @@ function InputText($type, $placeholder, $value, $regex, $replace)
 	if (utils.isset(regex) && regex !== '' && utils.isset(replace))
 			component.getById('input').filter(regex, replace);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -136,5 +140,5 @@ function InputText($type, $placeholder, $value, $regex, $replace)
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputText");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputText");

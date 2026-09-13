@@ -76,6 +76,3 @@ function OrthoMatrix($left, $right, $top, $bottom, $near, $far)
 	var $this = utils.extend(matrix, this); 
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("orthoMatrix");

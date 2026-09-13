@@ -19,6 +19,49 @@ function ImagePopup($url, $title)
 	var closeIcon = Loader.getSVG('icons', 'close-icon', 20, 20);
 	component.getById('closeIcon').appendChild(closeIcon);
 	
+	// Style
+	
+	component.addConfigStyle("imagePopup", function ()
+	{
+		return {
+					classic:
+					{
+						"this":
+						{
+							"backgroundColor": (function() { return STYLE.imagePopupBackgroundColor; })()
+						},
+						
+						"img":
+						{
+							"border": (function() { return STYLE.imagePopupBorder; })(),
+							"borderRadius": (function() { return STYLE.imagePopupBorderRadius; })(),
+							"backgroundColor": (function() { return STYLE.imagePopupBackgroundColor; })(),
+							"boxShadow": (function() { return STYLE.imagePopupBoxShadow; })()
+						}
+					},
+			
+					mobile:
+					{
+						"this":
+						{
+							"backgroundColor": (function() { return STYLE.imagePopupBackgroundColor; })()
+						},
+							
+						"img":
+						{
+							"border": (function() { return STYLE.imagePopupBorder; })(),
+							"borderRadius": (function() { return STYLE.imagePopupBorderRadius; })(),
+							"backgroundColor": (function() { return STYLE.imagePopupBackgroundColor; })(),
+							"boxShadow": (function() { return STYLE.imagePopupBoxShadow; })()
+						}
+					},
+				};
+	});
+	
+	component.applyConfigStyle();
+
+	// Données d'état du composant	
+
 	//var popupMouseDown = false;
 	var innerMouseDown = false;
 	
@@ -127,5 +170,5 @@ function ImagePopup($url, $title)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("imagePopup");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("imagePopup");

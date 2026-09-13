@@ -30,6 +30,139 @@ function TabManager()
 	
 	var editMode = false;
 	
+	/*
+// Style
+
+component.addConfigStyle("tabManager", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {
+		".tabManager .virtual-tab div": [
+			"background-Color: (function() { return STYLE.tabManagerBackgroundColor; })(),
+			"border: (function() { return STYLE.tabManagerBorder; })()
+		]
+	},
+	"tabManager": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"tabs": {
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"tab": {
+		"borderRight": (function() { return STYLE.tabManagerBorderRight; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.tabManagerBackgroundImage; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"unselectMargin": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })()
+	},
+	"selected": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.tabManagerBackgroundImage; })(),
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"openHiddenTabs": {
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"hiddenTabs": {
+		"border": (function() { return STYLE.tabManagerBorder; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.tabManagerBoxShadow; })()
+	},
+	"tab:hover": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"virtual-tab": {
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"ghost-tab": {
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderRight": (function() { return STYLE.tabManagerBorderRight; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"tabManager": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"tabs": {
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"tab": {
+		"borderRight": (function() { return STYLE.tabManagerBorderRight; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.tabManagerBackgroundImage; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"unselectMargin": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })()
+	},
+	"selected": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.tabManagerBackgroundImage; })(),
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"openHiddenTabs": {
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"hiddenTabs": {
+		"border": (function() { return STYLE.tabManagerBorder; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.tabManagerBoxShadow; })()
+	},
+	"tab:hover": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })()
+	},
+	"virtual-tab": {
+		"color": (function() { return STYLE.tabManagerColor; })()
+	},
+	"virtual-tab-border": {
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"border": (function() { return STYLE.tabManagerBorder; })()
+	},
+	"ghost-tab": {
+		"borderLeft": (function() { return STYLE.tabManagerBorderLeft; })(),
+		"borderRight": (function() { return STYLE.tabManagerBorderRight; })(),
+		"borderTop": (function() { return STYLE.tabManagerBorderTop; })(),
+		"borderBottom": (function() { return STYLE.tabManagerBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.tabManagerBackgroundColor; })(),
+		"color": (function() { return STYLE.tabManagerColor; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Contenu
 	
 	var tabList = [];
@@ -58,9 +191,7 @@ function TabManager()
 	this.dragOutAll = function()
 	{
 		component.removeClass('drag-over');
-		
-		for (var i = 0; i < tabList.length; i++)
-			tabList[i].dragOut();
+		tabList.forEach(function($tab) { $tab.dragOut(); });
 	};
 	
 	this.addTab = function($tab)
@@ -72,7 +203,6 @@ function TabManager()
 			tabList.push($tab);
 			component.getById('tabs').appendChild($tab);
 			$tab.setParent($this);
-			
 		}
 		
 		$tab.setEditMode(editMode);
@@ -141,6 +271,12 @@ function TabManager()
 		
 		$this.updateTabs();
 	};
+
+	this.selectFirst = function()
+	{
+		if (tabList[0])
+			tabList[0].select();
+	};
 	
 	this.addToHistory = function($tab)
 	{
@@ -166,7 +302,7 @@ function TabManager()
 		component.getById('content').removeAllChildren();
 		component.getById('content').appendChild($content);
 		
-		if (utils.isset(content) && utils.isset(content.onResize))
+		if (content && content.onResize)
 			content.onResize();
 	};
 	
@@ -186,13 +322,9 @@ function TabManager()
 		
 		var tabsBlockWidth = component.getById('tabs').offsetWidth - component.getById('openHiddenTabs').offsetWidth;
 		
-		for (var i = 0; i < tabList.length; i++)
-			component.getById('tabs').appendChild(tabList[i]);
+		component.getById('tabs').appendChildren(tabList);
 		
-		var totalTabsWidth = 0;
-		
-		for (var i = 0; i < tabList.length; i++)
-			totalTabsWidth = totalTabsWidth + tabList[i].offsetWidth;
+		var totalTabsWidth = tabList.reduce(function($size, $tab) { return $size + $tab.offsetWidth; }, 0);
 		
 		if (totalTabsWidth > tabsBlockWidth)
 		{
@@ -215,8 +347,7 @@ function TabManager()
 			for (var i = displayed.length-1; i >= 0; i--)
 				component.getById('tabs').appendChild(displayed[i]);
 			
-			for (var i = 0; i < hidden.length; i++)
-				hiddenTabs.appendChild(hidden[i]);
+			hiddenTabs.appendChildren(hidden);
 			
 			component.getById('hiddenTabsCount').innerHTML = hidden.length;
 		}
@@ -233,17 +364,17 @@ function TabManager()
 		var panelWidth = hiddenTabs.offsetWidth;
 		var panelHeight = hiddenTabs.offsetHeight;
 		var panelPosition = hiddenTabs.position();
+		var right = Screen.width - componentPosition.x - component.getById('openHiddenTabs').offsetWidth;
 		
 		invisibleFreezeScreen.resize(component.getById('tabs'));
 		
 		hiddenTabs.style.zIndex = "10000000000";
 		hiddenTabs.style.minWidth = component.getById('openHiddenTabs').offsetWidth + "px";
-		hiddenTabs.style.left = componentPosition.x + 'px';
+		hiddenTabs.style.right = right + 'px';
 		hiddenTabs.style.top = (componentPosition.y+component.getById('openHiddenTabs').offsetHeight) + 'px';
 		
 		if (panelHeight > Screen.getHeight())
 		{
-			hiddenTabs.style.left = (componentPosition.x + component.offsetWidth - panelWidth - 27) + 'px';
 			hiddenTabs.style.height = (Screen.getHeight()-20) + "px";
 			hiddenTabs.style.top = "7px";
 			hiddenTabs.style.overflow = "auto";
@@ -261,7 +392,6 @@ function TabManager()
 			setTimeout(function() { $this.autoResize(); }, 20);
 		else
 			$this.onResize();
-		
 	};
 	
 	this.displayHiddenTabs = function()
@@ -281,7 +411,7 @@ function TabManager()
 		invisibleFreezeScreen.hide();
 		hiddenTabs.style.display = "none";
 		
-		if (utils.isset(hiddenTabs.parentNode))
+		if (hiddenTabs.parentNode)
 			hiddenTabs.parentNode.removeChild(hiddenTabs);
 		
 		hiddenTabsDisplayed = false;
@@ -292,22 +422,21 @@ function TabManager()
 		var overLayer = null;
 		
 		$this.dragOutAll();
-		
-		for (var i = 0; i < tabList.length; i++)
+
+		tabList.every(function($t)
 		{
-			if (tabList[i] !== $tab)
+			if ($t !== $tab)
 			{
-				overLayer = tabList[i].getOverLayer($x, $y, $tab);
+				overLayer = $t.getOverLayer($x, $y, $tab);
 				
-				if (utils.isset(overLayer))
-				{
-					i = tabList.length;
-					//overLayer.dragOver();
-				}
+				if (overLayer)
+					return false;
 			}
-		}
+
+			return true;
+		});
 		
-		if (!utils.isset(overLayer))
+		if (!overLayer)
 			overLayer = $this.getById('tabs');
 		
 		return overLayer;
@@ -337,47 +466,23 @@ function TabManager()
 		if (hiddenTabsDisplayed === true)
 			resize();
 
-		if (utils.isset(selected) && utils.isset(selected.getContent().onResize))
+		if (selected && selected.getContent().onResize)
 			selected.getContent().onResize();
 	};
-	
-	var onMouseMove = function($event)
-	{
-		for (var i = 0; i < tabList.length; i++)
-		{
-			if (utils.isset(tabList[i].mouseMove))
-				tabList[i].mouseMove($event);
-		}
-	};
-	
-	document.getElementById('main').onMouseMove.push(onMouseMove);
-	
-	var onMouseUp = function($event)
-	{
-		for (var i = 0; i < tabList.length; i++)
-		{
-			if (utils.isset(tabList[i].mouseUp))
-				tabList[i].mouseUp($event);
-		}
-	};
-	
-	document.getElementById('main').onMouseUp.push(onMouseUp);
 
 	this.onKeyDown = function($event)
 	{
-		for (var i = 0; i < tabList.length; i++)
-			tabList[i].onKeyDown($event);
+		tabList.forEach(function($tab) { $tab.onKeyDown($event); });
 		
-		if (utils.isset(selected))
+		if (selected)
 			selected.getContent().onKeyDown($event);
 	};
 	
 	this.onKeyUp = function($event)
 	{
-		for (var i = 0; i < tabList.length; i++)
-			tabList[i].onKeyUp($event);
+		tabList.forEach(function($tab) { $tab.onKeyUp($event); });
 		
-		if (utils.isset(selected))
+		if (selected)
 			selected.getContent().onKeyUp($event);
 	};
 	
@@ -421,6 +526,3 @@ function TabManager()
 	setTimeout(function() { $this.autoResize(); }, 20);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("tabManager");

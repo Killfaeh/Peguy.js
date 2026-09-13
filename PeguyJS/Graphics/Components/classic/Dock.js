@@ -18,6 +18,39 @@ function Dock()
 
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("dock", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"support": {
+		"backgroundColor": (function() { return STYLE.dockBackgroundColor; })()
+	},
+	"dockItemLabel": {
+		"backgroundColor": (function() { return STYLE.dockBackgroundColor; })(),
+		"color": (function() { return STYLE.dockColor; })(),
+		"boxShadow": (function() { return STYLE.dockBoxShadow; })()
+	},
+	"virtual-dockItem": {
+		"color": (function() { return STYLE.dockColor; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var editMode = false;
 	var elementsList = [];
 	
@@ -356,5 +389,5 @@ function Dock()
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("dock");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("dock");

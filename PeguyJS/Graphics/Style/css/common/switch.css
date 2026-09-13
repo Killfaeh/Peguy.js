@@ -1,0 +1,25 @@
+.switch
+{
+	margin: auto;
+	position: relative;
+	display: inline-block;
+	width: 50px;
+	cursor: pointer;
+}
+
+.switch .switchBar,
+.switch .switchBarOn
+{
+	margin: 9px;
+	height: 12px;
+}
+
+
+.switch .switchHandler
+{
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	left: 0px;
+	top: 5px;
+}

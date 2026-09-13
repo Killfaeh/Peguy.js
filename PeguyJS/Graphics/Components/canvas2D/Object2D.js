@@ -65,6 +65,3 @@ function Object2D()
 	this.setStrokeStyle = function($strokeStyle) { strokeStyle = $strokeStyle; };
 	this.setLineWidth = function($lineWidth) { lineWidth = $lineWidth; };
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("object2D");

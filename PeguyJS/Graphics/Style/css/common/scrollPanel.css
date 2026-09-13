@@ -1,0 +1,150 @@
+.scrollPanel
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+}
+
+.scrollPanel > .corner
+{
+	position: absolute;
+	width: 20px;
+	right: 0px;
+	height: 20px;
+	bottom: 0px;
+}
+
+.scrollPanel .up-down-scrollBar
+{
+	position: absolute;
+	width: 20px;
+	right: 0px;
+	top: 0px;
+	bottom: 21px;
+	text-align: center;
+}
+
+.scrollPanel .up-down-scrollBar .topArrows
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	height: 40px;
+}
+
+.scrollPanel .up-down-scrollBar .up-down-container
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 40px;
+	bottom: 40px;
+}
+
+.scrollPanel .up-down-scrollBar .up-down-container .up-down-bar
+{
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	width: calc(100% - 8px);
+	height: calc(100% - 8px);
+}
+
+.scrollPanel .up-down-scrollBar .bottomArrows
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	height: 40px;
+	bottom: 0px;
+}
+
+.scrollPanel .left-right-scrollBar
+{
+	position: absolute;
+	left: 0px;
+	right: 21px;
+	height: 20px;
+	bottom: 0px;
+	text-align: center;
+}
+
+.scrollPanel .left-right-scrollBar .leftArrows
+{
+	position: absolute;
+	left: 0px;
+	width: 40px;
+	top: 0px;
+	bottom: 0px;
+	white-space: nowrap;
+}
+
+.scrollPanel .left-right-scrollBar .left-right-container
+{
+	position: absolute;
+	left: 40px;
+	right: 40px;
+	top: 0px;
+	bottom: 0px;
+}
+
+.scrollPanel .left-right-scrollBar .left-right-container .left-right-bar
+{
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	width: calc(100% - 8px);
+	height: calc(100% - 8px);
+}
+
+.scrollPanel .left-right-scrollBar .rightArrows
+{
+	position: absolute;
+	width: 40px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	white-space: nowrap;
+}
+
+.scrollPanel .left-right-scrollBar .arrow
+{
+	display: inline-block;
+	
+}
+
+.scrollPanel .canvas
+{
+	position: absolute;
+	left: 0px;
+	right: 22px;
+	top: 0px;
+	bottom: 22px;
+	overflow: hidden;
+}
+
+.scrollPanel .canvas > .content
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.scrollPanel .arrow
+{
+	padding: 2px;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+}
+
+.scrollPanel .downArrow
+{
+}
+
+.scrollPanel .downContainer
+{
+}

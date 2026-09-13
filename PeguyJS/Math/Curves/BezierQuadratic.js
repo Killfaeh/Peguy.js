@@ -93,6 +93,3 @@ function BezierQuadratic($p0, $p1, $p2)
 	$this.computeLength();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("bezierQuadratic");

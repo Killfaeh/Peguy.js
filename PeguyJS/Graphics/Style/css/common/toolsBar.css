@@ -1,0 +1,24 @@
+.toolsBar
+{
+    margin: 0px;
+    padding: 0px;
+}
+
+.toolsBar .iconsMenuItem
+{
+    list-style-type: none;
+    margin: 5px;
+	padding: 5px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.toolsBar .iconsMenuItem:hover
+{
+}
+
+.toolsBar .selected,
+.toolsBar .selected:hover
+{
+}

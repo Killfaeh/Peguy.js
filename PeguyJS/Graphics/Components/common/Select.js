@@ -1,14 +1,11 @@
 function Select($name, $options, $currentValue)
 {
-	//console.log("Current value : " + $currentValue);
-	//console.log($options); 
-	
 	///////////////
 	// Attributs //
 	///////////////
 
 	var name = $name;
-	var options = $options;
+	var options = $options ? $options : [];
 	var currentValue = $currentValue;
 	var currentName = "";
 	
@@ -20,6 +17,28 @@ function Select($name, $options, $currentValue)
 		html = '<select class="selectAndroid" id="' + name + '" name="' + name + '" ></select>';
 
 	var component = new Component(html);
+
+	// Style
+	
+	component.addConfigStyle("accordion", function ()
+	{
+		return {
+			common:
+			{
+				"multi-tag":
+				{
+					".selectAndroid":
+					[
+						"border: " + (function() { return STYLE.selectBorder; })(),
+						"background-color: " + (function() { return STYLE.selectBackgroundColor; })(),
+					]
+				},
+
+			},
+		};
+	});
+
+	component.applyConfigStyle();
 
 	//////////////
 	// Méthodes //
@@ -50,6 +69,9 @@ function Select($name, $options, $currentValue)
 			currentValue = selectedOption.value;
 			currentName = selectedOption.name
 		}
+		
+		if (currentValue)
+			component.value;
 	};
 
 	///////////////////////////////////
@@ -58,10 +80,12 @@ function Select($name, $options, $currentValue)
 
 	this.onChange = function($value) {};
 
-	component.addEvent('change', function() 
+	component.addEventListener('change', function() 
 	{
-		currentName = component.options[component.selectedIndex].firstChild.nodeValue;
+		console.log('Select onChange');
+		currentName = component.options[component.selectedIndex].text;
 		currentValue = component.value;
+		console.log("Value : " + currentValue);
 		$this.onChange(currentValue);
 	});
 
@@ -73,6 +97,7 @@ function Select($name, $options, $currentValue)
 	this.getName = function() { return name; };
 	this.getOptions = function() { return options; };
 	this.getCurrentValue = function() { return currentValue; };
+	this.getValue = this.getCurrentValue;
 	this.getCurrentName = function() { return currentName; };
 	this.isEnable = function() { return enable; };
 
@@ -87,8 +112,7 @@ function Select($name, $options, $currentValue)
 	this.setOptions = function($options) 
 	{
 		options = $options;
-
-		component.removeAllChildren();
+		component.empty();
 		loadOptions();
 	};
 
@@ -96,14 +120,18 @@ function Select($name, $options, $currentValue)
 	{
 		currentValue = $currentValue;
 
-		for (var i = 0; i < options.length; i++)
+		/* for (var i = 0; i < options.length; i++)
 		{
 			if (currentValue === options[i].value)
 				component.childNodes[i].setSelected(true);
 			else 
 				component.childNodes[i].setSelected(false);
-		}
+		} */
+		
+		component.value = currentValue;
 	};
+	
+	this.setValue = this.setCurrentValue;
 	
 	this.setEnable = function($enable)
 	{
@@ -124,6 +152,3 @@ function Select($name, $options, $currentValue)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("select");

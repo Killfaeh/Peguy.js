@@ -1,0 +1,10 @@
+.floatingPanel
+{
+	position: absolute;
+	overflow: auto;
+	overflow-x: hidden;
+	padding: 0px;
+	margin: 0px;
+	border-radius: 5px;
+	z-index: 1000000000;
+}

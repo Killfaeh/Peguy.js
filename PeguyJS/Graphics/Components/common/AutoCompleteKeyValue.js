@@ -1,4 +1,4 @@
-function AutoCompleteKeyValue()
+function AutoCompleteKeyValue($list)
 {
 	///////////////
 	// Attributs //
@@ -6,19 +6,17 @@ function AutoCompleteKeyValue()
 	
 	var selectedKey = "";
 	
-	var autoComplete = new AutoComplete();
+	var autoComplete = new AutoComplete($list);
 
 	//////////////
 	// Méthodes //
 	//////////////
 	
-	// Réimplémentation de la méthode select de l'objet AutoComplete
-	this.select = function($index)
+	this.onSelect = function($index)
 	{
-		var row = this.getList()[$index];
+		var list = this.getList();
+		var row = list[$index];
 		selectedKey = row.key;
-		autoComplete.setValue(row.value);
-		$this['super'].select(row.value);
 		$this.onChange(selectedKey);
 	};
 	
@@ -33,97 +31,51 @@ function AutoCompleteKeyValue()
 			}
 		}
 	};
-	
-	this.autoSelect = function()
+
+	this.createLineData = function($line, $index)
 	{
-		if ($this.getDisplayedLines().length === 1)
-		{
-			var row = $this.getList()[0];
-			selectedKey = row.key;
-			autoComplete.setSelectedIndex(0);
-			$this.close();
-		}
+		if ($line.value === $this.getValue())
+			$this.setDisplayIndex($index);
+		
+		return { index: $index, key: $line.key, value: $line.value };
 	};
 	
-	// Réimplémentation de la méthode buildInterface de l'objet AutoComplete
-	this.buildInterface = function($entry, $load)
+	this.matchLine = function($input, $line)
 	{
-		this.emptyDisplayedLines();
-		var displayNum = 0;
-		var displayIndex = null;
+		var match = false;
 		
-		for (var i = 0; i < this.getList().length; i++)
+		var regex = RegExp($input.removeAccents().toLowerCase());
+		
+		if ($input === "" 
+			|| regex.test(dataManager.encodeHTMLEntities($line.key).removeAccents().toLowerCase())
+			|| regex.test(dataManager.encodeHTMLEntities($line.value).removeAccents().toLowerCase()))
 		{
-			var regex = RegExp($entry.removeAccents().toLowerCase());
-			
-			if ($entry === "" || regex.test(dataManager.encodeHTMLEntities(this.getList()[i]).value.removeAccents().toLowerCase()))
-			{
-				this.getList()[i].index = i;
-				
-				if (this.getList()[i].key === selectedKey)
-					displayIndex = displayNum;
-				
-				var rowHtml = '<tr index="' + i + '" displayNum="' + displayNum + '" key="' + this.getList()[i].key + '" >' 
-									+ '<td><p>' + dataManager.encodeHTMLEntities(this.getList()[i].value) + '</p></td>' 
-								+ '</tr>';
-								
-				var rowNode = autoComplete.stringToHtml(rowHtml);
-				
-				if (autoComplete.isEnable())
-				{
-					rowNode.onClick = function()
-					{
-						var rowIndex = this.get('index');
-						$this.select(rowIndex);
-						this.style.backgroundColor = 'none';
-					};
-					
-					rowNode.onMouseOver = function()
-					{
-						var rowIndex = this.get('displayNum');
-						$this.enlight(rowIndex);
-					};
-				}
-				
-				this.addDisplayedLine(this.getList()[i], rowNode);
-				displayNum++;
-			}
+			match = true;
 		}
 		
-		if (this.getDisplayedLines().length <= 0)
-		{
-			var rowHtml = '<tr class="error" ><td>' + dataManager.encodeHTMLEntities(autoComplete.getEmptyMessage()) + '</td></tr>';
-			var rowNode = autoComplete.stringToHtml(rowHtml);
-			autoComplete.getById('list').appendChild(rowNode);
-		}
-		else if (utils.isset($this.enlight))
-			$this.enlight(displayIndex);
+		return match;
 	};
 	
-	autoComplete.onClose = function()
+	this.createDisplayedLine = function($line, $displayIndex)
 	{
-		if ($this.isOpen() === true)
-		{
-			if (!utils.isset($this.getDisplayedLines()) || $this.getDisplayedLines().length <= 0)
-			{
-				selectedKey = "";
-				autoComplete.setValue("");
-			}
-			
-			if (utils.isset($this.enlight))
-				$this.enlight(null);
-		}
+		return '<tr index="' + $line.index + '" id="' + $displayIndex + '" displayNum="' + $displayIndex + '" key="' + $line.key + '" value="' + $line.value + '" >' 
+					+ '<td>' + dataManager.encodeHTMLEntities($line.value) + '</td>' 
+				+ '</tr>';
 	};
+	
+	autoComplete.onClose = function() { selectedKey = ""; };
 	
 	////////////////
 	// Accesseurs //
 	////////////////
 	
-	// GET 
+	// GET
+	
 	this.getKey = function() { return selectedKey; };
 
 	// SET
-	//this.setKey = function($key){ selectedKey = $key; };
+
+	this.setKey = function($key) { selectedKey = $key; };
 	
 	//////////////
 	// Héritage //
@@ -132,6 +84,3 @@ function AutoCompleteKeyValue()
 	var $this = utils.extend(autoComplete, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("autoCompleteKeyValue");

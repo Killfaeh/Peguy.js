@@ -4,89 +4,82 @@ function ButtonsMenu($buttonsList)
 	// Attributes //
 	////////////////
 
-    var buttonsList = $buttonsList;
+	var buttonsList = $buttonsList ? $buttonsList : [];
 
-    if (!utils.isset(buttonsList))
-    buttonsList = [];
+	var map = new Map();
 
-    var map = {};
-
-	var html = '<div class="buttonsMenu" >'
-				+ '</div>';
+	var html = '<div class="buttonsMenu" ></div>';
 
 	var component = new Component(html);
+
+	/*
+// Style
+
+component.addConfigStyle("buttonsMenu", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
 
 	/////////////
 	// Methods //
 	/////////////
 	
-    this.createButton = function($param)
-    {
-        var item = new Button($param.name);
+	this.createButton = function($param)
+	{
+		var item = new Button($param.name);
+		item.onAction = $param.action;
+		component.appendChild(item);
+		map.set($param.name, item);
+	};
 
-        //if (utils.isset($param.toolTip))
-        //    item.onToolTip = $param.toolTip;
-        
-        item.onAction = $param.action;
+	this.init = function() { buttonsList.forEach(function($button) { $this.createButton($button); }); };
 
-        component.appendChild(item);
+	this.addButton = function($param)
+	{
+		buttonsList.push($param);
+		$this.createButton($param);
+	};
 
-        map[$param.name] = item;
-    };
+	this.addButtons = function($buttonsList)
+	{
+		$buttonsList.forEach(function($button)
+		{
+			buttonsList.push($button);
+			$this.createButton($button);
+		});
+	};
 
-    this.init = function()
-    {
-        for (var i = 0; i < buttonsList.length; i++)
-            $this.createButton(buttonsList[i]);
-    };
+	this.hide = function($name)
+	{
+		if (map.has($name))
+			map.get($name).style.display = 'none';
+	};
 
-    this.addButton = function($param)
-    {
-        buttonsList.push($param);
-        $this.createButton($param);
-    };
-
-    this.addButtons = function($buttonsList)
-    {
-        for (var i = 0; i < $buttonsList.length; i++)
-        {
-            buttonsList.push(buttonsList[i]);
-            $this.createButton(buttonsList[i]);
-        }
-    };
-
-    this.hide = function($name)
-    {
-        if (utils.isset(map[$name]))
-            map[$name].style.display = 'none';
-    };
-
-    this.display = function($name)
-    {
-        if (utils.isset(map[$name]))
-            map[$name].removeAttribute('style');
-    };
-
-	/////////////////
-	// Init events //
-	/////////////////
-	
-	///////////////////////
-	// Getters & Setters //
-	///////////////////////
-
-	// GET
-
-	// SET
+	this.display = function($name)
+	{
+		if (map.has($name))
+			map.get($name).style.display = 'inline-block';
+	};
 
 	////////////
 	// Extend //
 	////////////
 
 	var $this = utils.extend(component, this);
-    $this.init();
+	$this.init();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("buttonsMenu");

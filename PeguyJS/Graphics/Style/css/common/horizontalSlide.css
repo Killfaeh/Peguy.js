@@ -1,0 +1,23 @@
+.horizontalSlide
+{
+	position: absolute;
+	width: 20px;
+	top: 0px;
+	bottom: 0px;
+	z-index: 100;
+	white-space: nowrap;
+	text-align: center;
+	cursor: col-resize;
+}
+
+.horizontalSlide *
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.horizontalSlide .slideButton
+{
+	width: 5px;
+	height: 5px;
+}

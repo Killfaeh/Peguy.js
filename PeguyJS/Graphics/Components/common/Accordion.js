@@ -8,68 +8,39 @@ function Accordion($openOneCloseAll)
 	
 	var html = '<ul class="accordion" ></ul>';
 				
-	var component = new Component(html);
+	var component = new ListComponent(html);
 	
-	var elementsList = [];
+	
+	// Style
+	
+	component.addConfigStyle("accordion", function ()
+	{
+	    return {
+	        common:
+	        {
+	        	"multi-tag":
+	        	{
+	        		".accordion .accordionHeader":
+	        		[
+	        			"background-color: " + (function() { return STYLE.accordionHeaderBackgroundColor; })(),
+	        		]
+	        	}
+			},
+	    };
+	});
+
+	component.applyConfigStyle();
 	
 	//////////////
 	// Méthodes //
 	//////////////
 	
-	this.closeAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-			elementsList[i].close();
-	};
-	
-	this.addElement = function($element)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index < 0)
-		{
-			elementsList.push($element);
-			component.appendChild($element);
-			$element.setParent($this);
-			
-		}
-	};
-	
-	this.insertElementInto = function($element, $index)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-			elementsList.splice(index, 1);
-		
-		elementsList.splice($index, 0, $element);
-		component.insertAt($element, $index);
-		$element.setParent($this);
-	};
-	
-	this.removeElement = function($element)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-		{
-			elementsList.splice(index, 1);
-			
-			if (utils.isset($element.parentNode))
-				$element.parentNode.removeChild($element);
-		}
-	};
-	
-	this.removeAllElement = function()
-	{
-		$this.closeAll();
-		elementsList = [];
-		component.removeAllChildren();
-	};
+	this.closeAll = function() { component.execAll([ 'close' ]); };
 
-	////////////////////////////
-	// Gestion des événements //
-	////////////////////////////
+	this.addElement = function($element) { return $this.addToList($element); };
+	this.insertElementInto = function($element, $index) { return $this.insertIntoListAt($element, $index); };
+	this.removeElement = function($element) { return $this.removeFromList($element); };
+	this.removeAllElement = function() { return $this.removeAllFromList(); };
 	
 	////////////////
 	// Accesseurs //
@@ -90,6 +61,3 @@ function Accordion($openOneCloseAll)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("accordion");

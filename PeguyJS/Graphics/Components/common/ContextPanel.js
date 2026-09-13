@@ -14,8 +14,40 @@ function ContextPanel($content)
 				
 	var component = new Component(html);
 	
-	var elementsList = [];
-	
+	/*
+// Style
+
+component.addConfigStyle("contextPanel", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"content-panel": {
+		"border": (function() { return STYLE.contextPanelBorder; })(),
+		"backgroundColor": (function() { return STYLE.contextPanelBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.contextPanelBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"content-panel": {
+		"border": (function() { return STYLE.contextPanelBorder; })(),
+		"backgroundColor": (function() { return STYLE.contextPanelBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.contextPanelBoxShadow; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -171,6 +203,3 @@ function ContextPanel($content)
 	
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("contextPanel");

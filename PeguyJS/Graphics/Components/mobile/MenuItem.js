@@ -1,10 +1,11 @@
-function MenuItem($label)
+function MenuItem($label, $name)
 {
 	///////////////
 	// Attributs //
 	///////////////
 	
 	var label = $label;
+	var name = $name;
 
 	var html = '<li class="menuItem" >'
 					+ '<div id="menu-item-label" class="menu-item-label" >'
@@ -21,13 +22,18 @@ function MenuItem($label)
 					+ '</ul>'
 				+ '</li>';
 				
-	var component = new Component(html);
+	var component = new ListComponent(html);
+	component.setNode(component.getById('children-list'));
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	var deploy = false;
 	var updated = false;
 	var disable = false;
 	var parentMenu = null;
-	var elementsList = [];
+	//var elementsList = [];
 	
 	var backItem = component.getById('backItem');
 	backItem.style.display = 'none';
@@ -43,7 +49,8 @@ function MenuItem($label)
 
 	this.update = function()
 	{
-		if (elementsList.length > 0)
+		//if (elementsList.length > 0)
+		if (component.getList().length > 0)
 		{
 			if (utils.isset(parentMenu) && !parentMenu.isClass('menuBar'))
 				component.getById('arrow').style.display = 'inline';
@@ -86,6 +93,7 @@ function MenuItem($label)
 		}
 	};
 
+	/*
 	this.addElement = function($element)
 	{
 		elementsList.push($element);
@@ -96,7 +104,16 @@ function MenuItem($label)
 		component.getById('children-list').appendChild($element);
 		$this.update();
 	};
+	//*/
+
+	this.addElement = function($element, $noresize)
+	{
+		var list = $this.addToList($element);
+		$this.update();
+		return list;
+	};
 	
+	/*
 	this.insertElementInto = function($element, $index)
 	{
 		elementsList.splice($index, 0, $element);
@@ -107,7 +124,16 @@ function MenuItem($label)
 		component.getById('children-list').insertAt($element, $index);
 		$this.update();
 	};
+	//*/
+
+	this.insertElementInto = function($element, $index, $noresize)
+	{
+		var list = $this.insertIntoListAt($element, $index);
+		$this.update();
+		return list;
+	};
 	
+	/*
 	this.removeElement = function($element)
 	{
 		var index = elementsList.indexOf($element);
@@ -132,16 +158,29 @@ function MenuItem($label)
 		
 		return $element;
 	};
+	//*/
 
+	this.removeElement = function($element, $noresize)
+	{
+		var list = $this.removeFromList($element);
+		$this.update();
+		return list;
+	};
+
+	/*
 	this.removeAllElements = function()
 	{
 		while (elementsList.length > 0)
 			$this.removeElement(elementsList[0]);
 	};
+	//*/
+
+	this.removeAllElements = function() { return $this.removeAllFromList(); };
 	
 	this.open = function()
 	{
-		if (elementsList.length > 0 && deploy === false)
+		//if (elementsList.length > 0 && deploy === false)
+		if (component.getList().length > 0 && deploy === false)
 		{
 			deploy = true;
 			updated = false;
@@ -153,7 +192,8 @@ function MenuItem($label)
 	
 	this.openAll = function()
 	{
-		if (elementsList.length > 0)
+		//if (elementsList.length > 0)
+		if (component.getList().length > 0)
 		{
 			deploy = true;
 			updated = false;
@@ -161,11 +201,15 @@ function MenuItem($label)
 			component.getById('children-list').style.display = 'block';
 			$this.update();
 			
+			component.execAll(['openAll']);
+
+			/*
 			for (var i = 0; i < elementsList.length; i++)
 			{
 				if (utils.isset(elementsList[i].openAll))
 					elementsList[i].openAll();
 			}
+			//*/
 		}
 	};
 	
@@ -178,6 +222,7 @@ function MenuItem($label)
 		$this.update();
 	};
 	
+	/*
 	this.closeAllChildren = function()
 	{
 		for (var i = 0; i < elementsList.length; i++)
@@ -186,6 +231,9 @@ function MenuItem($label)
 				elementsList[i].closeAll();
 		}
 	};
+	//*/
+
+	this.closeAllChildren = function() { component.execAll(['closeAll']); };
 	
 	this.closeAll = function()
 	{
@@ -208,11 +256,39 @@ function MenuItem($label)
 		if (deploy === false)
 			$this.removeClass('enlighted');
 		
+		component.execAll(['unlightAll']);
+
+		/*
 		for (var i = 0; i < elementsList.length; i++)
 		{
 			if (utils.isset(elementsList[i].closeAll))
 				elementsList[i].unlightAll();
 		}
+		//*/
+	};
+
+	this.enableByNames = function($names)
+	{
+		//elementsList.forEach(function($element)
+		component.getList().forEach(function($element)
+		{
+			if ($names.includes($element.getName()))
+				$element.setDisable(false);
+			
+			$element.enableByNames($names);
+		});
+	};
+
+	this.disableByNames = function($names)
+	{
+		//elementsList.forEach(function($element)
+		component.getList().forEach(function($element)
+		{
+			if ($names.includes($element.getName()))
+				$element.setDisable(true);
+			
+			$element.disableByNames($names);
+		});
 	};
 	
 	this.display = function()
@@ -250,7 +326,8 @@ function MenuItem($label)
 		}
 		else if (utils.isset(parentMenu) && parentMenu.isClass('menuBar'))
 		{
-			if (deploy === true || elementsList.length <= 0)
+			//if (deploy === true || elementsList.length <= 0)
+			if (deploy === true || component.getList().length <= 0)
 			{
 				parentMenu.setOpen(false);
 				parentMenu.closeAllChildren();
@@ -268,7 +345,8 @@ function MenuItem($label)
 	{
 		if (utils.isset(parentMenu) && parentMenu.isClass('menuBar'))
 		{
-			if (deploy === true || elementsList.length <= 0)
+			//if (deploy === true || elementsList.length <= 0)
+			if (deploy === true || component.getList().length <= 0)
 			{
 				parentMenu.setOpen(false);
 				parentMenu.closeAllChildren();
@@ -301,10 +379,62 @@ function MenuItem($label)
 	// GET
 	
 	this.getLabel = function() { return label; };
-	this.getElementsList = function() { return elementsList; };
+	this.getName = function() { return name; };
+	//this.getElementsList = function() { return elementsList; };
+	this.getElementsList = function() { return component.getList(); };
 	this.getListNode = function() { return component.getById('children-list'); };
+
+	/*
+	this.getByName = function($name)
+	{
+		var item = null;
+
+		elementsList.every(function($element)
+		{
+			if ($element.getName() === $name)
+			{
+				item = $element;
+				return false;
+			}
+			else if ($element.getByName($name))
+			{
+				item = $element.getByName($name);
+				return false;
+			}
+
+			return true;
+		});
+
+		return item;
+	};
+	//*/
+
+	this.getByName = function($name)
+	{
+		for (var i = 0; i < component.getList().length; i++)
+		{
+			var element = component.getList()[i];
+
+			if (element.getName)
+			{
+				if (element.getName() === $name)
+					return element;
+				else 
+				{
+					var item = element.getByName($name)
+
+					if (item)
+						return item;
+				}
+			}
+		}
+
+		return null;
+	};
 	
 	// SET
+
+	this.setName = function($name) { name = $name; };
 
 	this.setDisable = function($disable)
 	{
@@ -316,7 +446,68 @@ function MenuItem($label)
 			$this.removeClass('disable');
 	};
 	
-	this.setParent = function($parentMenu) { parentMenu = $parentMenu; }
+	this.setParent = function($parentMenu) { parentMenu = $parentMenu; };
+
+	/*
+	this.loadFromJSON = function($json)
+	{
+		$json.forEach(function($item)
+		{
+			var label = $item.label;
+			var name = $item.name;
+			var onAction = $item.onAction;
+			var disable = $item.disable;
+			var children = $item.children;
+
+			var item = new MenuItem(label);
+
+			if (name)
+				item.setName(name);
+
+			if (onAction)
+				item.onAction = onAction;
+
+			if (disable === true)
+				item.setDisable(true);
+
+			$this.addElement(item);
+
+			if (children && children.length > 0)
+				item.loadFromJSON(children);
+		});
+	};
+	//*/
+
+	this.loadElementFromJSON = function($item)
+	{
+		if ($item.separator)
+			return new MenuSeparator();
+		else
+		{
+			var label = $item.label;
+			var name = $item.name;
+			var shortcut = $item.shortcut;
+			var onAction = $item.onAction;
+			var disable = $item.disable;
+			var children = $item.children;
+
+			var item = new MenuItem(label, name, shortcut);
+
+			if (name)
+				item.setName(name);
+
+			if (onAction)
+				item.onAction = onAction;
+
+			if (disable === true)
+				item.setDisable(true);
+
+			if (children && children.length > 0)
+				item.loadFromJSON(children);
+
+			return item;
+		}
+	};
 	
 	//////////////
 	// Héritage //
@@ -325,6 +516,3 @@ function MenuItem($label)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("menuItem");

@@ -44,7 +44,7 @@ function SelectColorPopup($color)
 										+ '</tr>'
 										//*/
 										+ '<tr>'
-											+ '<td colspan="2" class="rgb-cell hex-cell" ><label for="input-hex" >#</label><input id="input-hex" class="input-hex" type="text" /></td>'
+											+ '<td colspan="2" class="rgb-cell hex-cell" ><label for="input-hex" >#</label><input id="input-hex" class="input-hex" type="text" value="#FF0000" /></td>'
 										+ '</tr>'
 										+ '<tr>'
 											+ '<td colspan="2" class="rgb-cell selector-block" id="selector-block" ></td>'
@@ -77,6 +77,31 @@ function SelectColorPopup($color)
 	
 	popup.getById('selector-block').appendChild(colorSelector);
 	
+	/*
+// Style
+
+component.addConfigStyle("selectColorPopup", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"color-preview": {
+		"border": (function() { return STYLE.selectColorPopupBorder; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -123,11 +148,16 @@ function SelectColorPopup($color)
 		var hexCode = popup.getById('input-hex').value;
 		var colorName = 'no-name';
 		
-		for (var name in Colors.named)
+		Object.keys(Colors.named).every(function($name)
 		{
-			if (Colors.named[name].toUpperCase() === hexCode.toUpperCase())
-				colorName = name;
-		}
+			if (Colors.named[$name].toUpperCase() === hexCode.toUpperCase())
+			{
+				colorName = $name;
+				return false;
+			}
+
+			return true;
+		});
 		
 		colorSelector.setCurrentValue(colorName);
 	};
@@ -447,6 +477,3 @@ function SelectColorPopup($color)
 	$this.updateInputs();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("selectColorPopup");

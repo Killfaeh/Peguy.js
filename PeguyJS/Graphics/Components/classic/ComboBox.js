@@ -1,27 +1,14 @@
-function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
+function ComboBox($name, $options, $currentValue, $freeOption)
 {
 	///////////////
 	// Attributs //
 	///////////////
 
-	var name = $name;
-	var options = $options;
-	var currentValue = $currentValue;
+	var name = $name ? $name : '';
+	var options = $options ? $options : [];
+	var currentValue = $currentValue ? $currentValue : '';
 	var currentIndex = 0;
-	var freeOption = $freeOption;
-	var autoResize = $autoResize;
-	
-	if (!utils.isset(name))
-		name = '';
-	
-	if (!utils.isset(options))
-		options = [];
-	
-	if (!utils.isset(currentValue))
-		currentValue = '';
-	
-	if (!utils.isset(freeOption))
-		freeOption = false;
+	var freeOption = $freeOption ? true : false;
 	
 	if (freeOption === true)
 		options.push({ name: KEYWORDS.otherChoice, value: '{{[[*]]}}', color: null });
@@ -31,84 +18,199 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 	var enlighted = null;
 
 	var html = '<div class="select" >'
-					+ '<div><input type="text" id="selected" class="selected" readonly="readonly" /><span id="icon" class="icon" ><div class="wall" ></div></span></div>'
-					+ '<div id="invisibleFreezeScreen" class="invisibleFreezeScreen" ></div>'
-					+ '<div id="panel" class="panel selectPanel" >'
-						+ '<ul id="list" ></ul>'
+					+ '<div>'
+						+ '<input type="text" id="selected" class="selected" readonly="readonly" />'
+						+ '<span id="icon" class="icon" >'
+							+ '<Icon id="openIcon" fileName="icons" name="sort-icon" width="17" height="17" ></Icon>'
+							+ '<div class="wall" ></div>'
+						+ '</span>'
 					+ '</div>'
 				+ '</div>';
 
 	var component = new Component(html);
 
-	var icon = Loader.getSVG('icons', 'sort-icon', 17, 17);
-	component.getById('icon').appendChild(icon);
+	var selectInput = component.getById('selected');
+	selectInput.setAttribute('readonly', 'readonly');
 	
-	//component.getById('invisibleFreezeScreen').style.display = "none";
+	var icon = component.getById('openIcon');
+	icon.style.width = '17px';
 	
-	//var invisibleFreezeScreen = component.getById('invisibleFreezeScreen');
-	var invisibleFreezeScreen = new InvisibleFreezeScreen();
-	component.getById('invisibleFreezeScreen').appendChild(invisibleFreezeScreen);
-	var panel = component.getById('panel');
-	var list = component.getById('list');
+	var panel = new FloatingPanel('<ul id="list" ></ul>');
+	panel.addClass('selectPanel');
+	
+	// Style
 
-	panel.style.display = 'none';
+	component.addConfigStyle("comboBox", function ()
+	{
+	    return {
+	        
+	        classic:
+	        {
+				"multi-tag":
+	        	{
+					'.color-icon': 
+					[
+						'border: ' + (function() { return STYLE.comboBoxBorder; })()
+					],
+					
+					".selectPanel .selected":
+	        		[
+						"background-color: " + (function() { return STYLE.comboBoxSeletedBackgroundColor; })(),
+	        		],
+					
+					".selectPanel il:hover":
+	        		[
+						"background-color: " + (function() { return STYLE.comboBoxSeletedBackgroundColor; })(),
+	        		]
+				},
+				
+				/*
+				"selected":
+				{
+					"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })()
+				},
+					//*/
+			},
+	        
+	        mobile:
+	        {
+				"displayedOption":
+	        	{
+					"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })()
+				}
+			},
+	    };
+	});
+
+	component.applyConfigStyle();
+
+	var list = panel.getById('list');
+
+	var invisibleFreezeScreen = new InvisibleFreezeScreen();
 
 	//////////////
 	// Méthodes //
 	//////////////
+	
+	//// Ouverture Fermeture ////
+	
+	this.open = function()
+	{
+		if (enable)
+		{
+			$this.onOpen();
+			$this.enlight(currentIndex);
+			invisibleFreezeScreen.display($this);
+			panel.display();
+			//resize();
+			requestAnimationFrame(function() { $this.autoResize(); });
+			open = true;
+		}
+	};
+	
+	this.close = function()
+	{
+		$this.onClose();
+		invisibleFreezeScreen.hide();
+		panel.hide();
+		open = false;
+	};
+	
+	var toggle = function()
+	{
+		if (open)
+			$this.close();
+		else
+			$this.open();
+	};
+	
+	//// Dimensions ////
+	
+	var resize = function()
+	{
+		var componentPosition = selectInput.position();
+		var componentWidth = selectInput.offsetWidth;
+		var panelWidth = panel.offsetWidth;
+		var panelHeight = panel.offsetHeight;
+		var panelPosition = panel.position();
+
+		panel.style.minWidth = selectInput.offsetWidth + "px";
+		panel.style.minHeight = selectInput.offsetHeight + "px";
+		panel.style.left = componentPosition.x + 'px';
+		panel.style.top = (componentPosition.y + selectInput.offsetHeight) + 'px';
+		
+		if (panelHeight > Screen.getHeight())
+		{
+			panel.style.left = (componentPosition.x + component.offsetWidth - panelWidth - 27) + 'px';
+			panel.style.height = (Screen.getHeight()-20) + "px";
+			panel.style.top = "7px";
+			panel.style.overflow = "auto";
+		}
+		else if (componentPosition.y + selectInput.offsetHeight + panelHeight > Screen.getHeight())
+		{
+			var delta = componentPosition.y + selectInput.offsetHeight + panelHeight - Screen.getHeight() - 25;
+			panel.style.left = (componentPosition.x + component.offsetWidth - panelWidth - 27) + 'px';
+			panel.style.top = (componentPosition.y-delta) + "px";
+		}
+	};
+	
+	this.autoResize = function()
+	{
+		var inputSize = selectInput.offsetWidth;
+		
+		if (inputSize <= 0)
+			requestAnimationFrame(function() { $this.autoResize(); });
+		else
+			resize();
+	};
+	
+	//// Construction de la liste affichée ////
 
 	var loadOptions = function()
 	{
-		for (var i = 0; i < options.length; i++)
+		//console.log(name);
+		//console.log(options);
+		
+		var optionsList = options.map(function($option, $index)
 		{
-			var option = new ComboBoxItem(options[i].name, options[i].value, options[i].color);
-			option.set('index', i);
+			var option = new ComboBoxItem($option.name, $option.value, $option.color);
+			option.set('index', $index);
 			
 			option.onClick = function()
 			{
 				var index = this.get('index');
 				$this.select(index);
-				this.style.backgroundColor = 'none';
 			};
-			
-			option.onMouseOver = function()
-			{
-				var index = parseInt(this.get('index'));
-				$this.enlight(index);
-			};
-			
-			if (currentValue === options[i].value)
+
+			if (currentValue === $option.value)
 			{
 				option.setSelected(true);
-				component.getById('selected').value = options[i].name;
-				enlighted = i;
-				currentIndex = i;
+				selectInput.value = $option.name;
+				enlighted = $index;
+				currentIndex = $index;
 			}
-			
-			list.appendChild(option);
-		}
+
+			return option;
+		});
 		
-		//if (freeOption === true)
-		//	component.getById('selected').removeAttribute('readonly');
+		//console.log(optionsList);
+
+		list.appendChildren(optionsList);
 		
 		if (utils.isset(currentIndex) && currentIndex !== "" && currentIndex >= 0 && utils.isset(options[currentIndex]))
-			component.getById('selected').value = options[currentIndex].name;
+			selectInput.value = options[currentIndex].name;
 		else
 		{
+			selectInput.value = '';
 			enlighted = null;
 			currentIndex = null;
 		}
 		
-		if (!utils.isset(currentValue) || currentValue === "")
-			currentValue = options[0].value;
-			
-		setTimeout(function()
-		{
-			var width = component.getById('selected').offsetWidth;
-			//panel.style.width = width + "px;"
-			panel.style.minWidth = width + "px;"
-		}, 20);
+		if ((!utils.isset(currentValue) || currentValue === "") && options.length > 0)
+			$this.select(0);
 	};
+	
+	//// Surbrillance ////
 	
 	this.select = function($index)
 	{
@@ -117,18 +219,19 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 		
 		if (currentValue === '{{[[*]]}}')
 		{
-			component.getById('selected').removeAttribute('readonly');
-			component.getById('selected').value = '';
-			component.getById('selected').focus();
+			selectInput.removeAttribute('readonly');
+			selectInput.value = '';
+			selectInput.focus();
+			$this.onChange('');
 		}
 		else
 		{
-			component.getById('selected').setAttribute('readonly', 'readonly');
-			component.getById('selected').value = options[currentIndex].name;
+			selectInput.setAttribute('readonly', 'readonly');
+			selectInput.value = options[currentIndex].name;
+			$this.onChange(currentValue);
 		}
 		
 		$this.close();
-		$this.onChange(currentValue);
 	};
 	
 	this.enlight = function($index)
@@ -154,159 +257,57 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 		}
 	};
 	
-	//// Gestion de l'affichage du panneau de sélection. ////
-	
-	var resize = function()
-	{
-		//var componentPosition = $this.position();
-		var componentPosition = component.getById('selected').position();
-		var componentWidth = component.getById('selected').offsetWidth;
-		var panelWidth = panel.offsetWidth;
-		var panelHeight = panel.offsetHeight;
-		var panelPosition = panel.position();
-		
-		invisibleFreezeScreen.resize(component.getById('selected'));
-		
-		panel.style.zIndex = "10000000000";
-		panel.style.minWidth = component.getById('selected').offsetWidth + "px";
-		panel.style.left = componentPosition.x + 'px';
-		panel.style.top = (componentPosition.y+component.getById('selected').offsetHeight) + 'px';
-		
-		if (panelHeight > Screen.getHeight())
-		{
-			panel.style.left = (componentPosition.x + component.offsetWidth - panelWidth - 27) + 'px';
-			panel.style.height = (Screen.getHeight()-20) + "px";
-			panel.style.top = "7px";
-			panel.style.overflow = "auto";
-		}
-		else if (componentPosition.y + component.getById('selected').offsetHeight + panelHeight > Screen.getHeight())
-		{
-			var delta = componentPosition.y + component.getById('selected').offsetHeight + panelHeight - Screen.getHeight() - 25;
-			panel.style.left = (componentPosition.x + component.offsetWidth - panelWidth - 27) + 'px';
-			panel.style.top = (componentPosition.y-delta) + "px";
-		}
-	};
-	
-	this.autoResize = function()
-	{
-		$this.open();
-		
-		var maxSize = $this.getPanel().offsetWidth;
-		
-		if (utils.isset(autoResize) && autoResize > 0)
-		{
-			if (maxSize <= 0)
-				setTimeout(function() { $this.autoResize(); }, autoResize);
-			else
-			{
-				$this.getById('selected').style.width = maxSize + 'px';
-				$this.getById('selected').style.minWidth = maxSize + 'px';
-			}
-		}
-		else
-		{
-			$this.getById('selected').style.width = maxSize + 'px';
-			$this.getById('selected').style.minWidth = maxSize + 'px';
-		}
-		
-		$this.close();
-	};
-	
-	this.onOpen = function() {};
-	
-	this.open = function()
-	{
-		if (enable === true)
-		{
-			$this.onOpen();
-			$this.enlight(currentIndex);
-			
-			invisibleFreezeScreen.display(component.getById('selected'));
-			document.getElementById('main').appendChild(invisibleFreezeScreen);
-			panel.style.display = "block";
-			document.getElementById('main').appendChild(panel);
-			
-			resize();
-
-			open = true;
-		}
-	};
-	
-	this.onClose = function() {};
-	
-	this.close = function()
-	{
-		$this.onClose();
-		
-		if (utils.isset(panel.parentNode))
-			panel.parentNode.removeChild(panel);
-		
-		panel.removeAttribute('style');
-		panel.style.display = "none";
-		invisibleFreezeScreen.hide();
-		open = false;
-	};
-	
-	this.onRemove = function()
-	{
-		/*
-		var index = document.getElementById('main').onClick.indexOf(this.close);
-		
-		if (index >= 0)
-			document.getElementById('main').onClick.splice(index, 1);
-		//*/
-	};
-
 	///////////////////////////////////
 	// Initialisation des événements //
 	///////////////////////////////////
-
-	component.getById('selected').onClick = function($event)
-	{
-		if (freeOption === false || currentValue !== '{{[[*]]}}')
-			Events.preventDefault($event);
-		
-		if (panel.style.display === 'block')
-			$this.close();
-		else
-		{
-			if (enable === true)
-				$this.open();
-		}
-	};
 	
-	//component.getById('selected').addEvent('keyup', function($event) { Events.onTipText($event, function() { $this.onchange(component.getById('selected').value); }); });
-	component.getById('selected').addEvent('keyup', function($event) { Events.onTipText($event, function() { $this.onChange(component.getById('selected').value); }); });
+	this.onChange = function($value) {};
+	//this.onSelect = function() { $this.onChange(value); };
+	this.onOpen = function() {};
+	this.onClose = function() {};
+	
+	component.onClick = function() {};
 	
 	component.getById('icon').onClick = function()
 	{
-		if (panel.style.display === 'block')
-			$this.close();
-		else
-		{
-			if (enable === true)
-				$this.open();
-		}
+		if (enable)
+			toggle();
 	};
 
-	this.onChange = function($value) {};
-	
-	// Ces 2 lignes empêchent le rechargement de la page de l'application lorsqu'on tape entrer avec le focus dans le champ de saisie
-	component.getById('selected').addEvent('keydown', function($event)
+	selectInput.onClick = function($event)
 	{
-		if ($event.keyCode === 13)
+		if (!freeOption || currentValue !== '{{[[*]]}}')
+		{
 			Events.preventDefault($event);
+			selectInput.setAttribute('readonly', 'readonly');
+		}
+
+		if (enable)
+			toggle();
+	};
+	
+	var rerouteKeyCode = [13, 38, 40];
+
+	selectInput.addEvent('keydown', function($event)
+	{
+		if (rerouteKeyCode.includes($event.keyCode))
+		{
+			Events.preventDefault($event);
+			onKeyDown($event);
+		}
+	});
+
+	selectInput.addEvent('keyup', function($event)
+	{
+		if (rerouteKeyCode.includes($event.keyCode))
+			Events.preventDefault($event);
+
+		Events.onTipText($event, function() { $this.onChange(selectInput.value); });
 	});
 	
-	component.getById('selected').addEvent('keyup', function($event)
+	var onKeyDown = function($event)
 	{
-		if ($event.keyCode === 13)
-			Events.preventDefault($event);
-	});
-	
-	this.onKeyDown = function($event)
-	{
-		if (enable === true && open === true)
+		if (open)
 		{
 			if ($event.keyCode === 13)
 				$this.select(enlighted);
@@ -314,7 +315,7 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 				$this.close();
 			else if ($event.keyCode === 38)
 			{
-				if (utils.isset(enlighted))
+				if (enlighted !== null)
 				{
 					enlighted--;
 				
@@ -328,7 +329,7 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 			}
 			else if ($event.keyCode === 40)
 			{
-				if (utils.isset(enlighted))
+				if (enlighted !== null)
 				{
 					enlighted++;
 					
@@ -342,23 +343,28 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 			}
 		}
 	};
+		
+	panel.onKeyDown = onKeyDown;
+	panel.onClick = function() {};
 	
 	this.onResize = function()
 	{
-		if (open === true)
+		if (open)
 			resize();
 	};
-	
-	component.onClick = function() {}; // Pour empêcher la fermeture quand on clique en dehors des boutons
-	//document.getElementById('main').onClick.push(this.close);
-	
-	invisibleFreezeScreen.onClick = function() { $this.close(); };
+		
+	invisibleFreezeScreen.onClick = function($event)
+	{
+		Events.preventDefault($event);
+		$this.close();
+	};
 
 	////////////////
 	// Accesseurs //
 	////////////////
 
 	// GET
+
 	this.getName = function() { return name; };
 	this.getOptions = function() { return options; };
 	
@@ -367,19 +373,20 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 		var valueToReturn = currentValue;
 		
 		if (currentValue === '{{[[*]]}}')
-			valueToReturn = component.getById('selected').value;
+			valueToReturn = selectInput.value;
 		
 		return valueToReturn;
 	};
 	
-	this.getDisplayedValue = function() { return component.getById('selected').value; };
+	this.getValue = this.getCurrentValue;
 	
-	this.getPanel = function() { return panel; };
+	this.getDisplayedValue = function() { return selectInput.value; };
 	
 	this.isOpen = function() { return open; };
 	this.isEnable = function() { return enable; };
 
 	// SET
+
 	this.setName = function($name) 
 	{
 		name = $name;
@@ -390,8 +397,7 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 	this.setOptions = function($options) 
 	{
 		options = $options;
-
-		list.removeAllChildren();
+		list.empty();
 		loadOptions();
 	};
 
@@ -404,7 +410,7 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 			if (currentValue + "" === options[i].value + "")
 			{
 				list.childNodes[i].setSelected(true);
-				component.getById('selected').value = options[i].name;
+				selectInput.value = options[i].name;
 				currentIndex = i;
 			}
 			else 
@@ -412,29 +418,25 @@ function ComboBox($name, $options, $currentValue, $freeOption, $autoResize)
 		}
 	};
 	
+	this.setValue = this.setCurrentValue;
+	
 	this.setEnable = function($enable)
 	{
 		enable = $enable;
 
-		if (enable === true)
-			component.getById('selected').removeAttribute('disabled');
+		if (enable)
+			selectInput.removeAttribute('disabled');
 		else
-			component.getById('selected').setAttribute('disabled', true);
+			selectInput.setAttribute('disabled', true);
 	};
 
 	//////////////
 	// Héritage //
 	//////////////
-	
-	loadOptions();
 
 	var $this = utils.extend(component, this);
-	
-	if (utils.isset(autoResize) && autoResize > 0)
-		setTimeout(function() { $this.autoResize(); }, autoResize);
+
+	loadOptions();
 	
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("comboBox");

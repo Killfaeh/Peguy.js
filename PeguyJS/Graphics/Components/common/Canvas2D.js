@@ -8,13 +8,16 @@ function Canvas2D($width, $height)
 	var width = $width;
 	var height = $height;
 	
-	var canvas = new Component('<canvas></canvas>');
+	var canvas = new ListComponent('<canvas></canvas>');
+	canvas.setNode(null);
 	canvas.setAttribute('width', width);
 	canvas.setAttribute('height', height);
 	
-	var context = canvas.getContext('2d');
+	/*
+{{INSERT CODE}}
+	//*/
 	
-	var objectsList = [];
+	var context = canvas.getContext('2d');
 	
 	//////////////
 	// Méthodes //
@@ -24,44 +27,17 @@ function Canvas2D($width, $height)
 	
 	this.render = function()
 	{
-		// Effacer l'écran
 		context.clearRect(0, 0, width, height);
-		
-		// Afficher les objets
-		for (var i = 0; i < objectsList.length; i++)
-			objectsList[i].render(context);
+		canvas.execAll([ 'render' ], [ context ]);
 	};
 
 	// Convert to SVG
 	// Create from SVG
-	
-	this.addObject = function($object)
-	{
-		var index = objectsList.indexOf($object);
-		
-		if (index < 0)
-			objectsList.push($object);
-	};
-	
-	this.insertObjectInto = function($object, $index)
-	{
-		var index = objectsList.indexOf($object);
-		
-		if (index >= 0)
-			objectsList.splice(index, 1);
-		
-		objectsList.splice($index, 0, $object);
-	};
-	
-	this.removeObject = function($element)
-	{
-		var index = elementsList.indexOf($object);
-		
-		if (index >= 0)
-			objectsList.splice(index, 1);
-	};
-	
-	this.removeAllObjects = function() { objectsList = []; };
+
+	this.addObject = function($object) { return $this.addToList($object); };
+	this.insertObjectInto = function($object, $index) { return $this.insertIntoListAt($object, $index); };
+	this.removeObject = function($object) { return $this.removeFromList($object); };
+	this.removeAllObjects = function() { return $this.removeAllFromList(); };
 	
 	/////////////
 	// Filtres //
@@ -249,6 +225,3 @@ function Canvas2D($width, $height)
 	var $this = utils.extend(canvas, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("canvas2D");

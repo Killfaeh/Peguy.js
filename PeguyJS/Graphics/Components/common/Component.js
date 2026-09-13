@@ -9,11 +9,20 @@ function Component($html)
 	var html = $html;
 	var xml = null;
 	var node = null;
+	var idNodes = new Map();
+
+	//var tagNamesToRemove = ['script', 'iframe', 'object', 'embed'];
+	//var tagNamesToRemove = ['script', 'object', 'embed'];
+	var tagNamesToRemove = new Set(['script', 'object', 'embed']);
+	var desactivatedKeys = [65, 67, 86, 88];
 	
 	//////////////
 	// Méthodes //
 	//////////////
 	
+	//// Construction du composant ////
+
+	/*
 	this.xmlToHtml = function($xmlNode)
 	{
 		var htmlNode;
@@ -24,7 +33,10 @@ function Component($html)
 			var attributes = $xmlNode.attributes;
 			var children = $xmlNode.childNodes;
 
-			htmlNode = document.createElement($xmlNode.tagName);
+			htmlNode = Components.createTag($xmlNode);
+			
+			if (!htmlNode)
+				htmlNode = document.createElement($xmlNode.tagName);
 			
 			if (SVGTAGS.indexOf($xmlNode.tagName) >= 0)
 			{
@@ -36,50 +48,169 @@ function Component($html)
 			
 			if (utils.isset(attributes))
 			{
-				for (var i = 0; i < attributes.length; i++)
+				Array.from(attributes).forEach(function($attribute)
 				{
-					if (attributes[i].name === 'id' || attributes[i].name === 'for' || (attributes[i].name === 'target' && $xmlNode.tagName.toLowerCase() === 'form'))
+					if (!Components.tags[$xmlNode.tagName] || !Components.tags[$xmlNode.tagName].includes($attribute.name))
 					{
-						if (SVGTAGS.indexOf($xmlNode.tagName) >= 0)
-							htmlNode.setAttributeNS(null, attributes[i].name, attributes[i].value + id);
-						else
-							htmlNode.setAttribute(attributes[i].name, attributes[i].value + id);
-					}
-					else
-					{
-						if (SVGTAGS.indexOf($xmlNode.tagName) >= 0 
-							&& !/^xml/.test(attributes[i].name) && !/[a-z]+:[a-z]+/.test(attributes[i].name) 
-							&& attributes[i].name !== 'width' && attributes[i].name !== 'height')
+						if ($attribute.name === 'id' || $attribute.name === 'for' || ($attribute.name === 'target' && $xmlNode.tagName.toLowerCase() === 'form'))
 						{
-							var attributeValue = attributes[i].value;
-							
-							if (/url\(#[a-zA-Z0-9-_]+\)/.test(attributeValue))
-								attributeValue = attributeValue.replace(/url\(#([a-zA-Z0-9-_]+)\)/gi, 'url(#$1' + id + ')');
-							
-							htmlNode.setAttributeNS(null, attributes[i].name, attributeValue);
+							if (SVGTAGS.indexOf($xmlNode.tagName) >= 0)
+								htmlNode.setAttributeNS(null, $attribute.name, $attribute.value + id);
+							else
+								htmlNode.setAttribute($attribute.name, $attribute.value + id);
 						}
 						else
-							htmlNode.setAttribute(attributes[i].name, attributes[i].value);
+						{
+							if (SVGTAGS.indexOf($xmlNode.tagName) >= 0 
+								&& !/^xml/.test($attribute.name) && !/[a-z]+:[a-z]+/.test($attribute.name) 
+								&& $attribute.name !== 'width' && $attribute.name !== 'height')
+							{
+								var attributeValue = $attribute.value;
+							
+								if (/url\(#[a-zA-Z0-9-_]+\)/.test(attributeValue))
+									attributeValue = attributeValue.replace(/url\(#([a-zA-Z0-9-_]+)\)/gi, 'url(#$1' + id + ')');
+							
+								htmlNode.setAttributeNS(null, $attribute.name, attributeValue);
+							}
+							else
+								htmlNode.setAttribute($attribute.name, $attribute.value);
+						}
 					}
-				}
+				});
 			}
+
+			var tmpThis = this;
 			
-			for (var i = 0; i < children.length; i++)
-				htmlNode.appendChild(this.xmlToHtml(children[i]));
+			children.forEach(function($child) { htmlNode.appendChild(tmpThis.xmlToHtml($child)); });
 		}
 		else
 			htmlNode = document.createTextNode($xmlNode.textContent);
 
 		return htmlNode;
 	};
+	//*/
+
+	this.cleanNodes = function($node)
+	{
+		var checkedNodes = new Set();
+		var iterator = document.createNodeIterator($node, NodeFilter.SHOW_ELEMENT);
+		var node;
+
+		while ((node = iterator.nextNode()))
+		{
+			if (node.nodeType !== Node.TEXT_NODE)
+			{
+				if (tagNamesToRemove.has(node.tagName.toLowerCase()))
+					node.remove();
+				else
+				{
+					if (!checkedNodes.has(node))
+					{
+						var htmlNode = Components.createTag(node);
+
+						if (!htmlNode)
+							htmlNode = node;
+						else
+							node.parentNode.replaceChild(htmlNode, node);
+
+						if (!checkedNodes.has(htmlNode))
+						{
+							if (SVGTAGS.includes(node.tagName))
+								addNodeMethods(htmlNode);
+
+							this.initDefaultEvents(htmlNode);
+
+							var attributes = node.attributes;
+
+							if (attributes && attributes.length > 0)
+							{
+								var upperTagName = node.tagName.toUpperCase();
+								var tagInfo = Components.tags.get(upperTagName);
+
+								Array.from(attributes).forEach(function($attribute)
+								{
+									if (!tagInfo || !tagInfo.paramNames.includes($attribute.name))
+									{
+										if (htmlNode === node && (/^on/.test($attribute.name) || /^javascript:/.test($attribute.value)))
+										{
+											if (SVGTAGS.includes(node.tagName))
+												htmlNode.removeAttributeNS(null, $attribute.name);
+											else
+												htmlNode.removeAttribute($attribute.name);
+										}
+										else
+										{
+											if ($attribute.name === 'id')
+												idNodes.set($attribute.value, htmlNode);
+
+											if (node !== $node && (['id', 'for'].includes($attribute.name) || ($attribute.name === 'target' && node.tagName.toLowerCase() === 'form')))
+											{
+												if (SVGTAGS.includes(node.tagName))
+													htmlNode.setAttributeNS(null, $attribute.name, $attribute.value + id);
+												else
+													htmlNode.setAttribute($attribute.name, $attribute.value + id);
+											}
+											else if (SVGTAGS.includes(node.tagName))
+											{
+												if (!/(^xml|[a-zA-Z]+:[a-zA-Z]+)/.test($attribute.name) && (upperTagName !== 'SVG' || !['width', 'height'].includes($attribute.name)))
+												{
+													var attributeValue = $attribute.value;
+										
+													if (/url\(#[a-zA-Z0-9-_]+\)/.test(attributeValue))
+													{
+														attributeValue = attributeValue.replace(/url\(#([a-zA-Z0-9-_]+)\)/gi, 'url(#$1' + id + ')');
+														htmlNode.setAttributeNS(null, $attribute.name, attributeValue);
+													}
+													else  if (htmlNode !== node)
+														htmlNode.setAttributeNS(null, $attribute.name, attributeValue);
+												}
+												else if (htmlNode === node)
+													htmlNode.removeAttributeNS(null, $attribute.name);
+											}
+											else if (htmlNode !== node)
+												htmlNode.setAttribute($attribute.name, $attribute.value);
+										}
+									}
+								});
+							}
+						}
+
+						if (!checkedNodes.has(node))
+							checkedNodes.add(node);
+
+						if (!checkedNodes.has(htmlNode))
+							checkedNodes.add(htmlNode);
+					}
+				}
+			}
+		}
+
+		checkedNodes = new Set();
+	};
 
 	this.stringToHtml = function($input)
 	{
-		var xmlNode = dataManager.StringToXML('<?xml version="1.0" encoding="UTF-8"?>' + $input).firstChild;
-		var htmlNode = $this.xmlToHtml(xmlNode);
+		var rootTagName = $input.replace(/^< */, '').replace(/( |>).*/g, '');
+		var tmpNode = document.createElement('div');
+
+		if (SVGTAGS.includes(rootTagName) && rootTagName !== 'svg')
+			tmpNode = document.createElementNS(SVGNS, 'svg');
+		else if (rootTagName === 'tr')
+			tmpNode = document.createElement('tbody');
+		else if (rootTagName === 'td' || rootTagName === 'th')
+			tmpNode = document.createElement('tr');
+		else if (rootTagName === 'li')
+			tmpNode = document.createElement('ul');
+
+		tmpNode.innerHTML = $input;
+		var htmlNode = tmpNode.firstChild;
+
+		$this.cleanNodes(htmlNode);
+
 		return htmlNode;
 	};
 	
+	/*
 	this.parseNode = function($node)
 	{
 		if ($node.nodeType !== Node.TEXT_NODE)
@@ -106,21 +237,23 @@ function Component($html)
 		
 		return $node;
 	};
+	//*/
 	
+	//// Initialisation des événements du composant ////
+
 	this.initDefaultEvents = function($node)
 	{
-		if ($node.tagName === 'input' || $node.tagName === 'INPUT'
-			//|| $node.tagName === 'select' || $node.tagName === 'SELECT'
-			|| $node.tagName === 'textarea' || $node.tagName === 'TEXTAREA')
+		//var inputTagNames = new Set(['input', 'INPUT', 'select', 'SELECT', 'textarea', 'TEXTAREA']);
+		var inputTagNames = new Set(['input', 'INPUT', 'textarea', 'TEXTAREA']);
+
+		if (!$node.hasDefaultEvents && inputTagNames.has($node.tagName))
 		{
 			$node.onChangeDelay = 0;
 			$node.lastKeyStrokeDate = new Date();
 			
 			$node.onchange = function($event)
 			{
-				var keylist = [65, 67, 86, 88];
-				
-				if ((($event.metaKey || Events.keyPressTable['ctrl'] || Events.keyPressTable['cmd']) && keylist.indexOf($event.keyCode) < 0) || Events.keyPressTable['alt'])
+				if ((($event.metaKey || Events.keyPressTable['ctrl'] || Events.keyPressTable['cmd']) && !desactivatedKeys.includes($event.keyCode)) || Events.keyPressTable['alt'])
 				{
 					Events.preventDefault($event);
 					Events.stopPropagation($event);
@@ -132,9 +265,7 @@ function Component($html)
 			
 			$node.onkeydown = function($event)
 			{
-				var keylist = [65, 67, 86, 88];
-				
-				if ((($event.metaKey || Events.keyPressTable['ctrl'] || Events.keyPressTable['cmd']) && keylist.indexOf($event.keyCode) < 0) || Events.keyPressTable['alt'])
+				if ((($event.metaKey || Events.keyPressTable['ctrl'] || Events.keyPressTable['cmd']) && !desactivatedKeys.includes($event.keyCode)) || Events.keyPressTable['alt'])
 				{
 					Events.preventDefault($event);
 					Events.stopPropagation($event);
@@ -202,60 +333,149 @@ function Component($html)
 			});
 		}
 		
-		$node.addEvent('mouseover', function($event)
+		if (!$node.hasDefaultEvents && $node.addEvent)
 		{
-			$event = $event || window.event; // Compatibilité IE
-			
-			var catchNode = $event.targetNode();
-			var relatedTarget = $event.relatedTarget || $event.fromElement; // Idem
-			
-			if (!this.containsInChildren(relatedTarget))
+			$node.addEvent('mouseover', function($event)
 			{
-				if (utils.isset(this.onToolTip) && this.onToolTip !== "")
+				$event = $event || window.event; // Compatibilité IE
+				
+				var catchNode = $event.targetNode();
+				var relatedTarget = $event.relatedTarget || $event.fromElement; // Idem
+				
+				if (!this.containsInChildren(relatedTarget))
 				{
-					var toolTip = new ToolTip(this, this.onToolTip);
-					var mousePosition = this.mousePosition($event);
+					if (utils.isset(this.onToolTip) && this.onToolTip !== "")
+					{
+						var toolTip = new ToolTip(this, this.onToolTip);
+						var mousePosition = this.mousePosition($event);
+						
+						if (utils.isset(toolTip.update))
+							toolTip.update(mousePosition.x, mousePosition.y + 3);
+					}
 					
-					if (utils.isset(toolTip.update))
-						toolTip.update(mousePosition.x, mousePosition.y);
+					if (utils.isset(this.onMouseOver))
+						this.onMouseOver($event);
 				}
-				
-				if (utils.isset(this.onMouseOver))
-					this.onMouseOver($event);
-			}
-		});
-		
-		$node.addEvent('mouseout', function($event)
-		{
-			$event = $event || window.event; // Compatibilité IE
+			});
 			
-			var catchNode = $event.targetNode();
-			var relatedTarget = $event.relatedTarget || $event.toElement; // Idem
-			
-			if (!this.containsInChildren(relatedTarget))
+			$node.addEvent('mouseout', function($event)
 			{
-				if (utils.isset(this.toolTipOpen))
-					this.toolTipOpen.startFadeOut();
+				$event = $event || window.event; // Compatibilité IE
 				
-				if (utils.isset(this.onMouseOut))
-					this.onMouseOut($event);
+				var catchNode = $event.targetNode();
+				var relatedTarget = $event.relatedTarget || $event.toElement; // Idem
+				
+				if (!this.containsInChildren(relatedTarget))
+				{
+					if (utils.isset(this.toolTipOpen))
+						this.toolTipOpen.startFadeOut();
+					
+					if (utils.isset(this.onMouseOut))
+						this.onMouseOut($event);
+				}
+			});
+		}
+
+		$node.hasDefaultEvents = true;
+	};
+
+	//// Gestion du style du composant ////
+
+	//this.componentName = '';
+	this.configStyle = [];
+
+	this.addConfigStyle = function($name, $config) { this.configStyle.push({ name: $name, config: $config }); };
+
+	this.applyConfigStyle = function()
+	{
+		this.configStyle.forEach(function($el)
+		{
+			var name = $el.name;
+			var configStyle = $el.config();
+			var multiTagInstructions = {};
+
+			var apply = function($subConfig)
+			{
+				if ($subConfig['this'])
+					$this.applyStyle($subConfig['this']);
+
+				if ($subConfig['multi-tag'])
+				{
+					Object.keys($subConfig['multi-tag']).forEach(function($key)
+					{
+						if (multiTagInstructions[$key])
+							multiTagInstructions[$key] = multiTagInstructions[$key].concat($subConfig['multi-tag'][$key]);
+						else
+							multiTagInstructions[$key] = $subConfig['multi-tag'][$key];
+					});
+				}
+
+				Object.keys($subConfig).forEach(function($key)
+				{
+					if ($key !== 'this' && $key !== 'multi-tag' && $this.getById($key))
+						$this.getById($key).applyStyle($subConfig[$key]);
+				});
+			};
+
+			if (configStyle.common)
+				apply(configStyle.common);
+			if (Loader.getMode() === 'classic' && configStyle.classic)
+				apply(configStyle.classic);
+			else if (Loader.getMode() === 'mobile' && configStyle.mobile)
+				apply(configStyle.mobile);
+
+			STYLE.applyGlobalStyle(name, multiTagInstructions);
+		});
+	};
+
+	this.setChildren = function($content)
+	{
+		$this.innerHTML = $this.innerHTML.replace(/{{ *(CHILDREN|children) *}}/, $content);
+	};
+
+	this.hideNodes = function($nodes)
+	{
+		$nodes.forEach(function($id)
+		{
+			var el = $this.getById($id);
+
+			if (el)
+			{
+				var oldDisplay = el.getStyle('display');
+
+				if (oldDisplay !== 'none')
+					el.oldDisplay = el.getStyle('display');
+
+				el.style.display = 'none';
 			}
 		});
 	};
+
+	this.displayNodes = function($nodes)
+	{
+		$nodes.forEach(function($id)
+		{
+			var el = $this.getById($id);
+
+			if (el)
+				el.style.display = el.oldDisplay;
+		});
+	};
 	
+	//// Accéder aux noeuds du composant ////
+
 	this.getById = function($id)
 	{
-		//console.log(Components.nbComponents);
-		//console.log('#' + $id + id);
-		
-		$id = $id.replace(/\+/g, '\\+');
-		var output = node.querySelector('#' + $id + id);
-		
-		if (!utils.isset(output))
-			output = node.querySelector('#' + $id);
-		
-		if (!utils.isset(output) && (""+$id+id === $this.getAttribute('id') || $id === $this.getAttribute('id')))
-			output = $this;
+		var output = idNodes.get($id);
+
+		if (!output)
+		{
+			var realId = ""+$id+id;
+			var idAttribute = $this.getAttribute('id');
+
+			if (realId === idAttribute || $id === idAttribute)
+				output = $this;
+		}
 		
 		return output;
 	};
@@ -263,30 +483,32 @@ function Component($html)
 	this.getRealId = function($id)
 	{
 		$id = $id.replace(/\+/g, '\\+');
-		
 		var realId = $id + '' + id;
-		
-		var output = node.querySelector('#' + $id + id);
-		
-		if (!utils.isset(output))
+
+		var output = idNodes.get($id);
+
+		if (!output)
 		{
-			output = node.querySelector('#' + $id);
-			realId = $id;
+			var realId = ""+$id+id;
+			var idAttribute = $this.getAttribute('id');
+
+			if (realId === idAttribute || $id === idAttribute)
+				output = $this;
 		}
-		
-		if (!utils.isset(output) && (""+$id+id === $this.getAttribute('id') || $id === $this.getAttribute('id')))
-		{
-			if (""+$id+id === $this.getAttribute('id'))
-				realId = $id + '' + id;
-			else if ($id === $this.getAttribute('id'))
-				realId = $id;
-		}
-		
+
+		if (output)
+			realId = $this.getAttribute('id');
+		else
+			realId = null;
+
 		return realId;
 	};
 	
+	//// Divers ////
+
 	this.toCode = function()
 	{
+		/*
 		var tagName = $this.tagName;
 		var attributes = $this.attributes;
 		
@@ -302,6 +524,9 @@ function Component($html)
 		str = str + '>' + $this.innerHTML + '</' + tagName + '>';
 		
 		return str;
+		//*/
+
+		return $this.outerHTML;
 	};
 	
 	// Ajout des méthodes de noeuds
@@ -512,29 +737,29 @@ function Component($html)
 	this.focus = function()
 	{
 		$this.onFocus();
-		Components.addFocus($this);
+		//Components.addFocus($this);
 	};
 	
 	this.blur = function()
 	{
 		$this.onBlur();
-		Components.removeFocus($this);
+		//Components.removeFocus($this);
 	};
 	
 	// Méthodes de gestion des événements globaux à surcharger
 	
-	this.onResize = function() {};
-	this.onEndResize = function() {};
-	this.onKeyDown = function($event) {};
-	this.onKeyUp = function($event) {};
-	this.onGamepadConnected = function($event) {};
-	this.onGamepadDisconnected = function($event) {};
-	this.onGamepadButtonDown = function($event) {};
-	this.onGamepadButtonUp = function($event) {};
-	this.onGamepadAxisChange = function($event) {};
-	this.onRemove = function() {};
-	this.onFocus = function() {};
-	this.onBlur = function() {};
+	this.onResize = function() { return false; };
+	this.onEndResize = function() { return false; };
+	this.onKeyDown = function($event) { return false; };
+	this.onKeyUp = function($event) { return false; };
+	this.onGamepadConnected = function($event) { return false; };
+	this.onGamepadDisconnected = function($event) { return false; };
+	this.onGamepadButtonDown = function($event) { return false; };
+	this.onGamepadButtonUp = function($event) { return false; };
+	this.onGamepadAxisChange = function($event) { return false; };
+	this.onRemove = function() { return false; };
+	this.onFocus = function() { return false; };
+	this.onBlur = function() { return false; };
 	this.onUndo = doNothing;
 	this.onRedo = doNothing;
 	
@@ -546,6 +771,7 @@ function Component($html)
 	
 	// GET
 	this.getId = function() { return id; };
+	this.getIdNodes = function() { return idNodes; };
 	this.getHtml = function() { return html; };
 	this.getJSON = function() { return {}; };
 
@@ -553,15 +779,25 @@ function Component($html)
 	
 	this.loadFromJSON = function($json) {};
 
+	var $this = this;
+
 	if (typeof html === "string")
+		node = this.stringToHtml(html);
+	else if (html)
 	{
-		xml = dataManager.StringToXML('<?xml version="1.0" encoding="UTF-8"?>' + html);
-		node = this.xmlToHtml(xml.firstChild);
+		if (!html.getById)
+			this.cleanNodes(html);
+		else
+		{
+			id = html.getId();
+			idNodes = html.getIdNodes();
+		}
+
+		node = html;
+		//node = this.parseNode(html);
 	}
-	else
-		node = this.parseNode(html);
 	
-	if (SVGTAGS.indexOf(node.tagName) >= 0)
+	if (node && SVGTAGS.indexOf(node.tagName) >= 0)
 	{
 		this.totalLength = function() { return node.getTotalLength(); };
 
@@ -678,10 +914,7 @@ function Component($html)
 		};
 	}
 	
-	var $this = utils.extend(node, this);
+	$this = utils.extend(node, this);
 	Components.componentsList.push($this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("component");

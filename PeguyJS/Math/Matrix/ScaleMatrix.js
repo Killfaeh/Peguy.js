@@ -65,6 +65,3 @@ function ScaleMatrix($x, $y, $z)
 	var $this = utils.extend(matrix, this); 
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("scaleMatrix");

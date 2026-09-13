@@ -38,6 +38,10 @@ function FolderItem($html, $sorted)
 	var selectIcon = Loader.getSVG('icons', 'white-folder-icon', 18, 18);
 	component.getById('selectIcon').appendChild(selectIcon);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	// Contenu
 	
 	var parentFolder = null;
@@ -586,5 +590,5 @@ function FolderItem($html, $sorted)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("folderItem");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("folderItem");

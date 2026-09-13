@@ -31,6 +31,11 @@ var Events =
 		Events.mouseY = $event.clientY;
 	},
 	
+	mousePosition: function($event)
+	{
+		return document.getElementById('main').mousePosition($event);
+	},
+	
 	////////////////////////////
 	//// Gestion du clavier ////
 	////////////////////////////
@@ -42,6 +47,29 @@ var Events =
 	// Modifiers Mac : shift => 16, ctrl => 17, alt => 18, cmd (left) => 91, cmd (right) => 93, caps lock => 20
 	// Modifiers Windows : shift => 16, ctrl => 17, alt => 18, cmd (left) => 91, cmd (right) => 92, caps lock => 20
 	// Modifiers Linux : shift => 16, ctrl => 17, alt (left) => 18, alt (right) => 225, cmd (left) => 91?, cmd (right) => 92, caps lock => 20
+
+	metaKey: 'Ctrl-',
+
+	keyCodeToCode : {},
+
+	displayKeyCodeTable: function()
+	{
+		var str = '<table>\n';
+		
+		for (var key in Events.keyCodeToCode)
+		{
+			var row = Events.keyCodeToCode[key];
+			str = str + '\t<tr>\t';
+			str = str + '<td>' + row.code + '</td>\t';	
+			str = str + '<td>"' + row.key + '"</td>\t';	
+			str = str + '<td>' + row.keyCode + '</td>\t';	
+			str = str + '</tr>\n';	
+		}
+		
+		str = str + '</table>';
+		
+		//console.log(str);
+	},
 	
 	keyPressTable: {},
 	keyLastPressTable: {},
@@ -49,6 +77,16 @@ var Events =
 	startY: 0,
 	touchMoved: false,
 	doubleTouchStartTimestamp: 0,
+
+	shortcutModifier: function($event)
+	{
+		var shortcutModifier = Events.keyPressTable['ctrl'];
+		
+		if (/mac os x/.test(navigator.userAgent.toLowerCase().replace(" ", "")) || /macosx/.test(navigator.userAgent.toLowerCase().replace(" ", "")))
+			shortcutModifier = $event.metaKey;
+
+		return shortcutModifier;
+	},
 
 	onKeyDown: function($event)
 	{
@@ -58,14 +96,24 @@ var Events =
 		// Capturer le noeud déclencheur
 		var catchNode = $event.targetNode();
 		var catchNodeTagName = catchNode.tagName.toLowerCase();
+		
+		/*
+		if (!Events.keyCodeToCode[$event.keyCode])
+		{
+			Events.keyCodeToCode[$event.keyCode] = { keyCode: $event.keyCode, key: $event.key, code: $event.code };
+			Events.displayKeyCodeTable();
+		}
+		//*/
 
 		// Raccourcis standards
 		var standardShortcuts = {};
 		standardShortcuts[65] = Events.selectAll;
 		standardShortcuts[67] = Events.copy;
+		standardShortcuts[70] = Events.find;
 		standardShortcuts[88] = Events.cut;
 		standardShortcuts[86] = Events.paste;
 		standardShortcuts[90] = Events.undo;
+		standardShortcuts[81] = Events.quit;
 		standardShortcuts[83] = Events.save;
 		standardShortcuts[87] = Events.close;
 
@@ -97,14 +145,18 @@ var Events =
 						if (key !== 'cmd' && key !== 91 && key !== 93 && key !== '91' && key !== '93')
 						{
 							var date = Events.keyLastPressTable[key];
+							var delta = (date && date.getTime) ? now.getTime() - date.getTime() : 1000000000000;
 
-							if (now.getTime() - date.getTime() >= 550 && Events.keyPressTable[key] === true)
+							if (delta >= 550 && Events.keyPressTable[key] === true)
 							{
+								/*
 								console.log("SIMULE KEYUP");
 								console.log('Now : ' + now.getTime());
 								console.log('Key : ' + key);
 								console.log('Last press : ' + date.getTime());
 								console.log('Delta : ' + (now.getTime() - date.getTime()));
+								//*/
+								Events.emit('onKeyUp', [{ keyCode: key }]);
 								Events.onKeyUp({ keyCode: key });
 							}
 						}
@@ -118,8 +170,12 @@ var Events =
 
 		if (!utils.isset(Events.keyPressTable[$event.keyCode]) || Events.keyPressTable[$event.keyCode] === false)
 		{
+			/*
 			console.log("KEY DOWN : " + $event.keyCode);
+			console.log("KEY DOWN : " + $event.key);
+			console.log("KEY DOWN : " + $event.code);
 			//console.log($event);
+			//*/
 			
 			Events.keyPressTable[$event.keyCode] = true;
 
@@ -154,11 +210,24 @@ var Events =
 					Events.stopPropagation($event);
 					standardShortcuts[$event.keyCode]();
 				}
-				else if ($event.keyCode == 13 || $event.keyCode == 27 || (catchNodeTagName !== 'input' && catchNodeTagName !== 'textarea'))
+				else if ($event.keyCode === 13 || (catchNodeTagName !== 'input' && catchNodeTagName !== 'textarea'))
+				{
+					Events.emit('onKeyDown', [$event]);
 					Components.onKeyDown($event);
+				}
 			}
-			else if ($event.keyCode == 13 || $event.keyCode == 27 || (catchNodeTagName !== 'input' && catchNodeTagName !== 'textarea'))
+			else if ($event.keyCode === 13 || (catchNodeTagName !== 'input' && catchNodeTagName !== 'textarea'))
+			{
+				Events.emit('onKeyDown', [$event]);
 				Components.onKeyDown($event);
+			}
+
+			if ($event.keyCode === 27)
+			{
+				Events.preventDefault($event);
+				Events.stopPropagation($event);
+				Events.escape();
+			}
 		}
 		else if (Events.keyPressTable['ctrl'] === true || Events.keyPressTable['cmd'] === true || $event.metaKey === true)
 		{
@@ -184,7 +253,7 @@ var Events =
 
 		if (utils.isset(Events.keyPressTable[$event.keyCode]) && Events.keyPressTable[$event.keyCode] === true)
 		{
-			console.log("KEY UP : " + $event.keyCode);
+			//console.log("KEY UP : " + $event.keyCode);
 			
 			Events.keyPressTable[$event.keyCode] = false;
 			
@@ -202,7 +271,10 @@ var Events =
 				Events.keyPressTable['cmd'] = false;
 			
 			if ($event.keyCode == 13 || $event.keyCode == 27 || (catchNodeTagName !== 'input' && catchNodeTagName !== 'textarea'))
+			{
+				Events.emit('onKeyUp', [$event]);
 				Components.onKeyUp($event);
+			}
 		}
 	},
 	
@@ -221,7 +293,7 @@ var Events =
 	// https://alvaromontoro.com/blog/68044/playing-with-the-gamepad-api
 
 	gamepadsDelay: 25,
-	gamepadsTimer: null,
+	gamepadsTimer: false,
 
 	gamepadsPressTable: {},
 	gamepadsLastPressTable: {},
@@ -249,8 +321,10 @@ var Events =
 
 		if (gamepads.length > 0)
 		{
-			console.log(gamepads);
-			Events.gamepadsTimer = setInterval(Events.gamepadsLoop, Events.gamepadsDelay);
+			//console.log(gamepads);
+			//Events.gamepadsTimer = setInterval(Events.gamepadsLoop, Events.gamepadsDelay);
+			Events.gamepadsTimer = true;
+			Events.gamepadsLoop();
 		}
 	},
 
@@ -272,6 +346,7 @@ var Events =
 					{
 						Events.gamepadsPressTable[gamepad.index]['buttons'][j] = true;
 						Events.gamepadsLastPressTable[gamepad.index]['buttons'][j] = new Date();
+						Events.emit('onGamepadButtonDown', [{ buttonCode: j }]);
 						Components.onGamepadButtonDown({ buttonCode: j });
 					}
 				}
@@ -280,6 +355,7 @@ var Events =
 					if (utils.isset(Events.gamepadsPressTable[gamepad.index]['buttons'][j]) && Events.gamepadsPressTable[gamepad.index]['buttons'][j] === true)
 					{
 						Events.gamepadsPressTable[gamepad.index]['buttons'][j] = false;
+						Events.emit('onGamepadButtonUp', [{ buttonCode: j }]);
 						Components.onGamepadButtonUp({ buttonCode: j });
 					}
 				}
@@ -293,15 +369,21 @@ var Events =
 				{
 					Events.gamepadsPressTable[gamepad.index]['axis'][j] = axe;
 					Events.gamepadsLastPressTable[gamepad.index]['axis'][j] = new Date();
+					Events.emit('onGamepadAxisChange', [{ axisCode: j, value: axe }]);
 					Components.onGamepadAxisChange({ axisCode: j, value: axe });
 				}
 			}
 		}
+
+		gamepads = Events.getGamepads();
+
+		if (gamepads.length > 0)
+			requestAnimationFrame(Events.gamepadsLoop);
 	},
 
 	gamepadConnect: function($event)
 	{
-		console.log($event);
+		//console.log($event);
 		// Gestion des gamepads
 
 		Events.gamepadsPressTable[$event.gamepad.index] = { 'buttons': {}, 'axis': {} };
@@ -309,15 +391,16 @@ var Events =
 
 		var gamepads = Events.getGamepads();
 
-		if (!utils.isset(Events.gamepadsTimer) && gamepads.length > 0)
-			Events.gamepadsTimer = setInterval(Events.gamepadsLoop, Events.gamepadsDelay);
+		if (!Events.gamepadsTimer && gamepads.length > 0)
+			Events.initGamepadLoop();
 
+		Events.emit('onGamepadConnected', [$event]);
 		Components.onGamepadConnected($event);
 	},
 
 	gamepadDisconnect: function($event)
 	{
-		console.log($event);
+		//console.log($event);
 		// Gestion des gamepads
 
 		Events.gamepadsPressTable[$event.gamepad.index] = null;
@@ -327,12 +410,13 @@ var Events =
 
 		if (gamepads.length <= 0)
 		{
-			clearInterval(Events.gamepadsTimer);
-			Events.gamepadsTimer = null;
+			//clearInterval(Events.gamepadsTimer);
+			Events.gamepadsTimer = false;
 			Events.gamepadsPressTable = {};
 			Events.gamepadsLastPressTable = {};
 		}
 
+		Events.emit('onGamepadDisconnected', [$event]);
 		Components.onGamepadDisconnected($event);
 	},
 	
@@ -511,6 +595,51 @@ var Events =
 				Events.preventDefault($event);
 		}
 	},
+
+	manageFrameClick: function($event)
+	{
+		if (!$event) // Cas IE 
+			$event = window.event;
+
+		var catchNode = $event.targetNode();
+
+		if (catchNode && catchNode.propagate)
+		{
+			var cancelNode = catchNode.propagate(function($currentNode)
+			{
+				var className = $currentNode.getAttribute ? $currentNode.getAttribute('class') : '';
+
+				if (className 
+					&& (className.split(' ').includes('closeScreen') 
+						|| className.split(' ').includes('popup')
+						|| className.split(' ').includes('invisibleFreezeScreen')
+						|| className.split(' ').includes('floatingPanel')))
+				{
+					return true;
+				}
+
+				return false;
+			});
+
+			if (!cancelNode)
+			{
+				Components.blurAllFrames();
+
+				var frame = catchNode.propagate(function($currentNode)
+				{
+					var className = $currentNode.getAttribute ? $currentNode.getAttribute('class') : '';
+
+					if (className && className.split(' ').includes('frame') && $currentNode.frame)
+						return true;
+
+					return false;
+				});
+
+				if (frame)
+					frame.onFocusFrame();
+			}
+		}
+	},
 	
 	///////////////////////////////////////////////
 	//// Initialisation globale des événements ////
@@ -529,7 +658,9 @@ var Events =
 		document.getElementById('main').addEvent('mousemove', function($event)
 		{
 			Events.updateMouse($event);
-			Events.catchEvent('MouseMove', $event);
+
+			//if (Components.iceRinks.length > 0)
+				Events.catchEvent('MouseMove', $event);
 		});
 		
 		document.getElementById('main').addEvent('mouseup', function($event)
@@ -587,6 +718,9 @@ var Events =
 			document.getElementById('main').addEvent('drop', function($event) { Events.catchEvent('Drop', $event); });
 			document.getElementById('main').addEvent('contextmenu', function($event) { Events.catchEvent('ContextMenu', $event); });
 			document.getElementById('main').addEvent('mousewheel', function($event) { Events.catchEvent('MouseWheel', $event); });
+
+			document.getElementById('main').addEvent('click', function($event) { Events.manageFrameClick($event); });
+			document.getElementById('main').addEvent('dblclick', function($event) { Events.manageFrameClick($event); });
 		}
 		else
 		{
@@ -632,6 +766,8 @@ var Events =
 			document.getElementById('main').addEvent('gestureend', function($event) { Events.catchEvent('GestureEnd', $event); });
 		}
 
+		document.getElementById('main').onKeyDown = new Array();
+		document.getElementById('main').onKeyUp = new Array();
 		document.getElementById('main').onClick = new Array();
 		document.getElementById('main').onDblClick = new Array();
 		document.getElementById('main').onMouseDown = new Array();
@@ -657,6 +793,9 @@ var Events =
 		document.getElementById('main').onGestureEnd = new Array();
 		window.onBlur = new Array();
 		window.onFocus = new Array();
+
+		//document.getElementById('main').onClick.push(function() { Components.blurAllFrames(); });
+		//document.getElementById('main').onDblClick.push(function() { Components.blurAllFrames(); });
 		
 		window.onblur = function($event)
 		{
@@ -1009,7 +1148,8 @@ var Events =
 	//// Mécanisme de signaux ////
 	//////////////////////////////
 	
-	signals: {},
+	//signals: {},
+	signals: new Map(),
 	
 	emit: function($eventName, $args)
 	{
@@ -1022,6 +1162,7 @@ var Events =
 		//console.log($args);
 		//console.log(Events.signals[$eventName]);
 		
+		/*
 		if (utils.isset(Events.signals[$eventName]))
 		{
 			for (var i = 0; i < Events.signals[$eventName].length; i++)
@@ -1033,6 +1174,18 @@ var Events =
 				}
 			}
 		}
+		//*/
+		
+		if (Events.signals.has($eventName))
+		{
+			var slotList = Events.signals.get($eventName);
+			
+			slotList.forEach(function($slot)
+			{
+				if (!utils.isset($slot.node) || (utils.isset($slot.node) && utils.isset($slot.node.parentNode)))
+					$slot.apply(Events, $args);
+			});
+		}
 	},
 	
 	connect: function($eventName, $function, $node)
@@ -1042,18 +1195,24 @@ var Events =
 			if (utils.isset($node))
 				$function.node = $node;
 			
-			if (!utils.isset(Events.signals[$eventName]))
-				Events.signals[$eventName] = [];
+			//if (!utils.isset(Events.signals[$eventName]))
+			//	Events.signals[$eventName] = [];
+				
+			if (!Events.signals.has($eventName))
+				Events.signals.set($eventName, []);
 			
-			var index = Events.signals[$eventName].indexOf($function);
+			//var index = Events.signals[$eventName].indexOf($function);
+			var index = Events.signals.get($eventName).indexOf($function);
 			
 			if (index < 0)
-				Events.signals[$eventName].push($function);
+				Events.signals.get($eventName).push($function);
+				//Events.signals[$eventName].push($function);
 		}
 	},
 	
 	unconnect: function($eventName, $function)
 	{
+		/*
 		if (utils.isset(Events.signals[$eventName]))
 		{
 			var index = Events.signals[$eventName].indexOf($function)
@@ -1061,9 +1220,19 @@ var Events =
 			if (index >= 0)
 				Events.signals[$eventName].splice(index, 1);
 		}
+		//*/
+		
+		if (Events.signals.has($eventName))
+		{
+			var index = Events.signals.get($eventName).indexOf($function)
+			
+			if (index >= 0)
+				Events.signals.get($eventName).splice(index, 1);
+		}
 	},
 	
-	unconnectAll: function() { Events.signals = {}; },
+	//unconnectAll: function() { Events.signals = {}; },
+	unconnectAll: function() { Events.signals = new Map(); },
 	
 	////////////////////////////
 	//// Actions génériques ////
@@ -1077,8 +1246,11 @@ var Events =
 	redo: doNothing,
 	save: doNothing,
 	saveAs: doNothing,
-	close: doNothing
+	close: doNothing,
+	find: doNothing,
+	escape: doNothing,
+	quit: doNothing
 };
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("events");
+if (/mac os x/.test(navigator.userAgent.toLowerCase().replace(" ", "")) || /macosx/.test(navigator.userAgent.toLowerCase().replace(" ", "")))
+	Events.metaKey = '⌘';

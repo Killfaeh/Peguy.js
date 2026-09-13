@@ -4,14 +4,33 @@ function FreezeScreen($content)
 	// Attributs //
 	///////////////
 
+	// Structure du composant
+
 	var content = $content;
 
-	var html = '<div class="freezeScreen" >'
+	var html = '<div id="freezeScreen" class="freezeScreen" >'
 					+ '<div id="freezeScreenContent" class="freezeScreenContent" >' + content + '<div class="wall" ></div></div>'
-					+ '<div class="wall" ></div>'
+					+ '<div id="wall" class="wall" ></div>'
 				+ '</div>';
 				
 	var component = new Component(html);
+
+	// Style
+
+	component.addConfigStyle("freezeScreen", function ()
+	{
+		return {
+			common:
+			{
+				'this':
+				{
+					backgroundColor: (function() { return STYLE.popupFreezeScreenColor; })(),
+				},
+			}
+		};
+	});
+
+	component.applyConfigStyle();
 	
 	//////////////
 	// Méthodes //
@@ -45,6 +64,3 @@ function FreezeScreen($content)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("freeze-screen");

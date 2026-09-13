@@ -1,28 +1,53 @@
-function VerticalSlide($topPanel, $bottomPanel, $minSize)
+function VerticalSlide($topPanel, $bottomPanel, $minSize, $fixedSide)
 {
 	///////////////
 	// Attributs //
 	///////////////
 	
+	this.TOP = 'top';
+	this.BOTTOM = 'bottom';
+	
 	var topPanel = $topPanel;
 	var bottomPanel = $bottomPanel;
 	var minSize = $minSize;
+	var fixedSide = $fixedSide;
 	
 	if (!utils.isset(minSize) || minSize < 100)
 		minSize = 100;
 	
+	if (!utils.isset(fixedSide))
+		fixedSide = this.TOP;
+	
 	var html = '<div id="verticalSlide" class="verticalSlide" ><div id="slideButton" class="slideButton" ></div><div class="wall" ></div></div>';
 				
-	var component = new Component(html);
-	
-	// Drag & drop
-	var moved = false;
-	
-	var dragging = false;
-	var startX = 0;
-	var startY = 0;
-	var offsetX = 0;
-	var offsetY = 0;
+	var component = new DraggableComponent(html, false, true);
+
+	/*
+// Style
+
+component.addConfigStyle("verticalSlide", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"slideButton": {
+		"border": (function() { return STYLE.verticalSlideBorder; })(),
+		"boxShadow": (function() { return STYLE.verticalSlideBoxShadow; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var deltaTop = 0;
 	var deltaBottom = 0;
 	
@@ -41,108 +66,91 @@ function VerticalSlide($topPanel, $bottomPanel, $minSize)
 			var topPosition = topPanel.offsetTop + topPanel.offsetHeight;
 			var bottomPosition = bottomPanel.offsetTop;
 			var slidePosition = (topPosition + bottomPosition)/2.0;
-			$this.style.top = (slidePosition - currentHeight/2.0) + 'px';
+			var top = slidePosition - currentHeight/2.0;
+			$this.style.top = top + 'px';
 			
-			deltaTop = topPosition - (slidePosition - currentHeight/2.0);
-			deltaBottom = bottomPosition - (slidePosition - currentHeight/2.0);
+			deltaTop = topPosition - top;
+			deltaBottom = bottomPosition - top;
 		}
 	};
 	
 	///////////////////////////////////
 	// Initialisation des événements //
 	///////////////////////////////////
-	
-	this.onDrag = function() {};
-	
-	component.onMouseDown = function($event)
+
+	component.onDragElement = function($x, $y)
 	{
-		if (!$event) // Cas IE 
-			$event = window.event;
-		
-		if ($event.preventDefault) 
-			$event.preventDefault(); 
+		var y = $y;
+
+		var parentHeight = component.offsetParent.offsetHeight;
+
+		if (component.offsetParent)
+		{
+			if (y < minSize)
+				y = minSize;
+			else if (y > parentHeight - minSize)
+				y = parentHeight - minSize;
+		}
 		else
-			$event.returnValue = false;
+			y = 0;
+
+		var topMargin = topPanel.getMargin();
+		var topPadding = topPanel.getPadding();
+		var topBorder = topPanel.getBorder();
+
+		var bottomMargin = bottomPanel.getMargin();
+		var bottomPadding = bottomPanel.getPadding();
+		var bottomBorder = bottomPanel.getBorder();
+
+		var topPanelOffsetHeight = topPadding.top + topPadding.bottom + topBorder.top + topBorder.bottom;
+		var bottomPanelOffsetHeight = bottomPadding.top + bottomPadding.bottom + bottomBorder.top + bottomBorder.bottom;
+
+		component.getById('verticalSlide').style.top = y + 'px';
+
+		if (fixedSide === $this.RIGHT)
+		{
+			var right = parentWidth - x - leftMargin.right;
+			var offsetRight = parentWidth - rightPanel.offsetLeft - rightPanel.offsetWidth;
+			var width = parentWidth - x - deltaRight - rightPanelOffsetWidth - offsetRight;
+			leftPanel.style.right = right + 'px';
+			rightPanel.style.left = 'unset';
+			rightPanel.style.width = width + 'px';
+		}
+		else
+		{
+			var left = x + deltaRight - rightMargin.left;
+			var width = x + deltaLeft - leftPanel.offsetLeft - leftPanelOffsetWidth;
+			leftPanel.style.right = 'unset';
+			leftPanel.style.width = width + 'px';
+			rightPanel.style.left = left + 'px';
+		}
+
+		if (fixedSide === $this.BOTTOM)
+		{
+			var bottom = parentHeight - y - topMargin.bottom;
+			var offsetBottom = parentHeight - bottomPanel.offsetTop - bottomPanel.offsetHeight;
+			var height = parentHeight - y - deltaBottom - bottomPanelOffsetHeight - offsetBottom;
+			topPanel.style.bottom = bottom + 'px';
+			bottomPanel.style.top = 'unset';
+			bottomPanel.style.height = height + 'px';
+		}
+		else
+		{
+			var top = y + deltaBottom - bottomMargin.top;
+			var height = y + deltaTop - topPanel.offsetTop - topPanelOffsetHeight;
+			topPanel.style.bottom = 'unset';
+			topPanel.style.height = height + 'px';
+			bottomPanel.style.top = top + 'px';
+		}
+
+		if (topPanel.onResize)
+			topPanel.onResize();
 		
-		if ($event.button === 0)
-		{
-			dragging = true;
-			
-			var x = $event.clientX + component.offsetParent.scrollLeft;
-			var y = $event.clientY + component.offsetParent.scrollTop;
-			startX = x;
-			startY = y;
-			offsetX = startX-component.offsetLeft;
-			offsetY = startY-component.offsetTop;
-		}
-
-		return false;
+		if (bottomPanel.onResize)
+			bottomPanel.onResize();
 	};
-	
-	var onMouseMove = function($event)
-	{
-		if (dragging === true)
-		{
-			if (!$event) // Cas IE 
-				$event = window.event;
-			
-			if ($event.preventDefault) 
-				$event.preventDefault(); 
-			else
-				$event.returnValue = false; 
-
-			var y = $event.clientY-offsetY;
-			
-			if (utils.isset(component.offsetParent))
-			{
-				if (y < minSize)
-					y = minSize;
-				else if (y > component.offsetParent.offsetHeight - minSize)
-					y = component.offsetParent.offsetHeight - minSize;
-			}
-			else
-				y = 0;
-			
-			var topPanelStyle = getComputedStyle(topPanel);
-			var topPanelOffsetHeight = parseInt(topPanelStyle.paddingTop.replace('px', '')) + parseInt(topPanelStyle.paddingBottom.replace('px', '')) 
-										+ parseInt(topPanelStyle.borderTop.replace('px', '')) + parseInt(topPanelStyle.borderBottom.replace('px', ''));
-			
-			var bottomPanelStyle = getComputedStyle(bottomPanel);
-			var bottomPanelOffsetTop = parseInt(bottomPanelStyle.marginTop.replace('px', ''));
-			
-			component.getById('verticalSlide').style.top = y + 'px';
-			topPanel.style.height = (y + deltaTop - topPanel.offsetLeft - topPanelOffsetHeight) + 'px';
-			bottomPanel.style.top = (y + deltaBottom - bottomPanelOffsetTop) + 'px';
-			
-			if (utils.isset(topPanel.onResize))
-				topPanel.onResize();
-			
-			if (utils.isset(bottomPanel.onResize))
-				bottomPanel.onResize();
-			
-			$this.onDrag();
-		}
-	};
-	
-	document.getElementById('main').onMouseMove.push(onMouseMove);
-	
-	var onMouseUp = function($event)
-	{
-		dragging = false;
-		moved = false;
-	};
-	
-	document.getElementById('main').onMouseUp.push(onMouseUp);
 	
 	this.onResize = function() { autoUpdate(); };
-	
-	////////////////
-	// Accesseurs //
-	////////////////
-	
-	// GET
-	
-	// SET
 	
 	//////////////
 	// Héritage //
@@ -152,6 +160,3 @@ function VerticalSlide($topPanel, $bottomPanel, $minSize)
 	autoUpdate();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("verticalSlide");

@@ -4,149 +4,93 @@ function ListBox()
 	// Attributs //
 	///////////////
 	
-	var html = '<ul class="listBox" >'
-				+ '</ul>';
+	var html = '<ul class="listBox" ></ul>';
 				
-	var component = new Component(html);
+	var component = new ListComponent(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("listBox", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {
+		".listBox .virtual-list div": [
+			"background-Color: (function() { return STYLE.listBoxBackgroundColor; })(),
+			"border: (function() { return STYLE.listBoxBorder; })()
+		]
+	},
+	"listItem": {
+		"borderBottom": (function() { return STYLE.listBoxBorderBottom; })()
+	},
+	"virtual-list": {
+		"color": (function() { return STYLE.listBoxColor; })(),
+		"border": (function() { return STYLE.listBoxBorder; })()
+	},
+	"ghost-list": {
+		"border": (function() { return STYLE.listBoxBorder; })(),
+		"backgroundColor": (function() { return STYLE.listBoxBackgroundColor; })(),
+		"color": (function() { return STYLE.listBoxColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
+	var template = '';
 	var editMode = false;
-	var elementsList = [];
 	
 	//////////////
 	// Méthodes //
 	//////////////
 	
-	this.addElement = function($element)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index < 0)
-		{
-			elementsList.push($element);
-			component.appendChild($element);
-			$element.setParent($this);
-		}
-		
-		$element.onDrag = function($x, $y) { return onDrag($x, $y, $element); };
-		$element.onRelease = function($element2, $index) { return onRelease($element2, $index); };
-		$this.onChange();
-	};
-	
-	this.insertElementInto = function($element, $index)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-			elementsList.splice(index, 1);
-		
-		elementsList.splice($index, 0, $element);
-		component.insertAt($element, $index);
-		$element.setParent($this);
-		$element.onDrag = function($x, $y) { return onDrag($x, $y, $element); };
-		$element.onRelease = function($element2, $index) { return onRelease($element2, $index); };
-		$this.onChange();
-	};
-	
-	this.removeElement = function($element)
-	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-		{
-			elementsList.splice(index, 1);
-			
-			if (utils.isset($element.parentNode))
-				$element.parentNode.removeChild($element);
-			
-			$this.onChange();
-		}
-	};
-	
-	this.removeAllElement = function()
-	{
-		//$this.closeAll();
-		elementsList = [];
-		component.removeAllChildren();
-		$this.onChange();
-	};
+	this.addElement = function($element) { return $this.addToList($element); };
+	this.insertElementInto = function($element, $index) { return $this.insertIntoListAt($element, $index); };
+	this.removeElement = function($element) { return $this.removeFromList($element); };
+	this.removeAllElement = function() { return $this.removeAllFromList(); };
+
+	this.removeAllElements = this.removeAllElement;
+	this.empty = this.removeAllElement;
 	
 	var onDrag = function($x, $y, $element)
 	{
-		var overLayer = null;
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (elementsList[i] !== $element)
-			{
-				overLayer = elementsList[i].getOverLayer($x, $y, $element);
-				
-				if (utils.isset(overLayer))
-				{
-					i = elementsList.length;
-					//overLayer.dragOver();
-				}
-			}
-		}
-		
-		if (!utils.isset(overLayer))
-			overLayer = $this;
-		
-		return overLayer;
+		var overLayer = component.testAll('getOverLayer', [$x, $y, $element], function($overLayer) { return $overLayer; });
+		return overLayer ? overLayer : $this;
 	};
 	
-	var onRelease = function($tab, $index) { $this.insertElementInto($tab, $index); };
+	var onRelease = function($item, $index) { $this.insertElementInto($item, $index); };
 
 	////////////////////////////
 	// Gestion des événements //
 	////////////////////////////
 	
-	this.onChange = function() {};
-	
-	var onMouseMove = function($event)
+	this.initElementEvents = function($element)
 	{
-		if (editMode === true)
-		{
-			for (var i = 0; i < elementsList.length; i++)
-			{
-				if (utils.isset(elementsList[i].mouseMove))
-					elementsList[i].mouseMove($event);
-			}
-		}
+		$element.onDrag = function($x, $y) { return onDrag($x, $y, $element); };
+		$element.onRelease = function($el, $index) { return onRelease($el, $index); };
 	};
-	
-	document.getElementById('main').onMouseMove.push(onMouseMove);
-	
-	var onMouseUp = function($event)
+
+	this.removeElementEvents = function($element)
 	{
-		if (editMode === true)
-		{
-			var hasChanged = false;
-
-			for (var i = 0; i < elementsList.length; i++)
-			{
-				if (utils.isset(elementsList[i].mouseUp))
-				{
-					var changed = elementsList[i].mouseUp($event);
-
-					if (changed === true)
-						hasChanged = true;
-				}
-			}
-			
-			if (hasChanged === true)
-				$this.onChange();
-		}
+		$element.onDrag = function() {};
+		$element.onRelease = function() {};
 	};
-	
-	document.getElementById('main').onMouseUp.push(onMouseUp);
 	
 	this.onKeyUp = function($event)
 	{
 		if (editMode === true)
 		{
-			for (var i = 0; i < elementsList.length; i++)
-				elementsList[i].onKeyUp($event);
-			
+			component.execAllEvents([ 'onKeyUp' ], $event);
 			$this.onChange();
 		}
 	};
@@ -157,31 +101,32 @@ function ListBox()
 
 	// GET
 	
-	this.getElementsList = function() { return elementsList; };
+	this.getElementsList = function() { return component.getList(); };
 	this.isEditMode = function() { return editMode; };
 
-	this.getJSON = function()
+	this.getCode = function()
 	{
-		var jsonTable = [];
+		var code = component.getList().reduce(function($code, $el)
+		{
+			$el.setTemplate(template);
+			return $code + $el.getCode();
+		}, '');
 
-		for (var i = 0; i < elementsList.length; i++)
-			jsonTable.push(elementsList[i].getJSON());
-
-		return jsonTable;
+		return code;
 	};
 	
 	// SET
 	
+	this.setTemplate = function($template) { template = $template; };
 	this.setEditMode = function($editMode) { editMode = $editMode; };
 
-	this.loadFromJSON = function($json)
+	this.loadElementFromJSON = function($element)
 	{
-		for (var i = 0; i < $json.length; i++)
-		{
-			var item = new ListItem($json[i].label);
-			item.loadFromJSON($json[i]);
-			$this.addElement(item);
-		}
+		var item = new ListItem($element.label);
+		item.setTemplate(template);
+		item.loadFromJSON($element);
+
+		return item;
 	};
 	
 	//////////////
@@ -191,6 +136,3 @@ function ListBox()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("listBox");

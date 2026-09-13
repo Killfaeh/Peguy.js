@@ -51,6 +51,3 @@ function Circle2D($x, $y, $radius)
 	var $this = utils.extend(object2D, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("circle2D");

@@ -34,6 +34,70 @@ function ImagesManager()
 	var searchField = new InputSearch('text', '');
 	popup.getById('search-field').appendChild(searchField);
 
+	/*
+// Style
+
+component.addConfigStyle("imagesManager", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {
+		".images-manager-popup .images-list li img": [
+			"border: (function() { return STYLE.imagesManagerBorder; })(),
+			"box-Shadow: (function() { return STYLE.imagesManagerBoxShadow; })()
+		]
+	},
+	"images-list-block": {
+		"border": (function() { return STYLE.imagesManagerBorder; })(),
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.imagesManagerBoxShadow; })()
+	},
+	"selected": {
+		"border": (function() { return STYLE.imagesManagerBorder; })()
+	},
+	"inputFile": {
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })(),
+		"border": (function() { return STYLE.imagesManagerBorder; })()
+	},
+	"mask": {
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {
+		".images-manager-popup .images-list li img": [
+			"border: (function() { return STYLE.imagesManagerBorder; })(),
+			"box-Shadow: (function() { return STYLE.imagesManagerBoxShadow; })()
+		]
+	},
+	"images-list-block": {
+		"border": (function() { return STYLE.imagesManagerBorder; })(),
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.imagesManagerBoxShadow; })()
+	},
+	"selected": {
+		"border": (function() { return STYLE.imagesManagerBorder; })()
+	},
+	"inputFile": {
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })(),
+		"border": (function() { return STYLE.imagesManagerBorder; })()
+	},
+	"mask": {
+		"backgroundColor": (function() { return STYLE.imagesManagerBackgroundColor; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var withMetadata = false;
 	
 	var displayFreezeScreen = function() {};
@@ -665,6 +729,3 @@ function ImagesManager()
 	var $this = utils.extend(popup, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("imagesManager");

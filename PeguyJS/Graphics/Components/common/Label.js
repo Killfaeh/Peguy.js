@@ -13,6 +13,10 @@ function Label($label)
 
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	var parent = null;
 
 	/////////////
@@ -67,6 +71,3 @@ function Label($label)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("label");

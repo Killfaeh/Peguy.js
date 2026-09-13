@@ -14,6 +14,39 @@ function Button($label)
 	
 	var component = new Component(html);
 	
+	// Style
+
+	component.addConfigStyle("button", function ()
+	{
+	    return {
+	        common:
+	        {
+	        	"this":
+				{
+					"color": (function() { return STYLE.buttonsTextColor; })(),
+					"fontWeight": (function() { return STYLE.buttonsFontWeight; })(),
+					"backgroundColor": (function() { return STYLE.buttonsBackgroundColor; })(),
+					"backgroundImage": (function() { return STYLE.buttonsBackgroundImage; })(),
+					"border": (function() { return STYLE.buttonsBorder; })(),
+					"borderRadius": (function() { return STYLE.buttonsBorderRadius; })()
+				},
+				
+				"multi-tag":
+	        	{
+					".disabledButton":
+	        		[
+						"color: " + (function() { return STYLE.disableButtonsTextColor; })(),
+						"backgroundColor: " + (function() { return STYLE.disableButtonsBackgroundColor; })(),
+						"border: " + (function() { return STYLE.disableButtonsBorder; })()
+					]
+				},
+	        },
+	    };
+	});
+
+	component.applyConfigStyle();
+
+	
 	//////////////
 	// Méthodes //
 	//////////////
@@ -65,6 +98,3 @@ function Button($label)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("button");

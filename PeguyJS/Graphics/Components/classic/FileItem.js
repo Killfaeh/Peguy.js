@@ -23,6 +23,10 @@ function FileItem($html, $sorted)
 
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	// Contenu
 	
 	var parentFolder = null;
@@ -424,5 +428,5 @@ function FileItem($html, $sorted)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("fileItem");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("fileItem");

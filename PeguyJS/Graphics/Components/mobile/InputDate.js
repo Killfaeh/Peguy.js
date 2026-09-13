@@ -32,6 +32,10 @@ function InputDate($date)
 		component.getById('displayedDate').parentNode.style.display = "none";
 	}
 	
+	/*
+{{INSERT CODE}}
+	//*/
+	
 	//////////////
 	// Méthodes //
 	//////////////
@@ -110,5 +114,5 @@ function InputDate($date)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputDate");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputDate");

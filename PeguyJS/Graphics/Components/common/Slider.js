@@ -14,16 +14,40 @@ function Slider($min, $max, $currentValue)
 				+ '</div>';
 	
 	var component = new Component(html);
+
+	var handler = component.getById('handler');
+	handler = new DraggableComponent(handler, false, false, true);
 	
 	var icon = Loader.getSVG('icons', 'slider-cursor-icon', 18, 18);
-	component.getById('handler').appendChild(icon);
+	handler.appendChild(icon);
+
+	var barWidth = component.getById('bar').offsetWidth;
 	
-	var dragging = false;
-	var startX = 0;
-	var startY = 0;
-	var offsetX = 0;
-	var offsetY = 0;
-	
+	/*
+// Style
+
+component.addConfigStyle("slider", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"sliderBar": {
+		"backgroundColor": (function() { return STYLE.sliderBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -31,13 +55,13 @@ function Slider($min, $max, $currentValue)
 	var updateCursor = function()
 	{
 		var cursorPosition = (currentValue-min)/(max-min);
-		var barWidth = component.getById('bar').offsetWidth;
-		component.getById('handler').style.left = (barWidth*cursorPosition) + 'px';
+		barWidth = component.getById('bar').offsetWidth;
+		handler.style.left = (barWidth*cursorPosition) + 'px';
 	};
 	
 	this.autoResize = function()
 	{
-		var barWidth = component.getById('bar').offsetWidth;
+		barWidth = component.getById('bar').offsetWidth;
 		
 		if (barWidth > 0)
 			updateCursor();
@@ -50,126 +74,30 @@ function Slider($min, $max, $currentValue)
 	////////////////////////////
 	
 	this.onChange = function($value) {};
-	
-	component.getById('handler').onMouseDown = function($event)
-	{
-		console.log("Handle slider");
-		console.log(document.getElementById('main').onMouseMove);
 
-		if (!$event) // Cas IE 
-			$event = window.event;
-		
-		if ($event.preventDefault) 
-			$event.preventDefault(); 
-		else
-			$event.returnValue = false;
-		
-		if ($event.button === 0)
-		{
-			dragging = true;
-			
-			var x = $event.clientX + component.parentNode.scrollLeft;
-			var y = $event.clientY + component.parentNode.scrollTop;
-			var componentInitPosition = component.getById('handler').position();
-			//console.log("Mouse position : " + x + ", " + y);
-			//console.log(componentInitPosition);
-			var componentInitX = componentInitPosition.x;
-			var componentInitY = componentInitPosition.y;
-			startX = x;
-			startY = y;
-			offsetX = startX-componentInitX;
-			offsetY = startY-componentInitY;
-			
-			$this.focus();
-		}
-
-		return false;
-	};
-	
-	var onMouseMove = function($event)
+	var onChange = function($x)
 	{
-		if (dragging === true)
-		{
-			Events.preventDefault($event);
-			
-			var componentPosition = $this.position();
-			var componentX = componentPosition.x;
-			var componentY = componentPosition.y;
-	
-			var mouseX = $event.clientX + $this.scrollLeft;
-			var mouseY = $event.clientY + $this.scrollTop;
-			
-			var x = mouseX - offsetX - componentX;
-			var y = mouseY - offsetY - componentY;
-			
-			if (x < 0)
-				x = 0;
-			else if (x > component.getById('bar').offsetWidth)
-				x = component.getById('bar').offsetWidth;
-			
-			component.getById('handler').style.left = x + 'px';
-			
-			var positionRatio = x/component.getById('bar').offsetWidth;
-			currentValue = min + (max-min)*positionRatio;
-			
-			$this.onChange(currentValue);
-		}
-	};
-	
-	//document.getElementById('main').onMouseMove.push(onMouseMove);
-	
-	var onMouseUp = function($event)
-	{
-		if (dragging === true)
-		{
-			dragging = false;
-			
-			Events.preventDefault($event);
-			
-			var componentPosition = $this.position();
-			var componentX = componentPosition.x;
-			var componentY = componentPosition.y;
-	
-			var mouseX = $event.clientX + $this.scrollLeft;
-			var mouseY = $event.clientY + $this.scrollTop;
-			
-			var x = mouseX - offsetX - componentX;
-			var y = mouseY - offsetY - componentY;
-			
-			if (x < 0)
-				x = 0;
-			else if (x > component.getById('bar').offsetWidth)
-				x = component.getById('bar').offsetWidth;
-			
-			component.getById('handler').style.left = x + 'px';
-			
-			var positionRatio = x/component.getById('bar').offsetWidth;
-			currentValue = min + (max-min)*positionRatio;
-			
-			$this.onChange(currentValue);
-		}
-	};
-	
-	//document.getElementById('main').onMouseUp.push(onMouseUp);
-	
-	this.onAppend = function()
-	{
-		document.getElementById('main').onMouseMove.push(onMouseMove);
-		document.getElementById('main').onMouseUp.push(onMouseUp);
+		barWidth = component.getById('bar').offsetWidth;
+		var componentPosition = $this.position();
+		var x = $x - componentPosition.x;
+		handler.style.left = x + 'px';
+		x = x + 9;
+		var positionRatio = x/barWidth;
+		currentValue = min + (max-min)*positionRatio;
+		$this.onChange(currentValue);
 	};
 
-	this.onRemove = function()
+	handler.onStartDrag = function($event)
 	{
-		var index = document.getElementById('main').onMouseMove.indexOf(onMouseMove);
-		
-		if (index >= 0)
-			document.getElementById('main').onMouseMove.splice(index, 1);
-		
-		index = document.getElementById('main').onMouseUp.indexOf(onMouseUp);
-		
-		if (index >= 0)
-			document.getElementById('main').onMouseUp.splice(index, 1);
+		var componentPosition = $this.position();
+
+		handler.setLimits(componentPosition.x - 9, 
+							componentPosition.x + component.getById('bar').offsetWidth - 9, 
+							null, null);
 	};
+
+	handler.onDragElement = function($x, $y) { onChange($x); };
+	handler.onDraggableMouseUp = function($x, $y) { onChange($x); };
 	
 	////////////////
 	// Accesseurs //
@@ -203,6 +131,3 @@ function Slider($min, $max, $currentValue)
 	$this.autoResize();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("slider");

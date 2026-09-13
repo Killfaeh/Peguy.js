@@ -202,5 +202,5 @@ var Screen =
 	}
 };
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("screen");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("screen");

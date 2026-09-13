@@ -35,6 +35,26 @@ function AutoComplete()
 	var selectedElement = new InputText("text", "", "", "");
 	component.getById('selectedElement').appendChild(selectedElement);
 	
+	
+	// Style
+
+	component.addConfigStyle("autoComplete", function ()
+	{
+	    return {
+	        
+	        mobile:
+	        {
+				"truncate":
+	        	{
+					"backgroundImage": (function() { return STYLE.autoCompleteTruncateMask; })()
+				}
+			},
+	    };
+	});
+
+	component.applyConfigStyle();
+
+	
 	//////////////
 	// Méthodes //
 	//////////////
@@ -282,6 +302,3 @@ function AutoComplete()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("autoComplete");

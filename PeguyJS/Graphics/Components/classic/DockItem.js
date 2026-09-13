@@ -25,6 +25,10 @@ function DockItem($label, $icon, $isOpen)
 	var openIcon = Loader.getSVG('icons', 'active-dock-item-icon', 6, 6);
 	component.getById('openIcon').appendChild(openIcon);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	// Animation de réduction
 	var animationTimer = null;
 	var animationSpeed = 0;
@@ -454,5 +458,5 @@ function DockItem($label, $icon, $isOpen)
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("dockItem");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("dockItem");

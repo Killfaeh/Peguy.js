@@ -7,26 +7,26 @@
 	bottom: 0px;
 }
 
-.leftPanel, .rightPanel
+.testCodePanel .leftPanel, .testCodePanel .rightPanel
 {
 	position: absolute;
 	top: 10px;
 	bottom: 10px;
 }
 
-.leftPanel
+.testCodePanel .leftPanel
 {
 	left: 10px;
 	right: calc(50% + 7px);
 }
 
-.rightPanel
+.testCodePanel .rightPanel
 {
 	left: calc(50% + 7px);
 	right: 10px;
 }
 
-.panel
+.testCodePanel .panel
 {
 	position: absolute;
 	padding: 0px;
@@ -34,42 +34,42 @@
 	overflow: auto;
 }
 
-.topPanel, .bottomPanel, .buttonsPanel
+.testCodePanel .topPanel, .testCodePanel .bottomPanel, .testCodePanel .buttonsPanel
 {
 	position: absolute;
 	left: 0px;
 	right: 0px;
 }
 
-.topPanel
+.testCodePanel .topPanel
 {
 	top: 0px;
 	bottom: 285px;
 	padding: 10px;
 }
 
-.bottomPanel
+.testCodePanel .bottomPanel
 {
 	top: calc(100% - 267px);
 	bottom: 47px;
 }
 
-.buttonsPanel
+.testCodePanel .buttonsPanel
 {
     top: calc(100% - 37px);
 	bottom: 10px;
 }
 
-.topPanel pre, .topPanel code, 
-.bottomPanel pre, .bottomPanel code
+.testCodePanel .topPanel pre, .testCodePanel .topPanel code, 
+.testCodePanel .bottomPanel pre, .testCodePanel .bottomPanel code
 {
 	padding: 0px;
 	margin: 0px;
 	text-align: left;
 }
 
-.topPanel code, 
-.bottomPanel code
+.testCodePanel .topPanel code, 
+.testCodePanel .bottomPanel code
 {
 	position: absolute;
 	left: 10px;
@@ -79,12 +79,12 @@
 	overflow: auto;
 }
 
-.bottomPanel code
+.testCodePanel .bottomPanel code
 {
 	color: #d1242e;
 }
 
-.testFrame
+.testCodePanel .testFrame
 {
     position: absolute;
     left: 10px;

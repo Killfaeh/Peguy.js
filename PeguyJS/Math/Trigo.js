@@ -74,6 +74,3 @@ Trigo =
 		return output; 
 	},
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("trigo");

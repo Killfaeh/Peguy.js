@@ -23,6 +23,10 @@ function Table($nbColumns, $nbRows)
 				
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -105,6 +109,3 @@ function Table($nbColumns, $nbRows)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("table");

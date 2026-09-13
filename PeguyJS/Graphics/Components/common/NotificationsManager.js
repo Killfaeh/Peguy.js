@@ -4,12 +4,37 @@ function NotificationsManager()
 	// Attributs //
 	///////////////
 
-	var html = '<div class="notifications" >'
-					
-				+ '</div>';
+	var html = '<div class="notifications" ></div>';
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("notificationsManager", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"innerNotification": {
+		"border": (function() { return STYLE.notificationsManagerBorder; })(),
+		"backgroundColor": (function() { return STYLE.notificationsManagerBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.notificationsManagerBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var notifications = [];
 	
 	//////////////
@@ -54,18 +79,6 @@ function NotificationsManager()
 	{
 		new Notification($this, $html, $persistent);
 	};
-
-	////////////////////////////
-	// Gestion des événements //
-	////////////////////////////
-
-	////////////////
-	// Accesseurs //
-	////////////////
-
-	// GET
-	
-	// SET
 	
 	//////////////
 	// Héritage //
@@ -74,6 +87,3 @@ function NotificationsManager()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("notificationsManager");

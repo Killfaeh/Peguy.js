@@ -92,7 +92,55 @@ var utils =
 	
 		return $parent; 
 	},
+
+	// Cloner un objet
+	clone: function($object)
+	{
+		var output = {};
+		Object.entries($object).forEach(function([$key, $value]) { output[$key] = $value; });
+		return output;
+	},
 	
+	execIfEvery: function($conditions, $callback)
+	{
+		var execCallBack = true;
+		
+		for (var i = 0; i < $conditions.length; i++)
+		{
+			var condition = $conditions[i];
+			
+			if (!condition.condition)
+			{
+				execCallBack = false;
+				condition.onError();
+				i = $conditions.length;
+			}
+		}
+		
+		if (execCallBack)
+			$callback();
+	},
+	
+	execIfAny: function($conditions, $callback, $onError)
+	{
+		var execCallBack = false;
+		
+		for (var i = 0; i < $conditions.length; i++)
+		{
+			if ($conditions[i])
+			{
+				execCallBack = true;
+				$callback();
+				i = $conditions.length;
+			}
+		}
+		
+		if (!execCallBack)
+			$onError();
+	},
+	
+	//// A déplacer ////
+
 	// Raccourcis pour créer un élément
 	create: function($tagName, $attributes)
 	{
@@ -124,20 +172,21 @@ var utils =
 	{
 		console.log($code);
 
-        code = $code.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+		var code = $code;
+        //code = $code.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-        var scriptParent = utils.scriptToExec.parentNode;
+        if (utils.scriptToExec)
+			utils.scriptToExec.remove();
 
-        if (utils.isset(scriptParent))
-            scriptParent.removeChild(utils.scriptToExec);
+        var scriptHTML = 'var scriptToExec = function() { ' + code + '\n};\n '
+                            + 'try { utils.emptyExecCodeError();\nscriptToExec(); }\n '
+                            + 'catch($error) { console.log($error);\nutils.displayExecCodeError($error); }\n ';
+                            
+        console.log(scriptHTML);
+        utils.scriptToExec = document.createElement('script');
+        utils.scriptToExec.setAttribute('type', 'text/javascript');
+        utils.scriptToExec.innerHTML = scriptHTML;
 
-        var scriptHTML = '<script type="text/javascript" >'
-                            + 'var scriptToExec = function() { ' + code + '\n};\n '
-                            + 'try { scriptToExec();\nutils.emptyExecCodeError(); }\n '
-                            + 'catch($error) { utils.displayExecCodeError($error); }\n '
-                        + '</script>';
-
-		utils.scriptToExec = new Component(scriptHTML);
         document.getElementById('main').appendChild(utils.scriptToExec);
 	},
 
@@ -205,6 +254,3 @@ var utils =
 		link.click();
 	}
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("utils");

@@ -1,0 +1,38 @@
+.autoComplete { position: relative; }
+.autoComplete p, .autoCompletePanel p { margin: 0px;}
+
+.autoComplete .selectedBlock { position: relative; }
+
+.autoComplete .selectedBlock .truncate
+{
+	display: none;
+	position: absolute;
+	right: 5px;
+	top: 1px;
+	bottom: 1px;
+	width: 40px;
+}
+
+.autoComplete .panel,
+.autoCompletePanel
+{
+	position: absolute;
+	max-height: 150px;
+	min-width: 150px;
+	overflow: auto;
+	overflow-x: hidden;
+	padding: 0px;
+	font-size: 0.9em;
+	z-index: 1000000000;
+}
+
+.autoComplete .panel tr, .autoCompletePanel tr { cursor: pointer; }
+
+.autoComplete .panel td,
+.autoCompletePanel td
+{
+	padding: 3px;
+	padding-left: 10px;
+	padding-right: 15px;
+	text-align: left;
+}

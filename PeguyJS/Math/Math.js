@@ -1,4 +1,19 @@
 
+Math.range = function($start, $end, $step)
+{
+	var step = Math.round($step);
+	
+	if (!utils.isset(step) || step < 1)
+		step = 1;
+	
+	var output = [];
+	
+	for (var i = $start; i < $end; i += step)
+		output.push(i);
+	
+	return output;
+};
+
 Math.isPowerOf2 = function($input) 
 { 
 	var output = true; 
@@ -46,5 +61,44 @@ Math.roundToDigit = function($input, $digit)
 	return Math.round($input*Math.pow(10, $digit))/Math.pow(10, $digit);
 };
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("math");
+Math.gcd = function($a, $b)
+{
+	var a = Math.max($a, $b);
+	var b = Math.min($a, $b);
+
+	while (b !== 0)
+	{
+		var tmp = b;
+		b = a%b;
+		a = tmp;
+	}
+
+	return a;
+};
+
+Math.lcm = function($a, $b)
+{
+	var result = 0;
+
+	if (!utils.isset($b) && Array.isArray($a))
+	{
+		if (!utils.isset($a) || $a.length === 0)
+			result = 0;
+		else
+		{
+			result = $a[0];
+
+			for (var i = 1; i < $a.length; i++)
+    			result = Math.lcm(result, $a[i]);
+		}
+	}
+	else
+	{
+		if ($a === 0 || $b === 0)
+			result = 0;
+		else
+			result = ($a * $b) / Math.gcd($a, $b);
+	}
+
+	return result;
+};

@@ -1,8 +1,5 @@
 function TreeLeaf($html)
 {
-	//console.log("Current value : " + $currentValue);
-	//console.log($options); 
-	
 	///////////////
 	// Attributs //
 	///////////////
@@ -17,38 +14,24 @@ function TreeLeaf($html)
 					+ '</div>'
 				+ '</li>';
 
-	var component = new Component(html);
+	var component = new DraggableComponent(html, true);
+	component.ghostClass = 'ghost-item';
+	component.virtualClass = 'virtual-item';
+	component.virtualTagName = 'li';
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	var parentBranch = null;
-	
-	// Drag & drop
-	var clicked = false;
-	var moved = false;
-	
-	var dragging = false;
-	var startX = 0;
-	var startY = 0;
-	var offsetX = 0;
-	var offsetY = 0;
-	
-	var ghost = null;
-	var virtualItem = null;
-	var parentNode = null;
-	var offsetIndex = 0;
-	var currentIndex = 0;
 
 	//////////////
 	// Méthodes //
 	//////////////
 
-	//// Désélectionner l'élément ////
+	//// Gestion de la sélection ////
 
-	this.deselect = function()
-	{
-		component.removeAttribute('class');
-	};
-
-	//// Sélectionner l'élément ////
+	this.deselect = function() { component.removeAttribute('class'); };
 	
 	this.select = function()
 	{
@@ -59,19 +42,10 @@ function TreeLeaf($html)
 			component.setAttribute('class', 'selected');
 	};
 	
-	//// Ajouter le style de survole ////
+	//// Survole ////
 	
-	this.dragOver = function()
-	{
-		component.addClass('drag-over');
-	};
-	
-	//// Supprimer le style de survole ////
-	
-	this.dragOut = function()
-	{
-		component.removeClass('drag-over');
-	};
+	this.dragOver = function() { component.addClass('drag-over'); };
+	this.dragOut = function() { component.removeClass('drag-over'); };
 
 	///////////////////////////////////
 	// Initialisation des événements //
@@ -97,222 +71,88 @@ function TreeLeaf($html)
 		$this.select();
 	};
 	
-	//// Déclenchement du drag & drop ////
-	
-	component.onMouseDown = function($event)
+	//// Drag & drop ////
+
+	component.isEditable = function() { return editMode; };
+
+	component.updateVirtualItem = function($parentNode, $overLayer, $virtualItem, $mousePosition)
 	{
-		if (editMode === true)
+		var parentNode = $parentNode;
+
+		// Si on survole un élément
+		
+		if ($overLayer && $overLayer.getById('element-label') && $overLayer !== $this)
 		{
-			if (!$event) // Cas IE 
-				$event = window.event;
+			var deltaX = $mousePosition.x - $overLayer.x;
+			var deltaY = $mousePosition.y - $overLayer.y;
+			var halfHeight = $overLayer.getById('element-label').offsetHeight/2.0;
+			var threeQuartersHeight = $overLayer.getById('element-label').offsetHeight*3.0/4.0;
 			
-			if ($event.preventDefault) 
-				$event.preventDefault(); 
-			else
-				$event.returnValue = false;
-			
-			if ($event.button === 0)
+			if ($overLayer.isClass('tree'))
 			{
-				dragging = true;
-				
-				var x = $event.clientX + component.parentNode.scrollLeft;
-				var y = $event.clientY + component.parentNode.scrollTop;
-				var componentInitPosition = component.position();
-				console.log("Mouse position : " + x + ", " + y);
-				console.log(componentInitPosition);
-				var componentInitX = componentInitPosition.x;
-				var componentInitY = componentInitPosition.y;
-				startX = x;
-				startY = y;
-				offsetX = startX-componentInitX;
-				offsetY = startY-componentInitY;
-				
-				$this.focus();
+				parentNode = $overLayer;
+							
+				if ($virtualItem.parentNode !== parentNode)
+				{
+					if (deltaY < 0)
+						parentNode.insertAt($virtualItem, 0);
+					else
+						parentNode.appendChild($virtualItem);
+				}
 			}
+			else
+			{
+				if ($overLayer.isBranch === true)
+				{
+					if ($overLayer.isDeployed() === true)
+					{
+						parentNode = $overLayer.getById('leafs');
+						parentNode.insertAt($virtualItem, 0);
+					}
+					else
+					{
+						if (deltaY <= halfHeight)
+						{
+							$overLayer.addClass('drag-over');
+							parentNode = $overLayer.getById('leafs');
+							parentNode.appendChild($virtualItem);
+						}
+						else if ($overLayer.isLast() !== true || deltaY <= threeQuartersHeight)
+						{
+							parentNode = $overLayer.parentNode;
+							parentNode.insertAfter($virtualItem, $overLayer);
+						}
+						else
+						{
+							var overLayerParentBranch = $overLayer.getParentBranch();
+							parentNode = overLayerParentBranch.parentNode;
+							parentNode.insertAfter($virtualItem, overLayerParentBranch);
+						}
+					}
+				}
+				else
+				{
+					parentNode = $overLayer.parentNode;
+					parentNode.insertAfter($virtualItem, $overLayer);
+				}
+			}
+		}
+		
+		// Si on ne survole aucun élément 
+		
+		else if ($overLayer && $overLayer.isTree === true)
+		{
+			var y = $mousePosition.y - $this.getOffsetY();
+			parentNode = $overLayer;
+			
+			if (y <= parentNode.position().y)
+				parentNode.insertAt($virtualItem, 0);
+			else
+				parentNode.appendChild($virtualItem);
 		}
 
-		return false;
+		return parentNode;
 	};
-	
-	this.onDrag = function($x, $y) { return null; };
-	this.onRelease = function($element, $index) {};
-	
-	//// Déplacement de l'élément ////
-	
-	var onMouseMove = function($event)
-	{
-		if (editMode === true)
-		{
-			if (dragging === true)
-			{
-				//moved = true;
-				
-				Events.preventDefault($event);
-	
-				var mouseX = $event.clientX;
-				var mouseY = $event.clientY;
-				
-				// Création de l'élément fantôme s'il n'existe pas encore
-				
-				if (!utils.isset(ghost))
-				{
-					mouseX = $event.clientX + component.parentNode.scrollLeft;
-					mouseY = $event.clientY + component.parentNode.scrollTop;
-					
-					var moveDistance = Math.sqrt((mouseX-startX)*(mouseX-startX) + (mouseY-startY)*(mouseY-startY));
-					
-					if (moveDistance > 10)
-					{
-						moved = true;
-						
-						ghost = document.createElement('div');
-						ghost.setAttribute('class', 'ghost-item');
-						//ghost.style.width = component.offsetWidth + "px";
-						ghost.innerHTML = component.innerHTML;
-						
-						document.getElementById('main').appendChild(ghost);
-						
-						parentNode = component.parentNode;
-						offsetIndex = component.index();
-						currentIndex = offsetIndex;
-						parentNode.removeChild(component);
-						
-						virtualItem = document.createElement('li');
-						virtualItem.setAttribute('class', 'virtual-item');
-						virtualItem.innerHTML = '<div class="virtual-item-border" ></div>';
-						parentNode.insertAt(virtualItem, offsetIndex);
-					}
-				}
-				
-				// Si le fantôme existe
-				
-				if (utils.isset(ghost))
-				{
-					mouseX = $event.clientX + parentNode.scrollLeft;
-					mouseY = $event.clientY + parentNode.scrollTop;
-					var x = mouseX - offsetX;
-					var y = mouseY - offsetY;
-		
-					ghost.style.left = x + 'px';
-					ghost.style.top = y + 'px';
-					
-					var overLayer = $this.onDrag(mouseX, mouseY);
-					
-					// Si on survole un élément
-					
-					if (utils.isset(overLayer) && utils.isset(overLayer.getById('element-label')) && overLayer !== $this)
-					{
-						overLayerPosition = overLayer.position();
-						deltaX = mouseX-overLayerPosition.x;
-						deltaY = mouseY-overLayerPosition.y;
-						var halfHeight = overLayer.getById('element-label').offsetHeight/2.0;
-						var threeQuartersHeight = overLayer.getById('element-label').offsetHeight*3.0/4.0;
-						
-						if (overLayer.isClass('tree'))
-						{
-							parentNode = overLayer;
-							
-							if (virtualItem.parentNode !== parentNode)
-							{
-								if (deltaY < 0)
-									parentNode.insertAt(virtualItem, 0);
-								else
-									parentNode.appendChild(virtualItem);
-							}
-						}
-						else
-						{
-							if (overLayer.isBranch === true)
-							{
-								if (overLayer.isDeployed() === true)
-								{
-									parentNode = overLayer.getById('leafs');
-									parentNode.insertAt(virtualItem, 0);
-								}
-								else
-								{
-									if (deltaY <= halfHeight)
-									{
-										overLayer.addClass('drag-over');
-										parentNode = overLayer.getById('leafs');
-										parentNode.appendChild(virtualItem);
-									}
-									else if (overLayer.isLast() !== true || deltaY <= threeQuartersHeight)
-									{
-										parentNode = overLayer.parentNode;
-										parentNode.insertAfter(virtualItem, overLayer);
-									}
-									else
-									{
-										var overLayerParentBranch = overLayer.getParentBranch();
-										parentNode = overLayerParentBranch.parentNode;
-										parentNode.insertAfter(virtualItem, overLayerParentBranch);
-									}
-								}
-							}
-							else
-							{
-								parentNode = overLayer.parentNode;
-								parentNode.insertAfter(virtualItem, overLayer);
-							}
-						}
-					}
-					
-					// Si on ne survole aucun élément 
-					
-					else if (utils.isset(overLayer) && overLayer.isTree === true)
-					{
-						parentNode = overLayer;
-						
-						if (y <= parentNode.position().y)
-							parentNode.insertAt(virtualItem, 0);
-						else
-							parentNode.appendChild(virtualItem);
-					}
-					
-					currentIndex = virtualItem.index();
-				}
-			}
-		}
-	};
-	
-	this.mouseMove = onMouseMove;
-	
-	//// Relâcher l'élément ////
-	
-	var onMouseUp = function($event)
-	{
-		if (editMode === true)
-		{
-			if (dragging === true)
-			{
-				dragging = false;
-				
-				if (utils.isset(ghost) && utils.isset(ghost.parentNode))
-				{
-					document.getElementById('main').removeChild(ghost);
-					ghost = null;
-					moved = false;
-				}
-				
-				if (utils.isset(parentNode))
-				{
-					if (utils.isset(virtualItem) && utils.isset(virtualItem.parentNode))
-						virtualItem.parentNode.removeChild(virtualItem);
-					
-					// Mettre à jour les données internes de l'ancien et du nouveau parent
-					$this.onRelease($this, currentIndex);
-					
-					virtualItem = null;
-					parentNode = null;
-				}
-			}
-		}
-	};
-	
-	this.mouseUp = onMouseUp;
-	
-	//document.getElementById('main').onMouseUp.push(onMouseUp);
 	
 	//// Relâcher l'élément avec la touche échappe au cas où ça coincerait ////
 	
@@ -336,7 +176,6 @@ function TreeLeaf($html)
 	
 	this.isEditMode = function() { return editMode; };
 	this.getParentBranch = function() { return parentBranch; };
-	this.getParentNode = function() { return parentNode; };
 	
 	//// Détecter si l'élement ou un de ses enfants est survolé ////
 	
@@ -390,8 +229,6 @@ function TreeLeaf($html)
 		
 		return isLast;
 	}
-	
-	this.isDragging = function() { return dragging; };
 
 	this.getJSON = function()
 	{
@@ -401,6 +238,7 @@ function TreeLeaf($html)
 
 	// SET
 	
+	this.setLabel = function($label) { component.getById('element-label').innerHTML = $label; };
 	this.setEditMode = function($editMode) { editMode = $editMode; };
 	this.setParentBranch = function($parentBranch) { parentBranch = $parentBranch; };
 
@@ -411,6 +249,3 @@ function TreeLeaf($html)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("treeLeaf");

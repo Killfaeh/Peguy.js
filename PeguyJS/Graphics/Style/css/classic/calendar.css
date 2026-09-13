@@ -1,0 +1,65 @@
+.calendar { position: relative; }
+.calendar p, .calendarPanel p { margin: 0px;}
+
+.calendar .selectedDate
+{
+	text-align: center;
+	font-weight: bold;
+}
+
+.calendarPanel
+{
+	position: absolute;
+	padding: 5px;
+	z-index: 1000000000;
+}
+
+.calendarPanel .navigation { font-weight: bold; }
+
+.calendarPanel .navigation .previousMonth,
+.calendarPanel .navigation .nextMonth
+{
+	font-size: 1.2em;
+	cursor: pointer;
+	position: absolute;
+	top: 5px;
+}
+
+.calendarPanel .navigation .previousMonth { left: 5px; }
+.calendarPanel .navigation .nextMonth { right: 5px; }
+
+.calendarPanel th,
+.calendarPanel td
+{
+	position: relative;
+	padding: 4px;
+	font-size: 0.9em;
+}
+
+.calendarPanel th
+{
+	font-weight: normal;
+}
+
+.calendarPanel td span
+{
+	display: inline-block;
+	width: 60%;
+	padding: 3px;
+}
+
+.calendarPanel table .today,
+.calendarPanel .selected,
+.calendarPanel td:hover span
+{
+	
+}
+
+.calendarPanel table .today,
+.calendarPanel .selected
+{ 
+	font-weight: bold;
+}
+
+.calendarPanel td,
+.calendarPanel .today { cursor: pointer; }

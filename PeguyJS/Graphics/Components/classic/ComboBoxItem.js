@@ -6,7 +6,7 @@ function ComboBoxItem($name, $value, $color, $selected)
 
 	var name = $name;
 	var value = $value;
-	var color = $color;
+	var color = (!$color && $color !== '') ? $color : null;
 	var selected = $selected;
 
 	var html = '<li>';
@@ -22,6 +22,10 @@ function ComboBoxItem($name, $value, $color, $selected)
 	html = html + '</li>';
 	
 	var component = new Component(html);
+
+	/*
+{{INSERT CODE}}
+	//*/
 
 	//////////////
 	// Méthodes //
@@ -80,6 +84,3 @@ function ComboBoxItem($name, $value, $color, $selected)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("comboBoxItem");

@@ -16,12 +16,38 @@ function InputCheckBox($name, $label, $checked, $isHTML)
 	
 	var enable = true;
 	
-	var html = '<li class="inputCheckBox" ><label id="label" >' + labelToDisplay + '</label></li>';
+	var html = '<li class="inputCheckBox" >'
+					+ '<CheckBox id="checkBox" checked="' + $checked + '" size="18" ></CheckBox>'
+					+ '<label id="label" >' + labelToDisplay + '</label>'
+				+ '</li>';
 	
 	var component = new Component(html);
-	
-	var checkBox = new CheckBox($checked, 18);
-	component.insertAt(checkBox, 0);
+
+	var checkBox = component.getById('checkBox');
+
+	// Style
+
+	component.addConfigStyle("checkBox", function ()
+	{
+		return {
+			common:
+			{
+				'this':
+				{
+					listStyleType: "none",
+					padding: "5px",
+					margin: "0px"
+				},
+
+				'checkBox':
+				{
+					marginRight: "10px"
+				}
+			}
+		};
+	});
+
+	component.applyConfigStyle();
 	
 	//////////////
 	// Méthodes //
@@ -92,6 +118,3 @@ function InputCheckBox($name, $label, $checked, $isHTML)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputCheckBox");

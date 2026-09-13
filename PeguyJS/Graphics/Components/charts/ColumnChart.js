@@ -411,6 +411,3 @@ function ColumnChart($data, $width, $height, $params)
 	$this.build();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("columnChart");

@@ -4,12 +4,14 @@ function Popup($content)
 	// Attributs //
 	///////////////
 
+	// Structure du composant
+
 	var content = $content;
 
 	var html = '<div class="popup" >'
 					+ '<div id="popupContent" class="popupContent" >'
 						+ '<div id="innerPopupContent" class="innerPopupContent" >'
-							+ '<div id="closeIcon" class="close" ></div>'
+							+ '<div id="closeIcon" class="close" ><Icon fileName="icons" name="close-icon" width="20" height="20" /></div>'
 							+ content
 							+ '<div class="wall" ></div>'
 						+ '</div>'
@@ -18,10 +20,71 @@ function Popup($content)
 				+ '</div>';
 				
 	var component = new Component(html);
-	
-	var closeIcon = Loader.getSVG('icons', 'close-icon', 20, 20);
-	component.getById('closeIcon').appendChild(closeIcon);
-	
+
+	// Style
+
+	component.addConfigStyle("popup", function ()
+	{
+		return {
+			common:
+			{
+				'this': { backgroundColor: (function() { return STYLE.popupScreenColor; })() },
+
+				'popupContent':
+				{
+					border: (function() { return STYLE.popupBorder; })(),
+					borderRadius: (function() { return STYLE.popupBorderRadius; })(),
+					backgroundColor: (function() { return STYLE.popupBackGroundColor; })(),
+					boxShadow: (function() { return STYLE.popupBoxShadow; })(),
+				},
+			},
+		};
+	});
+
+	component.applyConfigStyle();
+
+	/*
+// Style
+
+component.addConfigStyle("popup", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"popup": {
+		"backgroundColor": (function() { return STYLE.popupBackgroundColor; })()
+	},
+	"popupContent": {
+		"border": (function() { return STYLE.popupBorder; })(),
+		"backgroundColor": (function() { return STYLE.popupBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.popupBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"popup": {
+		"backgroundColor": (function() { return STYLE.popupBackgroundColor; })()
+	},
+	"popupContent": {
+		"border": (function() { return STYLE.popupBorder; })(),
+		"backgroundColor": (function() { return STYLE.popupBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.popupBoxShadow; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
+	// Variables opérationnelles
+
 	var popupMouseDown = false;
 	var innerMouseDown = false;
 	
@@ -39,8 +102,8 @@ function Popup($content)
 		
 			if (confirmHide !== false)
 			{
-				if (utils.isset(component) && utils.isset(component.parentNode))
-					component.parentNode.removeChild(component);
+				if (component)
+					component.remove();
 				
 				if (utils.isset($this.blur) && $this instanceof Window)
 					$this.blur();
@@ -146,6 +209,3 @@ function Popup($content)
 	$this.focus();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("popup");

@@ -12,6 +12,15 @@ function CheckBoxList($name, $options, $nbColumns, $isHTML)
 	var enable = true;
 	
 	var html = '<ul class="checkBoxList" ></ul>';
+
+	var thisStyle = 
+	{
+		listStyleType: 'none',
+		textAlign: 'left',
+		margin: '0px',
+		padding: '0px',
+		display: 'inline-block'
+	};
 	
 	if (nbColumns > 1 && nbColumns < options.length)
 	{
@@ -21,9 +30,33 @@ function CheckBoxList($name, $options, $nbColumns, $isHTML)
 			html = html + '<ul class="checkBoxList" ></ul>';
 		
 		html = html + '</div>';
+
+		thisStyle = {};
 	}
 	
 	var component = new Component(html);
+	
+	/*
+// Style
+
+component.addConfigStyle("checkBoxList", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
 	
 	var inputCheckBoxList = [];
 	
@@ -33,22 +66,25 @@ function CheckBoxList($name, $options, $nbColumns, $isHTML)
 	
 	var loadOptions = function()
 	{
-		for (var i = 0; i < options.length; i++)
+		if (options)
 		{
-			var option = new InputCheckBox(options[i].name, options[i].label, options[i].checked, isHTML);
-			
-			option.onChange = function($checked) { $this.onChange($this.getState()); };
-			
-			if (nbColumns > 1 && nbColumns < options.length)
+			for (var i = 0; i < options.length; i++)
 			{
-				var columns = component.getElementsByTagName('ul');
-				var num = Math.floor(i/options.length*$nbColumns);
-				columns[num].appendChild(option);
+				var option = new InputCheckBox(options[i].name, options[i].label, options[i].checked, isHTML);
+				
+				option.onChange = function($checked) { $this.onChange($this.getState()); };
+				
+				if (nbColumns > 1 && nbColumns < options.length)
+				{
+					var columns = component.getElementsByTagName('ul');
+					var num = Math.floor(i/options.length*$nbColumns);
+					columns[num].appendChild(option);
+				}
+				else
+					component.appendChild(option);
+				
+				inputCheckBoxList.push(option);
 			}
-			else
-				component.appendChild(option);
-			
-			inputCheckBoxList.push(option);
 		}
 	};
 	
@@ -156,6 +192,3 @@ function CheckBoxList($name, $options, $nbColumns, $isHTML)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("checkBoxList");

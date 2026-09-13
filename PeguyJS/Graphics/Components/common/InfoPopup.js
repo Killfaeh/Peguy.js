@@ -4,9 +4,11 @@ function InfoPopup($content)
 	// Attributs //
 	///////////////
 
+	// Structure du composant
+
 	var content = $content;
 
-	var html = '<div class="infoBlock" >'
+	var html = '<div id="infoBlock" class="infoBlock" >'
 					+ '<div id="infoContent" class="infoContent" >' + content + '</div>'
 					+ '<div id="infoButtons" class="infoButtons" >'
 						+ '<input type="button" id="close" value="' + KEYWORDS.close + '" />'
@@ -14,6 +16,10 @@ function InfoPopup($content)
 				+ '</div>';
 
 	var popup = new Popup(html);
+
+	/*
+{{INSERT CODE}}
+	//*/
 
 	//////////////
 	// Méthodes //
@@ -26,6 +32,15 @@ function InfoPopup($content)
 	this.onClose = function() {};
 	popup.onHide = function() { $this.onClose(); };
 	popup.getById("close").onClick = function() { $this.hide(); };
+	
+	popup.onKeyDown = function($event)
+	{
+		//if ($this === Components.getFrontPopup())
+		{
+			if ($event.keyCode === 27)
+				$this.hide();
+		}
+	};
 
 	////////////////
 	// Accesseurs //
@@ -43,10 +58,7 @@ function InfoPopup($content)
 	//////////////
 	// Héritage //
 	//////////////
-	
+
 	var $this = utils.extend(popup, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("infoPopup");

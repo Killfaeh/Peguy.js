@@ -1,0 +1,141 @@
+.tree
+{ 
+	list-style-position: inside;
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.tree { overflow: auto; }
+
+.tree ul, .tree ol
+{
+	list-style-position: inside;
+	list-style-type: none;
+	position: relative;
+	margin-top: 0px;
+	padding-left: 20px;
+}
+
+.tree li 
+{
+	text-align: left;
+	margin-left: 10px;
+	margin-bottom: 0px;
+}
+
+.tree .element-label
+{
+	position: relative;
+	display: inline-block;
+	padding: 5px;
+	width: calc(95% - 20px);
+	cursor: default;
+}
+
+.tree .element-label:hover
+{
+}
+
+.tree .selected > .element-label
+{
+}
+
+.tree .arrow 
+{
+	display: none;
+	cursor: pointer;
+	margin-right: 7px;
+}
+
+ ********* 
+ Edit mode 
+ ********* 
+
+.edit-mode ul, .edit-mode ol { margin-top: 0px; }
+.edit-mode li { margin-bottom: 0px; }
+
+.edit-mode .element-label
+{
+	padding: 5px;
+	cursor: grab;
+}
+
+
+.edit-mode .drag-over .element-label
+{
+}
+
+
+ *********** 
+ Drag & Drop 
+ *********** 
+
+.tree .virtual-item
+{
+	position: relative;
+	height: 0px;
+	max-height: 0px;
+	overflow: visible;
+}
+
+.tree .virtual-item div
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: -6px;
+	max-height: 10px;
+	height: 10px;
+}
+
+.ghost-item
+{
+	display: block;
+	list-style-type: none;
+	text-align: left;
+
+	position: absolute;
+	cursor: pointer;
+	opacity: 0.8;
+	z-index: 100000000;
+
+	margin: 0px;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	height: 20px;
+	
+	
+	cursor: grabbing;
+}
+
+.ghost-item .arrow 
+{
+	cursor: pointer;
+	margin-right: 7px;
+}
+
+.ghost-item li { position: relative; }
+.ghost-item ul { list-style-type: none; }
+
+.ghost-item .element-label
+{
+	position: relative;
+	display: inline-block;
+	padding: 5px;
+	width: calc(95% - 20px);
+}
+
+
+.ghost-item .element-label span,
+.ghost-item .element-label img
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.ghost-item .element-label span { margin-left: 10px; }
+.ghost-item .element-label img { height: 16px; } 
+
+.ghost-item li .group-content { margin-left: 10px; }

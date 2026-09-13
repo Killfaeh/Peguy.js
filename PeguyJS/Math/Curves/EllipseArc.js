@@ -327,6 +327,3 @@ function EllipseArc($start, $end, $radius, $axisRotation, $largeArcFlag, $sweepF
 	$this.computeLength();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("ellipseArc");

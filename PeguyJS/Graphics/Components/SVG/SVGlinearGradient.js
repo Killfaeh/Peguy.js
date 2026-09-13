@@ -85,6 +85,3 @@ function SVGlinearGradient($x1, $y1, $x2, $y2, $colorsList)
 	$this.update();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("svgLinearGradient");

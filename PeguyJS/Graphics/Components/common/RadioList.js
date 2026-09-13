@@ -5,7 +5,7 @@ function RadioList($name, $options, $currentValue, $nbColumns, $isHTML)
 	///////////////
 	
 	var name = $name;
-	var options = $options;
+	var options = $options ? $options : [];
 	var currentValue = $currentValue;
 	var selectedOption = null;
 	var nbColumns = $nbColumns;
@@ -27,6 +27,28 @@ function RadioList($name, $options, $currentValue, $nbColumns, $isHTML)
 	
 	var component = new Component(html);
     
+	/*
+// Style
+
+component.addConfigStyle("radioList", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
     var inputRadioList = [];
 	
 	//////////////
@@ -175,6 +197,3 @@ function RadioList($name, $options, $currentValue, $nbColumns, $isHTML)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("radioList");

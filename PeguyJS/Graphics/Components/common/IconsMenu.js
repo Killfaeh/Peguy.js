@@ -20,6 +20,28 @@ function IconsMenu($iconsList, $iconsSize)
 
 	var component = new Component(html);
 
+	/*
+// Style
+
+component.addConfigStyle("iconsMenu", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	/////////////
 	// Methods //
 	/////////////
@@ -79,18 +101,6 @@ function IconsMenu($iconsList, $iconsSize)
         }
     };
 
-	/////////////////
-	// Init events //
-	/////////////////
-	
-	///////////////////////
-	// Getters & Setters //
-	///////////////////////
-
-	// GET
-
-	// SET
-
 	////////////
 	// Extend //
 	////////////
@@ -99,6 +109,3 @@ function IconsMenu($iconsList, $iconsSize)
     $this.init();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("iconsMenu");

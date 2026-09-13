@@ -1,0 +1,66 @@
+body
+{
+	margin: 0px;
+	padding: 0px;
+	border:	none;
+	font-size: 1.0em;
+	font-weight: normal;
+	font-style:	normal;
+	font-family: Arial;
+	
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	
+	overflow: hidden;
+}
+
+input[type="submit"], input[type="button"], button { cursor: pointer; }
+
+input[type="text"], input[type="password"], input[type="time"], input[type="email"], input[type="tel"], input[type="number"], textarea
+{
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 1.0em;
+}
+
+input[type="text"], input[type="password"], input[type="time"], input[type="email"], input[type="tel"], input[type="number"]
+{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+input::placeholder { opacity: 0.5; }
+
+input[type="button"]
+{
+	height: 30px;
+	min-width: 100px;
+	margin: 5px;
+	-webkit-appearance: none;
+	font-size: 0.9rem;
+	/*font-weight: bold;*/
+	background-image: none;
+	/*border-radius: 5px;*/
+}
+
+#screen
+{
+	z-index: 0;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	overflow: hidden;
+}
+
+.wall
+{
+	display: inline-block;
+	width: 0px;
+	height: 100%;
+	vertical-align: middle;
+}

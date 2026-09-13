@@ -19,6 +19,28 @@ function ColorPicker()
 	
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("colorPicker", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Carré de valeur et saturation
 	
 	var whiteRamp = new SVGlinearGradient(0, 0, "100%", 0, 
@@ -356,6 +378,3 @@ function ColorPicker()
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("colorPicker");

@@ -99,13 +99,13 @@
 
 .frame .innerFrame > .content
 {
-	position: relative;
-	margin: 10px;
-	margin-top: 40px;
-	/*margin-bottom: 20px;*/
-	min-width: 300px;
-	min-height: 200px;
+	position: absolute;
+	left: 10px;
+	right: 10px;
+	top: 40px;
+	bottom: 10px;
 	border: solid 1px rgb(120, 120, 120);
+	overflow: hidden;
 }
 
 /* ********************** */

@@ -8,14 +8,50 @@ function ContextMenu($mouseX, $mouseY)
 	var mouseY = $mouseY;
 
 	var html = '<div class="contextMenu" >'
-					+ '<ul id="children-list" class="root-children-list" >'
-					+ '</ul>'
+					+ '<ul id="children-list" class="root-children-list" ></ul>'
 				+ '</div>';
 				
-	var component = new Component(html);
+	var component = new ListComponent(html);
+	component.setNode(component.getById('children-list'));
 	
-	var elementsList = [];
-	
+	/*
+// Style
+
+component.addConfigStyle("contextMenu", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"root-children-list": {
+		"border": (function() { return STYLE.contextMenuBorder; })(),
+		"backgroundColor": (function() { return STYLE.contextMenuBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.contextMenuBoxShadow; })()
+	},
+	"enlighted": {
+		"backgroundColor": (function() { return STYLE.contextMenuBackgroundColor; })()
+	},
+	"arrow": {
+		"color": (function() { return STYLE.contextMenuColor; })()
+	},
+	"children-list": {
+		"border": (function() { return STYLE.contextMenuBorder; })(),
+		"backgroundColor": (function() { return STYLE.contextMenuBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.contextMenuBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -104,63 +140,13 @@ function ContextMenu($mouseX, $mouseY)
 		}
 	};
 
-	this.addElement = function($element)
-	{
-		elementsList.push($element);
-		$element.setParent($this);
-		component.getById('children-list').appendChild($element);
-		$this.update();
-	};
+	this.addElement = function($element) { return $this.addToList($element); };
+	this.insertElementInto = function($element, $index) { return $this.insertIntoListAt($element, $index); };
+	this.removeElement = function($element) { return $this.removeFromList($element); };
+	this.removeAllElement = function() { return $this.removeAllFromList(); };
 	
-	this.insertElementInto = function($element, $index)
-	{
-		elementsList.splice($index, 0, $element);
-		$element.setParent($this);
-		component.getById('children-list').insertAt($element, $index);
-		$this.update();
-	};
-	
-	this.removeElement = function($element)
-	{
-		var index = elementsList.indexOf($element);
-		
-		while (index >= 0)
-		{
-			if (index > -1)
-				elementsList.splice(index, 1);
-			
-			index = elementsList.indexOf($element);
-		}
-		
-		var parent = $element.parentNode;
-		
-		if (parent === component.getById('children-list'))
-			component.getById('children-list').removeChild($element);
-		
-		$this.update();
-		
-		$element.setParent(null);
-		
-		return $element;
-	};
-	
-	this.openAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].openAll))
-				elementsList[i].openAll();
-		}
-	};
-	
-	this.closeAll = this.closeAllChildren = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].closeAll))
-				elementsList[i].closeAll();
-		}
-	};
+	this.openAll = function() { component.execAll([ 'openAll' ]); };
+	this.closeAll = this.closeAllChildren = function() { component.execAll([ 'closeAll' ]); };
 	
 	this.closeParent = function()
 	{
@@ -172,12 +158,12 @@ function ContextMenu($mouseX, $mouseY)
 	// Gestion des événements //
 	////////////////////////////
 
+	component.onChange = function() { $this.update(); };
+
 	this.onCancel = function() {};
 
 	this.onClick = function()
 	{
-		console.log($this);
-		
 		if (utils.isset($this.parentNode))
 			document.getElementById('main').removeChild($this);
 		
@@ -194,14 +180,7 @@ function ContextMenu($mouseX, $mouseY)
 			document.getElementById('main').removeChild($this);
 	};
 	
-	component.getById('children-list').onMouseOut = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].closeAll))
-				elementsList[i].unlightAll();
-		}
-	};
+	component.getById('children-list').onMouseOut = function() { component.execAll([ 'closeAll', 'unlightAll' ]); };
 
 	////////////////
 	// Accesseurs //
@@ -209,7 +188,7 @@ function ContextMenu($mouseX, $mouseY)
 
 	// GET
 	
-	this.getElementsList = function() { return elementsList; };
+	this.getElementsList = function() { return component.getList(); };
 	this.getListNode = function() { return component.getById('children-list'); };
 	
 	// SET
@@ -219,6 +198,7 @@ function ContextMenu($mouseX, $mouseY)
 	//////////////
 	
 	var $this = utils.extend(component, this);
+
 	document.getElementById('main').appendChild($this);
 	var childrenList = component.getById('children-list');
 	childrenList.style.left = mouseX + 'px';
@@ -227,6 +207,3 @@ function ContextMenu($mouseX, $mouseY)
 	
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("contextMenu");

@@ -189,6 +189,3 @@ function SVG($width, $height, $code, $style)
 	var $this = utils.extend(svg, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("svg");

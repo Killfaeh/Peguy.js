@@ -16,6 +16,35 @@ function EditCommandsBar()
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("editCommandsBar", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {
+		".editCommandsBar .viewMode > span:hover": [
+			"background-Color: (function() { return STYLE.editCommandsBarBackgroundColor; })()
+		],
+		".editCommandsBar .editMode > span:hover": [
+			"background-Color: (function() { return STYLE.editCommandsBarBackgroundColor; })()
+		]
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var editIcon = Loader.getSVG('icons', 'edit-icon', 17, 17);
 	var saveIcon = Loader.getSVG('icons', 'save-icon', 17, 17);
 	var closeIcon = Loader.getSVG('icons', 'close-icon', 17, 17);
@@ -138,5 +167,5 @@ function EditCommandsBar()
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("editCommandsBar");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("editCommandsBar");

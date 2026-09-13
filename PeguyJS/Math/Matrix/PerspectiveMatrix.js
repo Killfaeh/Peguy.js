@@ -82,6 +82,3 @@ function PerspectiveMatrix($angle, $ratio, $near, $far)
 	var $this = utils.extend(matrix, this); 
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("perspectiveMatrix");

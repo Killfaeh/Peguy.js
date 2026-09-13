@@ -1,0 +1,55 @@
+.frame .content > .help-block
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	padding: 20px;
+	text-align: left;
+	overflow: auto;
+}
+
+.frame .content > .help-block pre
+{
+	font-family: monospace;
+}
+
+.frame .content > .help-block h1 { text-align: center; }
+
+.frame .content > .help-block h2
+{
+	position: relative;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+}
+
+.frame .content > .help-block table
+{
+	width: 100%;
+}
+
+.frame .content > .help-block table th,
+.frame .content > .help-block table td
+{
+    padding: 10px;
+}
+
+.frame .content > .help-block table th
+{
+	text-align: center;
+}
+
+.frame .content > .help-block pre
+{
+	padding: 20px;
+	overflow: auto;
+}
+
+.frame .content > .help-block pre code
+{
+	padding: 0px;
+	margin: 0px;
+}

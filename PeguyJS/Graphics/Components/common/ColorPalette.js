@@ -13,6 +13,53 @@ function ColorPalette($colorsList)
 	
 	var component = new Component(html);
 	
+	// Style
+	
+	component.addConfigStyle("colorPalette", function ()
+	{
+		return {
+					common:	{},
+			
+					classic:
+					{
+						"multi-tag":
+						{
+							".color-palette .selected":
+							[
+								"border : dotted 1px " +  (function() { return STYLE.colorPaletteBorder; })(),
+							],
+							
+							".color-palette .color-preview":
+							[
+								"border : solid 1px " +  (function() { return STYLE.colorPaletteBorder; })(),
+								"border-radius : " +  (function() { return STYLE.colorPaletteBorderRadius; })(),
+								"box-shadow : " +  (function() { return STYLE.colorPaletteBoxShadow; })(),
+							]
+						},
+					},
+			
+					mobile:
+					{
+						"multi-tag":
+						{
+							".color-palette .selected":
+							[
+								"border : dotted 1px " +  (function() { return STYLE.colorPaletteBorder; })(),
+							],
+							
+							".color-palette .color-preview":
+							[
+								"border : solid 1px " +  (function() { return STYLE.colorPaletteBorder; })(),
+								"border-radius : " +  (function() { return STYLE.colorPaletteBorderRadius; })(),
+								"box-shadow : " +  (function() { return STYLE.colorPaletteBoxShadow; })(),
+							]
+						},
+					},
+				};
+	});
+	
+	component.applyConfigStyle();
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -128,6 +175,3 @@ function ColorPalette($colorsList)
 	$this.buildColors();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("colorPalette");

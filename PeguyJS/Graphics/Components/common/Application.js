@@ -11,6 +11,10 @@ function Application($html)
 	
 	var component = new Component('<div class="application" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;" >' + html + '</div>');
 
+	/*
+{{INSERT CODE}}
+	//*/
+
 	var views = [];
 	var currentView = null;
 
@@ -97,6 +101,3 @@ function Application($html)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== undefined && Loader !== null)
-	Loader.hasLoaded("application");

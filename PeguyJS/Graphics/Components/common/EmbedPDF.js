@@ -18,6 +18,10 @@ function EmbedPDF($url, $width, $height)
 
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -41,6 +45,3 @@ function EmbedPDF($url, $width, $height)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("embedPDF");

@@ -20,6 +20,37 @@ function ToolsBar($iconsList, $iconsSize)
 
 	var component = new Component(html);
 
+	/*
+// Style
+
+component.addConfigStyle("toolsBar", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"iconsMenuItem:hover": {
+		"backgroundColor": (function() { return STYLE.toolsBarBackgroundColor; })()
+	},
+	"selected": {
+		"backgroundColor": (function() { return STYLE.toolsBarBackgroundColor; })()
+	},
+	"selected:hover": {
+		"backgroundColor": (function() { return STYLE.toolsBarBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var selectedName = null;
 
 	/////////////
@@ -165,6 +196,3 @@ function ToolsBar($iconsList, $iconsSize)
     $this.init();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("toolsBar");

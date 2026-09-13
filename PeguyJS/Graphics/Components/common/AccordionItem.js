@@ -7,8 +7,11 @@ function AccordionItem($label, $content)
 	var label = $label;
 	var content = $content;
 
+	if (!label)
+		label = '';
+
 	var html = '<li class="accordionItem" >'
-					+ '<div id="header" class="accordionHeader" >'
+					+ '<div id="accordionHeader" class="accordionHeader" >'
 						+ '<div id="icons" class="accordionIcons" ></div>'
 						+ '<div id="label" class="accordionLabel" >' + label + '</div>'
 					+ '</div>'
@@ -18,7 +21,9 @@ function AccordionItem($label, $content)
 	var component = new Component(html);
 	
 	var contentBlock = component.getById('content');
-	contentBlock.appendChild(content);
+
+	if (content)
+		contentBlock.appendChild(content);
 	
 	var plusIcon = Loader.getSVG('icons', 'plus-icon', 25, 25);
 	var minusIcon = Loader.getSVG('icons', 'minus-icon', 25, 25);
@@ -127,7 +132,7 @@ function AccordionItem($label, $content)
 	// Gestion des événements //
 	////////////////////////////
 	
-	component.getById('header').onClick = function()
+	component.getById('accordionHeader').onClick = function()
 	{
 		if (currentSize >= maxSize || speed > 0)
 			$this.close();
@@ -164,6 +169,3 @@ function AccordionItem($label, $content)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("accordionItem");

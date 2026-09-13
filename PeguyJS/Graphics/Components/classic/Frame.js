@@ -4,17 +4,20 @@ function Frame($content, $title)
 	// Attributs //
 	///////////////
 
+	var focus = false;
 	var content = $content;
 	var title = $title;
-	var minWidth = 300;
-	var minHeight = 200;
-	var width = 300;
-	var height = 200;
+	var minWidth = 350;
+	var minHeight = 250;
+	var width = 350;
+	var height = 250;
 	var x = 0;
 	var y = 35;
 	
 	if (!utils.isset(title))
 		title = '';
+
+	this.frame = true;
 
 	var html = '<div class="frame" >'
 					+ '<div class="innerFrame" >'
@@ -26,7 +29,12 @@ function Frame($content, $title)
 							+ '<div id="title" class="title" >' + title + '</div>'
 							+ '<div class="wall" ></div>'
 						+ '</div>'
-						+ '<div id="buttonsBlock" class="buttonsBlock" ></div>'
+						+ '<div id="buttonsBlock" class="buttonsBlock" >'
+							+ '<Icon id="closeIcon" fileName="icons" name="close-icon" width="20" height="20" ></Icon>'
+							+ '<Icon id="hideFrameIcon" fileName="icons" name="hide-frame-icon" width="20" height="20" ></Icon>'
+							+ '<Icon id="fullscreenModeIcon" fileName="icons" name="fullscreen-mode-icon" width="20" height="20" ></Icon>'
+							+ '<Icon id="frameModeIcon" fileName="icons" name="frame-mode-icon" width="20" height="20" ></Icon>'
+						+ '</div>'
 						+ '<div id="content" class="content" >'
 							+ content
 						+ '</div>'
@@ -38,29 +46,76 @@ function Frame($content, $title)
 						+ '<div id="resizeTR" class="resizeTR" ></div>'
 						+ '<div id="resizeBL" class="resizeBL" ></div>'
 						+ '<div id="resizeBR" class="resizeBR" ></div>'
-						//+ '<div id="resizeBlock" class="resizeBlock" ></div>'
 					+ '</div>'
 				+ '</div>';
-				
+
 	var component = new Component(html);
 	
-	var closeIcon = Loader.getSVG('icons', 'close-icon', 20, 20);
-	var hideIcon = Loader.getSVG('icons', 'hide-frame-icon', 20, 20);
-	var fullscreenModeIcon = Loader.getSVG('icons', 'fullscreen-mode-icon', 20, 20);
-	var frameModeIcon = Loader.getSVG('icons', 'frame-mode-icon', 20, 20);
-	//var resizeIcon = Loader.getSVG('icons', 'resize-frame-icon', 20, 20);
+	var closeIcon = component.getById('closeIcon');
+	var hideIcon = component.getById('hideFrameIcon');
+	var fullscreenModeIcon = component.getById('fullscreenModeIcon');
+	var frameModeIcon = component.getById('frameModeIcon');
+
+	// Style
+
+	component.addConfigStyle("popup", function ()
+	{
+		return {
+			common:
+			{
+				'this':
+				{
+					border: (function() { return STYLE.frameBorder; })(),
+					borderRadius: (function() { return STYLE.frameBorderRadius; })(),
+					backgroundColor: (function() { return STYLE.frameBackGroundColor; })(),
+					boxShadow: (function() { return STYLE.frameBoxShadow; })(),
+				},
+				
+				'backgroundTitle':
+				{
+					display: (function() { return STYLE.frameBgTitleDisplay; })(),
+				},
+
+				'content': { border: (function() { return STYLE.innerFrameBorder; })(), },
+
+				'multi-tag':
+				{
+					'.frame': [ 'background-color: ' + (function() { return STYLE.frameBackGroundColor; })(), ],
+					'.blurFrame':
+					[
+						'border: ' + (function() { return STYLE.blurFrameBorder; })(),
+						'background-color: ' + (function() { return STYLE.blurFrameBackgroundColor; })(),
+						'box-shadow: ' + (function() { return STYLE.blurFrameBoxShadow; })(),
+					],
+
+					'.blurFrame .title': [ 'color: ' + (function() { return STYLE.blurFrameTitleColor; })() ],
+					'.blurFrame .content': [ 'border: ' + (function() { return STYLE.blurFrameContentBorder; })() ],
+				}
+			},
+		};
+	});
+
+	component.applyConfigStyle();
 	
-	component.getById('buttonsBlock').appendChild(closeIcon);
-	component.getById('buttonsBlock').appendChild(hideIcon);
-	component.getById('buttonsBlock').appendChild(fullscreenModeIcon);
-	component.getById('buttonsBlock').appendChild(frameModeIcon);
-	//component.getById('resizeBlock').appendChild(resizeIcon);
-	
+	hideIcon.style.display = 'none';
 	frameModeIcon.style.display = 'none';
-	component.getById('content').style.minWidth = width + 'px';
-	component.getById('content').style.minHeight = height + 'px';
-	component.getById('content').style.width = width + 'px';
-	component.getById('content').style.height = height + 'px';
+
+	component.style.minWidth = width + 'px';
+	component.style.minHeight = height + 'px';
+	component.style.width = width + 'px';
+	component.style.height = height + 'px';
+
+	var dragScreen = new Component('<div></div>');
+
+	dragScreen.applyStyle({
+		zIndex: 1000000000000000,
+		position: 'absolute',
+		left: '-1000px',
+		right: '-1000px',
+		top: '-1000px',
+		bottom: '-1000px',
+		cursor: 'grabbing',
+	});
 	
 	// Drag & drop
 	var clicked = false;
@@ -82,17 +137,30 @@ function Frame($content, $title)
 	var previousX = 0;
 	var previousY = 0;
 	
+	var displayed = false;
 	var fullscreen = false;
 	
 	//////////////
 	// Méthodes //
 	//////////////
 
+	this.display = function()
+	{
+		displayed = true;
+		document.getElementById('main').appendChild($this);
+		
+		requestAnimationFrame(function()
+		{
+			Components.addFrame($this);
+			Components.focusFrame($this);
+		});
+	};
+
 	this.onHide = function() { return true; };
 
 	this.hide = function()
 	{
-		setTimeout(function()
+		requestAnimationFrame(function()
 		{
 			var confirmHide = $this.onHide();
 		
@@ -118,22 +186,25 @@ function Frame($content, $title)
 		
 				if (index >= 0)
 					document.getElementById('main').onClick.splice(index, 1);
+
+				displayed = false;
+				$this.onBlurFrame();
 			}
 			
-		}, 50);
+		});
 	};
 	
 	this.close = this.hide;
 	
 	this.onFocusFrame = function()
 	{
-		// On dégrise la fenêtre
+		focus = true;
 		$this.setAttribute('class', 'frame');
 	};
-	
+
 	this.onBlurFrame = function()
 	{
-		// On grise la fenêtre
+		focus = false;
 		$this.setAttribute('class', 'frame blurFrame');
 	};
 	
@@ -153,30 +224,18 @@ function Frame($content, $title)
 	fullscreenModeIcon.onClick = function()
 	{
 		fullscreen = true;
-		
-		var marginLeft = parseInt(component.getById('content').getStyle('margin-left').replace('px', ''));
-		var marginRight = parseInt(component.getById('content').getStyle('margin-right').replace('px', ''));
-		var marginTop = parseInt(component.getById('content').getStyle('margin-top').replace('px', ''));
-		var marginBottom = parseInt(component.getById('content').getStyle('margin-bottom').replace('px', ''));
-		
+
 		component.style.left = '0px';
 		component.style.right = '0px';
 		component.style.top = '35px';
 		component.style.bottom = '0px';
-		
-		component.getById('content').style.width = 'unset';
-		component.getById('content').style.height = 'unset';
-		
-		component.getById('content').style.position = 'absolute';
-		component.getById('content').style.left = marginLeft + 'px';
-		component.getById('content').style.right = marginRight + 'px';
-		component.getById('content').style.top = marginTop + 'px';
-		component.getById('content').style.bottom = marginBottom + 'px';
+		component.style.width = 'unset';
+		component.style.height = 'unset';
 		
 		fullscreenModeIcon.style.display = 'none';
-		frameModeIcon.style.display = 'inline';
+		frameModeIcon.style.display = 'inline-block';
 		
-		$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
+		$this.onResize();
 	};
 	
 	frameModeIcon.onClick = function()
@@ -187,22 +246,13 @@ function Frame($content, $title)
 		component.style.right = 'unset';
 		component.style.top = y + 'px';
 		component.style.bottom = 'unset';
+		component.style.width = width + 'px';
+		component.style.height = height + 'px';
 		
-		
-		component.getById('content').style.position = 'relative';
-		component.getById('content').style.left = 'unset';
-		component.getById('content').style.right = 'unset';
-		component.getById('content').style.top = 'unset';
-		component.getById('content').style.bottom = 'unset';
-		
-		component.getById('content').style.width = width + 'px';
-		component.getById('content').style.height = height + 'px';
-		
-		fullscreenModeIcon.style.display = 'inline';
+		fullscreenModeIcon.style.display = 'inline-block';
 		frameModeIcon.style.display = 'none';
 		
-		//$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
-		$this.onResize(width, height);
+		$this.onResize();
 	};
 	
 	component.getById('content').onClick = function() { Components.focusFrame($this); };
@@ -214,6 +264,8 @@ function Frame($content, $title)
 	
 	var onMouseDown = function($event, $component)
 	{
+		document.getElementById('main').appendChild(dragScreen);
+		Components.addIceRink(dragScreen);
 		var titleWidth = component.getById('title').offsetWidth;
 		var buttonsBlockWidth = component.getById('buttonsBlock').offsetWidth;
 		var marginLeft = parseInt(component.getById('content').getStyle('margin-left').replace('px', ''));
@@ -397,11 +449,8 @@ function Frame($content, $title)
 					{
 						x = mouseX - offsetX;
 						component.style.left = x + 'px';
-						component.getById('content').style.width = width + 'px';
-						$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
-						
-						if (utils.isset(content) && utils.isset(content.resize))
-							content.resize();
+						component.style.width = width + 'px';
+						$this.onResize();
 					}
 				}
 				
@@ -413,11 +462,8 @@ function Frame($content, $title)
 					{
 						y = mouseY - offsetY;
 						component.style.top = y + 'px';
-						component.getById('content').style.height = height + 'px';
-						$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
-						
-						if (utils.isset(content) && utils.isset(content.resize))
-							content.resize();
+						component.style.height = height + 'px';
+						$this.onResize();
 					}
 				}
 				
@@ -427,11 +473,8 @@ function Frame($content, $title)
 					
 					if (width > minWidth)
 					{
-						component.getById('content').style.width = width + 'px';
-						$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
-						
-						if (utils.isset(content) && utils.isset(content.resize))
-							content.resize();
+						component.style.width = width + 'px';
+						$this.onResize();
 					}
 				}
 				
@@ -441,11 +484,8 @@ function Frame($content, $title)
 					
 					if (height > minHeight)
 					{
-						component.getById('content').style.height = height + 'px';
-						$this.onResize(component.getById('content').offsetWidth, component.getById('content').offsetHeight);
-						
-						if (utils.isset(content) && utils.isset(content.resize))
-							content.resize();
+						component.style.height = height + 'px';
+						$this.onResize();
 					}
 				}
 			}
@@ -455,10 +495,10 @@ function Frame($content, $title)
 		}
 	};
 	
-	document.getElementById('main').onMouseMove.push(onMouseMove);
-	
 	var onMouseUp = function($event)
 	{
+		document.getElementById('main').removeChild(dragScreen);
+		Components.removeIceRink(dragScreen);
 		draggingAll = false;
 		draggingLeft = false;
 		draggingRight = false;
@@ -470,37 +510,22 @@ function Frame($content, $title)
 		draggingBR = false;
 	};
 	
-	document.getElementById('main').onMouseUp.push(onMouseUp);
-	
-	this.onKeyUp = function($event)
-	{
-		//if (utils.isset(ghost) && utils.isset(ghost.parentNode))
-		{
-			if ($event.keyCode === 27)
-			{
-				onMouseUp($event);
-				console.log("Echappe ! ");
-			}
-		}
-		/*
-		else
-		{
-			for (var i = 0; i < elementsList.length; i++)
-				elementsList[i].onKeyUp($event);
-		}
-		//*/
-	};
+	this.onKeyDown = null;
+	this.onKeyUp = null;
 
 	// Pour empêcher de déclencher les événements de la fenêtre quand on clique dans son contenu
 	component.getById('content').onMouseDown = function($event) {};
 	component.getById('content').onMouseMove = function($event) {};
+
+	dragScreen.onMouseMove = onMouseMove;
+	dragScreen.onMouseUp = onMouseUp;
 	
-	this.onResize = function($width, $height)
+	this.onResize = function()
 	{
-		//console.log("Resize frame");
+		var contentElement = component.getById('content').firstChild;
 		
-		if (utils.isset(content) && utils.isset(content.resize))
-			content.resize();
+		if (utils.isset(contentElement) && utils.isset(contentElement.onResize))
+			contentElement.onResize();
 	};
 
 	////////////////
@@ -508,6 +533,9 @@ function Frame($content, $title)
 	////////////////
 
 	// GET
+
+	this.isDisplayed = function() { return displayed; };
+	this.hasFocus = function() { return focus; };
 	
 	// SET
 	
@@ -527,8 +555,8 @@ function Frame($content, $title)
 		x = $x;
 		y = $y;
 		
-		$this.style.left = $x + 'px';
-		$this.style.top = $y + 'px';
+		$this.style.left = x + 'px';
+		$this.style.top = y + 'px';
 	};
 	
 	this.setMinDimensions = function($width, $height)
@@ -542,8 +570,8 @@ function Frame($content, $title)
 		if (minHeight < 10)
 			minHeight = 10;
 		
-		component.getById('content').style.minWidth = minWidth + 'px';
-		component.getById('content').style.minHeight = minHeight + 'px';
+		component.style.minWidth = minWidth + 'px';
+		component.style.minHeight = minHeight + 'px';
 	};
 	
 	this.setMinWidth = function($width)
@@ -553,7 +581,7 @@ function Frame($content, $title)
 		if (minWidth < 10)
 			minWidth = 10;
 		
-		component.getById('content').style.minWidth = minWidth + 'px';
+		component.style.minWidth = minWidth + 'px';
 	};
 	
 	this.setMinHeight = function($height)
@@ -563,7 +591,7 @@ function Frame($content, $title)
 		if (minHeight < 10)
 			minHeight = 10;
 		
-		component.getById('content').style.minHeight = minHeight + 'px';
+		component.style.minHeight = minHeight + 'px';
 	};
 	
 	this.setDimensions = function($width, $height)
@@ -576,9 +604,9 @@ function Frame($content, $title)
 		
 		if (height < minHeight)
 			height = minHeight;
-		
-		component.getById('content').style.width = width + 'px';
-		component.getById('content').style.height = height + 'px';
+
+		component.style.width = width + 'px';
+		component.style.height = height + 'px';
 	};
 	
 	this.setWidth = function($width)
@@ -588,7 +616,7 @@ function Frame($content, $title)
 		if (width < minWidth)
 			width = minWidth;
 		
-		component.getById('content').style.width = width + 'px';
+		component.style.width = width + 'px';
 	};
 	
 	this.setHeight = function($height)
@@ -598,7 +626,7 @@ function Frame($content, $title)
 		if (height < minHeight)
 			height = minHeight;
 		
-		component.getById('content').style.height = height + 'px';
+		component.style.height = height + 'px';
 	};
 	
 	//////////////
@@ -606,11 +634,5 @@ function Frame($content, $title)
 	//////////////
 	
 	var $this = utils.extend(component, this);
-	document.getElementById('main').appendChild($this);
-	Components.addFrame($this);
-	$this.focus();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("frame");

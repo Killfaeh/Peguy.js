@@ -98,6 +98,3 @@ function RotateMatrix($x, $y, $z, $theta)
 	var $this = utils.extend(matrix, this); 
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("rotateMatrix");

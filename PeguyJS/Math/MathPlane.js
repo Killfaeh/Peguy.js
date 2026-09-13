@@ -60,6 +60,3 @@ function MathPlane($a, $b, $c, $d)
 
 	var $this = this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("math-plane");

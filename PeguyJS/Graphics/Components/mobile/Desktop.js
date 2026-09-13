@@ -10,6 +10,40 @@ function Desktop()
 
     var component = new Component(html);
     
+    /*
+// Style
+
+component.addConfigStyle("desktop", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"desktopItemIcon": {
+		"border": (function() { return STYLE.desktopBorder; })(),
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })()
+	},
+	"desktopItemLabel": {
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })(),
+		"color": (function() { return STYLE.desktopColor; })()
+	},
+	"selectRect": {
+		"border": (function() { return STYLE.desktopBorder; })(),
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
     var elementsList = [];
     
     var editMode = false;
@@ -168,5 +202,5 @@ function Desktop()
     return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-    Loader.hasLoaded("desktop");
+//if (Loader !== null && Loader !== undefined)
+//    Loader.hasLoaded("desktop");

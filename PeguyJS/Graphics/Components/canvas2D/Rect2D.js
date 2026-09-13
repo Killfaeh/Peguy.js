@@ -51,6 +51,3 @@ function Rect2D($x, $y, $width, $height)
 	var $this = utils.extend(object2D, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("rect2D");

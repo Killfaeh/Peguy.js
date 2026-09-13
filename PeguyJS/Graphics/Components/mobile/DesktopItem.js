@@ -16,6 +16,10 @@ function DesktopItem($label, $icon)
 
     var component = new Component(html);
     
+    /*
+{{INSERT CODE}}
+	//*/
+
     // Drag & drop
     var clicked = false;
     var moved = false;
@@ -356,5 +360,5 @@ function DesktopItem($label, $icon)
     return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-    Loader.hasLoaded("desktopItem");
+//if (Loader !== null && Loader !== undefined)
+//    Loader.hasLoaded("desktopItem");

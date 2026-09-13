@@ -7,6 +7,9 @@ var PEGUY =
 	userAgent: navigator.userAgent,
 	platform: navigator.platform,
 	glPrecision: 7,
+	
+	main: document.getElementById('main'),
+	screen: document.getElementById('screen'),
 
 	appendToMain: function($node)
 	{
@@ -28,6 +31,3 @@ var PEGUY =
 		return document.getElementById('main').mousePosition($event);
 	}
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("peguy");

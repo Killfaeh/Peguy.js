@@ -97,6 +97,3 @@ function BezierCubic($p0, $p1, $p2, $p3)
 	$this.computeLength();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("bezierCubic");

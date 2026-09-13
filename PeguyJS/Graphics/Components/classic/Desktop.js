@@ -10,9 +10,44 @@ function Desktop()
 					+ '<div id="selectRect" class="selectRect" ></div>'
 				+ '</div>';
 
-	var component = new Component(html);
+	var component = new ListComponent(html);
+	component.setNode(component.getById('listIcons'));
 	
-	var elementsList = [];
+	/*
+// Style
+
+component.addConfigStyle("desktop", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"desktopItemIcon": {
+		"border": (function() { return STYLE.desktopBorder; })(),
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })()
+	},
+	"desktopItemLabel": {
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })(),
+		"color": (function() { return STYLE.desktopColor; })()
+	},
+	"selectRect": {
+		"border": (function() { return STYLE.desktopBorder; })(),
+		"backgroundColor": (function() { return STYLE.desktopBackgroundColor; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
+	//var elementsList = [];
 	
 	var editMode = false;
 	
@@ -31,64 +66,38 @@ function Desktop()
 	// Méthodes //
 	//////////////
 	
-	this.unselectAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-			elementsList[i].unselect();
-	};
-	
+	this.unselectAll = function() { component.getList().forEach(function($element) { $element.unselect(); }); };
+
 	this.addElement = function($element)
 	{
-		var index = elementsList.indexOf($element);
-		
-		if (index < 0)
-		{
-			elementsList.push($element);
-			$element.setParent($this);
-		}
-		
+		var list = $this.addToList($element);
 		updateIcons();
-		
-		//$element.onDrag = function($x, $y) { return onDrag($x, $y, $element); };
-		//$element.onRelease = function($element2, $index) { return onRelease($element2, $index); };
+		return list;
 	};
-	
+
 	this.insertElementInto = function($element, $index)
 	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-			elementsList.splice(index, 1);
-		
-		elementsList.splice($index, 0, $element);
-		$element.setParent($this);
-		
+		var list = $this.insertIntoListAt($element, $index);
 		updateIcons();
-		
-		//$element.onDrag = function($x, $y) { return onDrag($x, $y, $element); };
-		//$element.onRelease = function($element2, $index) { return onRelease($element2, $index); };
+		return list;
 	};
-	
+
 	this.removeElement = function($element)
 	{
-		var index = elementsList.indexOf($element);
-		
-		if (index >= 0)
-			elementsList.splice(index, 1);
-		
-		if (utils.isset($element.parentNode))
-			$element.parentNode.removeChild($element);
-		
+		var list = $this.removeFromList($element);
 		updateIcons();
+		return list;
 	};
-	
+
 	this.removeAllElement = function()
 	{
-		for (var i = 0; i < elementsList.length; i++)
-			elementsList[i].onRemoveFromDock();
-		
-		elementsList = [];
-		component.getById('listIcons').removeAllChildren();
+		component.getList().forEach(function($element)
+		{
+			if ($element.onRemoveFromDock)
+				$element.onRemoveFromDock();
+		});
+
+		return $this.removeAllFromList();
 	};
 	
 	var updateIcons = function()
@@ -98,13 +107,13 @@ function Desktop()
 		var width = component.offsetWidth;
 		var height = component.offsetHeight;
 		var nbLines = Math.floor(height/component.getById('standard').offsetHeight);
-		var nbColumns = Math.ceil(elementsList.length/nbLines);
+		var nbColumns = Math.ceil(component.getList().length/nbLines);
 		var nbColumnsOnScreen = Math.floor(component.offsetWidth/component.getById('standard').offsetWidth);
 		var iconSpaceRatio = component.getById('standardIcon').offsetWidth/component.getById('standardIcon').offsetHeight;
 		
-		for (var i = 0; i < elementsList.length; i++)
+		component.getList().forEach(function($element)
 		{
-			var icon = elementsList[i].getIcon();
+			var icon = $element.getIcon();
 			
 			if (utils.isset(icon))
 			{
@@ -135,7 +144,7 @@ function Desktop()
 				icon.setAttribute('width', iconWidth);
 				icon.setAttribute('height', iconHeight);
 			}
-		}
+		});
 		
 		for (var i = 0; i < nbColumns; i++)
 		{
@@ -144,8 +153,8 @@ function Desktop()
 			
 			for (var j = 0; j < nbLines; j++)
 			{
-				if (utils.isset(elementsList[i*nbLines + j]))
-					column.appendChild(elementsList[i*nbLines + j]);
+				if (utils.isset(component.getList()[i*nbLines + j]))
+					column.appendChild(component.getList()[i*nbLines + j]);
 			}
 			
 			column.onClick = function($event)
@@ -173,26 +182,8 @@ function Desktop()
 	
 	var onDrag = function($x, $y, $element)
 	{
-		var overLayer = null;
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (elementsList[i] !== $element)
-			{
-				overLayer = elementsList[i].getOverLayer($x, $y, $element);
-				
-				if (utils.isset(overLayer))
-				{
-					i = elementsList.length;
-					//overLayer.dragOver();
-				}
-			}
-		}
-		
-		if (!utils.isset(overLayer))
-			overLayer = $this;
-		
-		return overLayer;
+		var overLayer = component.testAll('getOverLayer', [$x, $y, $element], function($overLayer) { return $overLayer; });
+		return overLayer ? overLayer : $this;
 	};
 	
 	var onRelease = function($element, $index) { $this.insertElementInto($element, $index); };
@@ -266,13 +257,7 @@ function Desktop()
 		else
 		{
 			if (editMode === true)
-			{
-				for (var i = 0; i < elementsList.length; i++)
-				{
-					if (utils.isset(elementsList[i].mouseMove))
-						elementsList[i].mouseMove($event);
-				}
-			}
+				component.execAllEvents([ 'mouseMove' ], $event);
 		}
 	};
 	
@@ -284,11 +269,7 @@ function Desktop()
 		{
 			if (editMode === true)
 			{
-				for (var i = 0; i < elementsList.length; i++)
-				{
-					if (utils.isset(elementsList[i].mouseUp))
-						elementsList[i].mouseUp($event);
-				}
+				component.execAllEvents([ 'mouseUp' ], $event);
 				
 				// Déclencher les interactions avec les autres composents
 			
@@ -312,9 +293,8 @@ function Desktop()
 						i = flyingElements.length;
 					}
 				}
-				
-				for (var i = 0; i < elementsList.length; i++)
-					elementsList[i].setDragging(false);
+
+				component.execAll([ 'setDragging' ], [ false ]);
 			}
 		}
 		else
@@ -325,13 +305,11 @@ function Desktop()
 					$this.unselectAll();
 				
 				// Sélectionner les icones dans le rectangle
-				for (var i = 0; i < elementsList.length; i++)
+				component.execAll([ 'isInSelectRect' ], [ component.getById('selectRect') ], function($isInSelectRect, $element)
 				{
-					var isInSelectRect = elementsList[i].isInSelectRect(component.getById('selectRect'));
-					
-					if (isInSelectRect === true)
-						elementsList[i].addClass('selected');
-				}
+					if ($isInSelectRect === true)
+						$element.addClass('selected');
+				});
 			}
 			
 			setTimeout(function() { moved = false; }, 50);
@@ -347,10 +325,7 @@ function Desktop()
 	this.onKeyUp = function($event)
 	{
 		if (editMode === true)
-		{
-			for (var i = 0; i < elementsList.length; i++)
-				elementsList[i].onKeyUp($event);
-		}
+			component.execAllEvents([ 'onKeyUp' ], $event);
 	};
 	
 	this.onEndResize = function() { updateIcons(); };
@@ -359,26 +334,17 @@ function Desktop()
 	
 	var onDropItems = function($event)
 	{
-		var draggingItem = false;
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (elementsList[i].isDragging() === true)
-			{
-				draggingItem = true;
-				i = elementsList.length
-			}
-		}
+		var draggingItem = component.testAll('isDragging', [], function($isDragging) { return $isDragging; });
 		
 		if (draggingItem === true)
 		{
 			var selectedItems = [];
 			
-			for (var i = 0; i < elementsList.length; i++)
+			component.getList().forEach(function($element)
 			{
-				if (elementsList[i].isClass('selected') === true)
-					selectedItems.push(elementsList[i]);
-			}
+				if ($element.isClass('selected') === true)
+					selectedItems.push($element);
+			});
 			
 			Events.emit('onGetSelectedDesktopItems', [selectedItems]);
 		}
@@ -407,6 +373,3 @@ function Desktop()
 	this.autoResize();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("desktop");

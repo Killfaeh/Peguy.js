@@ -1,0 +1,39 @@
+.contextPalette
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	z-index: 1000000000;
+}
+
+.contextPalette .root-children-list
+{
+	position: absolute;
+	margin: 0px;
+	padding: 5px;
+	text-align: left;
+}
+
+.contextPalette .root-children-list li
+{
+	display: inline-block;
+	position: relative;
+	list-style-type: none;
+	margin: 0px;
+	padding: 3px;
+	cursor: pointer;
+}
+
+.contextPalette .root-children-list li:hover
+{
+	padding: 2px;
+}
+
+.contextPalette .root-children-list li span
+{
+	display: inline-block;
+	width: 30px;
+	height: 25px;
+}

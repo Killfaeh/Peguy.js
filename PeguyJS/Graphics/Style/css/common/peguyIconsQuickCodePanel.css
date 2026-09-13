@@ -1,0 +1,62 @@
+.peguyIconsQuickCodePanel
+{
+}
+
+.peguyIconsQuickCodePanel .topPanel, .peguyIconsQuickCodePanel .bottomPanel
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+}
+
+.peguyIconsQuickCodePanel .topPanel
+{
+	top: 10px;
+	bottom: calc(50% + 7px);
+	bottom: calc(100% - 29px);
+	padding: 10px;
+}
+
+.peguyIconsQuickCodePanel .topPanel .search .searchInner
+{
+	width: 100%;
+}
+
+.peguyIconsQuickCodePanel .topPanel .search .searchInner input
+{
+	width: calc(100% - 24px);
+}
+
+.peguyIconsQuickCodePanel .bottomPanel
+{
+	top: calc(50% + 7px);
+	top: 46px;
+	bottom: 0px;
+	overflow: auto;
+}
+
+.peguyIconsQuickCodePanel .bottomPanel .codeRow { position: relative; }
+
+.peguyIconsQuickCodePanel .bottomPanel .codeRow *
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.peguyIconsQuickCodePanel .bottomPanel .codeRow .preview
+{
+	margin-right: 10px;
+}
+
+.peguyIconsQuickCodePanel .bottomPanel .codeRow svg
+{
+	cursor: pointer;
+	margin: 3px;
+}
+
+.peguyIconsQuickCodePanel .bottomPanel .codeRow .icon
+{
+	position: absolute;
+	right: 5px;
+	top: 0px;
+}

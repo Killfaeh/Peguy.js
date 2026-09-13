@@ -6,9 +6,19 @@
 	-webkit-appearance: none;
 	font-size: 1.0rem;
 	color: rgb(0, 0, 0);
-	background-color: rgb(251, 190, 0);
+	background-color: rgb(242, 98, 33);
+	/*background-color: rgb(251, 190, 0);*/
+	/*background-color: rgb(249, 29, 14);*/
+	/*background-color: rgb(58, 195, 255);*/
+	/*background-color: rgb(0, 223, 17);*/
+	/*background-color: rgb(187, 61, 255);*/
 	background-image: none;
-	border: solid rgb(251, 190, 0) 2px;
+	border: solid rgb(242, 98, 33) 2px;
+	/*border: solid rgb(251, 190, 0) 2px;*/
+	/*border: solid rgb(249, 29, 14) 2px;*/
+	/*border: solid rgb(58, 195, 255) 2px;*/
+	/*border: solid rgb(0, 223, 17) 2px;*/
+	/*border: solid rgb(187, 61, 255) 2px;*/
 	border-radius: 5px;
 }
 

@@ -313,6 +313,3 @@ Polynomials =
 		return output; 
 	},
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("polynomial");

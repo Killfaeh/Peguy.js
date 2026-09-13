@@ -53,6 +53,3 @@ function RadialGradient2D($colors, $startCenterX, $startCenterY, $startRadius, $
 	this.setEndCenterY = function($endCenterY) { endCenterY = $endCenterY; };
 	this.setEndRadius = function($endRadius) { endRadius = $endRadius; };
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("radialGradient2D");

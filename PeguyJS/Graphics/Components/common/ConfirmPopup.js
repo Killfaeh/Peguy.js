@@ -4,10 +4,12 @@ function ConfirmPopup($content, $yesNo)
 	// Attributs //
 	///////////////
 	
+	// Structure du composant
+
 	var content = $content;
 	var yesNo = $yesNo;
 	
-	var html = '<div class="confirmBlock" >'
+	var html = '<div id="confirmBlock" class="confirmBlock" >'
 					+ '<div id="confirmContent" class="confirmContent" >' + content + '</div>'
 					+ '<div id="confirmButtons" class="confirmButtons" >'
 						+ '<input type="button" id="cancel" class="cancel" value="' + KEYWORDS.cancel + '" />'
@@ -17,6 +19,10 @@ function ConfirmPopup($content, $yesNo)
 	
 	var popup = new Popup(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	if (yesNo === true)
 	{
 		popup.getById('cancel').value = KEYWORDS.no;
@@ -33,20 +39,14 @@ function ConfirmPopup($content, $yesNo)
 	
 	this.onCancel = function() {};
 	this.onOk = function() { return true; };
-	
-	popup.getById('closeIcon').onClick = function()
+
+	var onCancel = function()
 	{
 		$this.onCancel();
 		$this.hide();
 	};
-	
-	popup.getById("cancel").onClick = function() 
-	{
-		$this.onCancel();
-		$this.hide();
-	};
-			
-	popup.getById("ok").onClick = function() 
+
+	var onOk = function()
 	{
 		var isOk = $this.onOk();
 		
@@ -54,6 +54,29 @@ function ConfirmPopup($content, $yesNo)
 			$this.hide();
 	};
 	
+	popup.getById('closeIcon').onClick = function() { onCancel(); };
+	popup.getById("cancel").onClick = function() { onCancel(); };
+	popup.getById("ok").onClick = function() { onOk(); };
+
+	popup.onKeyDown = function($event)
+	{
+		//if ($this === Components.getFrontPopup())
+		{
+			if ($event.keyCode === 13)
+			{
+				onOk();
+				return true;
+			}
+			else if ($event.keyCode === 27)
+			{
+				onCancel();
+				return true;
+			}
+		}
+
+		return false;
+	};
+
 	////////////////
 	// Accesseurs //
 	////////////////
@@ -78,6 +101,3 @@ function ConfirmPopup($content, $yesNo)
 	var $this = utils.extend(popup, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("confirmPopup");

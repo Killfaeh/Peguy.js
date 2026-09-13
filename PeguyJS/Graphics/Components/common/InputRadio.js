@@ -46,6 +46,10 @@ function InputRadio($name, $label, $value, $selected, $isHTML)
 	component.getById('radio').onClick = function() { onSelect(); };
 	component.getById('label').onClick = function() { onSelect(); };
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	////////////////
 	// Accesseurs //
 	////////////////
@@ -97,5 +101,5 @@ function InputRadio($name, $label, $value, $selected, $isHTML)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputRadio");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputRadio");

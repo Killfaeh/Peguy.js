@@ -4,8 +4,8 @@ function CheckBox($checked, $size)
 	// Attributs //
 	///////////////
 	
-	var checked = $checked;
-	var size = $size;
+	var checked = DataFilter.boolean($checked);
+	var size = DataFilter.integer($size);
 	var readonly = false;
 	
 	if (!utils.isset(size))
@@ -16,14 +16,35 @@ function CheckBox($checked, $size)
 
 	var html = '<div class="checkBox" >'
 					+ '<div id="inner" class="inner" style="min-width: ' + size + 'px; width: ' + size + 'px; height: ' + size + 'px; text-align: center;" >'
+						+ '<Icon id="checkIcon" fileName="icons" name="check-icon" width="' + iconSize + '" height="' + iconSize + '" ></Icon>'
 						+ '<div class="wall" ></div>'
 					+ '</div>'
 				+ '</div>';
 
 	var component = new Component(html);
-	
-	var checkIcon = Loader.getSVG('icons', 'check-icon', iconSize, iconSize);
-	component.getById('inner').appendChild(checkIcon);
+
+	var checkIcon = component.getById('checkIcon');
+
+	// Style
+
+	component.addConfigStyle("checkBox", function ()
+	{
+		return {
+			common:
+			{
+				'inner':
+				{
+					border: (function() { return STYLE.checkBoxBorder; })(),
+					minWidth: size + "px",
+					width: size + "px",
+					height: size + "px",
+					backgroundColor: (function() { return STYLE.checkBoxBackGroundColor; })(),
+				},
+			}
+		};
+	});
+
+	component.applyConfigStyle();
 	
 	//////////////
 	// Méthodes //
@@ -90,7 +111,10 @@ function CheckBox($checked, $size)
 			component.getById('inner').style.backgroundColor = 'none';
 		}
 		else
-			component.getById('inner').removeAttribute('style');
+		{
+			component.getById('inner').style.border = (function() { return STYLE.checkBoxBorder; })();
+			component.getById('inner').style.backgroundColor = (function() { return STYLE.checkBoxBackGroundColor; })();
+		}
 	};
 	
 	//////////////
@@ -102,6 +126,3 @@ function CheckBox($checked, $size)
 	//Components.addInputText($this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("checkBox");

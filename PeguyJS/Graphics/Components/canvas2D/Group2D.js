@@ -71,6 +71,3 @@ function Group2D()
 	this.setY = function($y) { y = $y; };
 	this.setAngle = function($angle) { angle = $angle; };
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("group2D");

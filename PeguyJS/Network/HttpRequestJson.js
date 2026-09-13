@@ -117,6 +117,3 @@ function HttpRequestJson()
 	
 	var $this = this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("httpRequestJson");

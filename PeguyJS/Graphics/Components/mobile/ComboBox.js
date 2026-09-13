@@ -30,6 +30,49 @@ function ComboBox($name, $options, $currentValue)
 	
 	var selector;
 
+	/*
+// Style
+
+component.addConfigStyle("comboBox", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"panel": {
+		"border": (function() { return STYLE.comboBoxBorder; })(),
+		"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.comboBoxBoxShadow; })()
+	},
+	"selectPanel": {
+		"border": (function() { return STYLE.comboBoxBorder; })(),
+		"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.comboBoxBoxShadow; })()
+	},
+	"selected": {
+		"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })()
+	},
+	"color-icon": {
+		"border": (function() { return STYLE.comboBoxBorder; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"displayedOption": {
+		"backgroundColor": (function() { return STYLE.comboBoxBackgroundColor; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -163,6 +206,3 @@ function ComboBox($name, $options, $currentValue)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("comboBox");

@@ -1,0 +1,96 @@
+.formPanel { position: relative; }
+
+.formPanel table
+{
+	width: 100%;
+}
+
+.formPanel table th
+{
+	padding-top: 15px;
+	padding-bottom: 10px;
+}
+
+.formPanel table td
+{
+	text-align: left;
+	padding: 7px;
+}
+
+.formPanel table .right
+{
+	text-align: right;
+}
+
+.formPanel tr:hover
+{
+}
+
+.formPanel textarea
+{
+	width: calc(100% - 20px);
+	min-width: calc(100% - 20px);
+	max-width: calc(100% - 20px);
+	min-height: 150px;
+	resize: none;
+}
+
+.formPanel td input[type="text"], .formPanel td input[type="password"], .formPanel td input[type="time"], 
+.formPanel td input[type="email"], .formPanel td input[type="tel"], .formPanel td input[type="number"]
+{
+	width: calc(100% - 40px);
+	min-width: calc(100% - 40px);
+	max-width: calc(100% - 40px);
+}
+
+.formPanel td .listBox
+{
+	width: calc(100% - 40px);
+	text-align: center;
+	margin: auto;
+}
+
+.formPanel td .codeEditor
+{
+	position: relative;
+	width: calc(100% - 20px);
+	min-width: calc(100% - 20px);
+	max-width: calc(100% - 20px);
+	margin: auto;
+	min-height: 40px;
+	height: 200px;
+	
+}
+
+.formPanel td .codeEditor code
+{
+	width: calc(100% - 65px);
+	min-width: calc(100% - 65px);
+	max-width: calc(100% - 65px);
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	overflow: auto;
+	text-align: left;
+}
+
+.formPanel td .codeEditor .num-lines,
+.formPanel td .codeEditor .num-lines code
+{
+    overflow: hidden;
+}
+
+.formPanel pre code
+{
+	padding: 10px;
+	text-align: left;
+}
+
+.formPanel .remove-icon
+{
+	position: absolute;
+	right: 0px;
+	top: 0px;
+}
+

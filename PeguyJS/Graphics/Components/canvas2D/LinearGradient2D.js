@@ -49,6 +49,3 @@ function LinearGradient2D($colors, $x1, $y1, $x2, $y2)
 	this.setX2 = function($x2) { x2 = $x2; };
 	this.setY2 = function($y2) { y2 = $y2; };
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("linearGradient2D");

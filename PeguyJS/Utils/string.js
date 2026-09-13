@@ -1,21 +1,41 @@
-String.prototype.replaceAll = function($strToReplace, $newStr)
+String.prototype.firstCharToUpperCase = function()
 {
-	var output = this;
-	
-	var improbableStr = '[[[hgdgugjhgjklfhlkjtlkhjkrhklhjkthjkjlkhdjklhk]]]';
-	
-	while (output.indexOf($strToReplace) >= 0)
-		output = output.replace($strToReplace, improbableStr);
-	
-	while (output.indexOf(improbableStr) >= 0)
-		output = output.replace(improbableStr, $newStr);
-	
-	return output;
+	return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+String.prototype.firstCharToLowerCase = function()
+{
+	return this.charAt(0).toLowerCase() + this.slice(1);
+};
+
+String.prototype.toCamelCase = function($separator)
+{
+	var strArray = this.split($separator);
+
+	return strArray.reduce(function($str, $word, $i)
+	{
+		if ($i > 0)
+			$str = $str + $word.firstCharToUpperCase();
+		else
+			$str = $str + $word;
+		
+		return $str;
+	}, '');
 };
 
 String.prototype.insertAt = function($text, $index)
 {
 	return this.slice(0, $index) + $text + this.slice($index);
+};
+
+String.prototype.remove = function($needle)
+{
+	return this.replace($needle, '');
+};
+
+String.prototype.removeAll = function($needle)
+{
+	return this.replaceAll($needle, '');
 };
 
 String.prototype.getDate = function()
@@ -103,6 +123,12 @@ String.prototype.removeAccents = function()
 	return str;
 };
 
+String.prototype.formatRegex = function()
+{
+	return this.replaceAll('/', '\\/')
+				.replaceAll('*', '\\*');
+};
+
 String.prototype.formatTel = function()
 {
 	var str = this;
@@ -122,6 +148,49 @@ String.prototype.formatTel = function()
 				output += ' ';
 		}
 	}
+	
+	return output;
+};
+
+String.prototype.allIndexOf = function($substr)
+{
+	var output = [];
+	var index = this.indexOf($substr);
+
+	while (index > -1)
+	{
+		output.push(index);
+		index = this.indexOf($substr, index+1);
+	}
+
+	return output;
+};
+
+String.prototype.getVariablesNames = function()
+{
+	var variablesList = [];
+	
+	var matchVariables = this.match(/{{([a-zA-Z0-9 ]+)}}/g);
+		
+	if (matchVariables)
+	{
+		for (let i = 0; i < matchVariables.length; i++)
+		{
+			var variablePattern = matchVariables[i].remove('{{').remove('}}');
+			
+			if (!variablesList.includes(variablePattern))
+				variablesList.push(variablePattern);
+		}
+	}
+	
+	return variablesList;
+};
+
+String.prototype.replaceVariables = function($config)
+{
+	var output = this;
+	
+	Object.keys($config).forEach(function($key) { output = output.replaceAll('{{' + $key + '}}', $config[$key]); } );
 	
 	return output;
 };
@@ -1634,6 +1703,3 @@ var Format =
 		return valueToDisplay;
 	}
 };
-
-if (typeof Loader !== 'undefined' && Loader !== undefined && Loader !== null)
-	Loader.hasLoaded("string");

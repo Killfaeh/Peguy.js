@@ -1,0 +1,74 @@
+.listBox
+{
+	position: relative;
+	margin: 0px;
+	padding: 0px;
+}
+
+.listBox .listItem
+{
+	list-style-type: none;
+	text-align: left;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.listBox .listItem .list-label
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+ *********** 
+ Drag & Drop 
+ *********** 
+
+.listBox .virtual-list
+{
+	margin: 0px;
+	padding: 0px;
+	position: relative;
+	min-width: calc(100% - 3px);
+	height: 0px;
+	max-height: 0px;
+	overflow: visible;
+	z-index: 15;
+}
+
+.listBox .virtual-list div
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: -6px;
+	max-height: 10px;
+	height: 10px;
+	width: calc(100% - 2px);
+}
+
+.ghost-list
+{
+	display: block;
+	list-style-type: none;
+	text-align: left;
+	
+	position: absolute;
+	opacity: 0.8;
+	z-index: 100000000;
+	
+	margin: 0px;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	height: 20px;
+	
+	
+	cursor: grabbing;
+}
+
+.ghost-list .list-label
+{
+	margin: 0px;
+	padding: 0px;
+}

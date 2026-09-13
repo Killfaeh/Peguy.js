@@ -116,6 +116,3 @@ function Sprite2D($sourceImage, $nbAnimations, $nbFrames, $vertical, $targetX, $
 	updateSprite();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("sprite2D");

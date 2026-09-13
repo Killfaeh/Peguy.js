@@ -6,13 +6,12 @@ function MenuBar()
 
 	var html = '<div class="menuBar" >'
 					+ '<div id="background-screen" class="background-screen" ></div>'
-					+ '<ul id="children-list" class="root-children-list" >'
-					+ '</ul>'
+					+ '<ul id="children-list" class="root-children-list" ></ul>'
 				+ '</div>';
 				
-	var component = new Component(html);
+	var component = new ListComponent(html);
+	component.setNode(component.getById('children-list'));
 	
-	var elementsList = [];
 	var isOpen = false;
 	
 	var menuIcon = Loader.getSVG('icons', 'menu-icon', 25, 25);
@@ -24,86 +23,144 @@ function MenuBar()
 	var classicWidth = 0;
 	var mode = 'classic';
 	
+	/*
+// Style
+
+component.addConfigStyle("menuBar", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {
+		".menuBar .root-children-list .children-list .menuSeparator div": [
+			"border-Bottom: (function() { return STYLE.menuBarBorderBottom; })()
+		]
+	},
+	"menuBar": {
+		"borderBottom": (function() { return STYLE.menuBarBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.menuBarBackgroundImage; })(),
+		"boxShadow": (function() { return STYLE.menuBarBoxShadow; })()
+	},
+	"enlighted": {
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })()
+	},
+	"disable": {
+		"color": (function() { return STYLE.menuBarColor; })()
+	},
+	"arrow": {
+		"color": (function() { return STYLE.menuBarColor; })()
+	},
+	"children-list": {
+		"border": (function() { return STYLE.menuBarBorder; })(),
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.menuBarBoxShadow; })()
+	},
+	"shortcut": {
+		"color": (function() { return STYLE.menuBarColor; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {
+		".menuBar .root-children-list .children-list .menuSeparator div": [
+			"border-Bottom: (function() { return STYLE.menuBarBorderBottom; })()
+		]
+	},
+	"menuBar": {
+		"border": (function() { return STYLE.menuBarBorder; })(),
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.menuBarBoxShadow; })()
+	},
+	"enlighted": {
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })()
+	},
+	"rootMenuItem": {
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })()
+	},
+	"arrow": {
+		"color": (function() { return STYLE.menuBarColor; })()
+	},
+	"backArrow": {
+		"color": (function() { return STYLE.menuBarColor; })()
+	},
+	"children-list": {
+		"border": (function() { return STYLE.menuBarBorder; })(),
+		"backgroundColor": (function() { return STYLE.menuBarBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.menuBarBoxShadow; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
 
 	this.addElement = function($element, $noresize)
 	{
-		elementsList.push($element);
-		
-		if (utils.isset($element.setParent))
-			$element.setParent($this);
-		
-		component.getById('children-list').appendChild($element);
-		
-		if (utils.isset($element.update))
+		var list = $this.addToList($element);
+
+		if (Array.isArray($element))
+			$element.forEach(function($el) { if ($el.update) { $el.update(); } });
+		else if ($element.update)
 			$element.update();
-		
+
 		if ($noresize !== true)
 			$this.onResize();
+
+		return list;
 	};
-	
+
 	this.insertElementInto = function($element, $index, $noresize)
 	{
-		elementsList.splice($index, 0, $element);
-		
-		if (utils.isset($element.setParent))
-			$element.setParent($this);
-		
-		component.getById('children-list').insertAt($element, $index);
-		
-		if (utils.isset($element.update))
+		var list = $this.insertIntoListAt($element, $index);
+
+		if (Array.isArray($element))
+			$element.forEach(function($el) { if ($el.update) { $el.update(); } });
+		else
 			$element.update();
-		
+
 		if ($noresize !== true)
 			$this.onResize();
+
+		return list;
 	};
-	
+
 	this.removeElement = function($element, $noresize)
 	{
-		var index = elementsList.indexOf($element);
-		
-		while (index >= 0)
-		{
-			if (index > -1)
-				elementsList.splice(index, 1);
-			
-			index = elementsList.indexOf($element);
-		}
-		
-		var parent = $element.parentNode;
-		
-		if (parent === component.getById('children-list'))
-			component.getById('children-list').removeChild($element);
-		
-		if (utils.isset($element.setParent))
-			$element.setParent(null);
-		
+		var list = $this.removeFromList($element);
+
 		if ($noresize !== true)
 			$this.onResize();
-		
-		return $element;
+
+		return list;
+	};
+
+	this.removeAllElement = function($noresize)
+	{
+		var list = $this.removeAllFromList();
+
+		if ($noresize !== true)
+			$this.onResize();
+
+		return list;
 	};
 	
-	this.openAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].openAll))
-				elementsList[i].openAll();
-		}
-	};
+	this.openAll = function() { component.execAll([ 'openAll' ]); };
 	
 	this.closeAll = this.closeAllChildren = function()
 	{
 		$this.setOpen(false);
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].closeAll))
-				elementsList[i].closeAll();
-		}
+		component.execAll([ 'closeAll' ]);
+
 	};
 	
 	this.closeParent = function()
@@ -112,37 +169,48 @@ function MenuBar()
 		$this.setOpen(false);
 		//document.getElementById('main').removeChild($this);
 	};
+
+	this.enableByNames = function($names)
+	{
+		component.getList().forEach(function($element)
+		{
+			if ($element.getName && $names.includes($element.getName()))
+				$element.setDisable(false);
+			
+			if ($element.enableByNames)
+				$element.enableByNames($names);
+		});
+	};
+
+	this.disableByNames = function($names)
+	{
+		component.getList().forEach(function($element)
+		{
+			if ($element.getName && $names.includes($element.getName()))
+				$element.setDisable(true);
+			
+			if ($element.disableByNames)
+				$element.disableByNames($names);
+		});
+	};
 	
 	var computeClassicWidth = function()
 	{
-		//Debug.callstack();
-		
-		var width = 0;
-		
-		for (var i = 0; i < elementsList.length; i++)
-			width = width + elementsList[i].offsetWidth;
-		
-		//console.log("Computed width : " + width);
-		
-		return width;
+		return component.getList().reduce(function($width, $element) { return $width + $element.offsetWidth }, 0);
 	};
 	
 	var toMobile = function()
 	{
-		var elementsToMove = [];
-		
-		for (var i = 0; i < elementsList.length; i++)
-			elementsToMove.push(elementsList[i]);
-		
-		for (var i = 0; i < elementsToMove.length; i++)
+		var elementsToMove = component.getList().map(function($element) { return $element; });
+
+		elementsToMove.forEach(function($element)
 		{
-			var element = elementsToMove[i];
-			$this.removeElement(element, true);
-			mobileItem.addElement(element);
+			$this.removeElement($element, true);
+			mobileItem.addElement($element);
 			
-			if (utils.isset(element.update))
-				element.update();
-		}
+			if ($element.update)
+				$element.update();
+		});
 		
 		$this.addElement(mobileItem, true);
 		
@@ -151,22 +219,18 @@ function MenuBar()
 	
 	var toClassic = function()
 	{
-		var elementsToMove = [];
-		
-		for (var i = 0; i < mobileItem.getElementsList().length; i++)
-			elementsToMove.push(mobileItem.getElementsList()[i]);
+		var elementsToMove = component.getList().map(function($element) { return $element; });
 		
 		$this.removeElement(mobileItem, true);
-		
-		for (var i = 0; i < elementsToMove.length; i++)
+
+		elementsToMove.forEach(function($element)
 		{
-			var element = elementsToMove[i];
-			mobileItem.removeElement(element);
-			$this.addElement(element, true);
+			mobileItem.removeElement($element);
+			$this.addElement($element, true);
 			
-			if (utils.isset(element.update))
-				element.update();
-		}
+			if ($element.update)
+				$element.update();
+		});
 		
 		mode = 'classic';
 	};
@@ -196,14 +260,7 @@ function MenuBar()
 		$this.closeAllChildren();
 	};
 	
-	component.getById('children-list').onMouseOut = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].unlightAll))
-				elementsList[i].unlightAll();
-		}
-	};
+	component.getById('children-list').onMouseOut = function() { component.execAll([ 'unlightAll' ]); };
 	
 	this.onResize = function()
 	{
@@ -231,8 +288,31 @@ function MenuBar()
 	// GET
 	
 	this.isOpen = function() { return isOpen; };
-	this.getElementsList = function() { return elementsList; };
+	this.getElementsList = function() { return component.getList(); };
 	this.getListNode = function() { return component.getById('root-children-list'); };
+
+	this.getByName = function($name)
+	{
+		for (var i = 0; i < component.getList().length; i++)
+		{
+			var element = component.getList()[i];
+
+			if (element.getName)
+			{
+				if (element.getName() === $name)
+					return element;
+				else 
+				{
+					var item = element.getByName($name)
+
+					if (item)
+						return item;
+				}
+			}
+		}
+
+		return null;
+	};
 	
 	// SET
 	
@@ -261,6 +341,37 @@ function MenuBar()
 		else
 			component.getById('background-screen').style.display = 'none';
 	};
+
+	this.loadElementFromJSON = function($item)
+	{
+		if ($item.separator)
+			return new MenuSeparator();
+		else
+		{
+			var label = $item.label;
+			var name = $item.name;
+			var shortcut = $item.shortcut;
+			var onAction = $item.onAction;
+			var disable = $item.disable;
+			var children = $item.children;
+
+			var item = new MenuItem(label, name, shortcut);
+
+			if (name)
+				item.setName(name);
+
+			if (onAction)
+				item.onAction = onAction;
+
+			if (disable === true)
+				item.setDisable(true);
+
+			if (children && children.length > 0)
+				item.loadFromJSON(children);
+
+			return item;
+		}
+	};
 	
 	//////////////
 	// Héritage //
@@ -269,6 +380,3 @@ function MenuBar()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("menuBar");

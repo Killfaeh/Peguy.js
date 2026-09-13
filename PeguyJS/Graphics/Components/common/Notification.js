@@ -20,6 +20,10 @@ function Notification($manager, $content, $persistent)
 	var closeIcon = Loader.getSVG('icons', 'close-icon', 20, 20);
 	component.getById('closeIcon').appendChild(closeIcon);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	// Données d'animation
 	
 	var persistenceTime = 10000;
@@ -134,14 +138,6 @@ function Notification($manager, $content, $persistent)
 		mouseOverDate = new Date(1000, 0, 1);
 		$this.startRemove();
 	};
-
-	////////////////
-	// Accesseurs //
-	////////////////
-
-	// GET
-	
-	// SET
 	
 	//////////////
 	// Héritage //
@@ -151,10 +147,12 @@ function Notification($manager, $content, $persistent)
 		setTimeout(function() { $this.startRemove(); }, persistenceTime);
 	
 	var $this = utils.extend(component, this);
-	manager.addNotification($this);
-	$this.startPush();
+
+	if (manager)
+	{
+		manager.addNotification($this);
+		$this.startPush();
+	}
+
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("notification");

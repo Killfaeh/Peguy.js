@@ -1,0 +1,67 @@
+.inputFile
+{
+	position: relative;
+	cursor: pointer;
+	
+	display: inline-block;
+	
+	height: 30px;
+	min-width: 100px;
+	margin: 5px;
+	-webkit-appearance: none;
+	font-size: 1.0rem;
+	
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.inputFile *
+{
+	display: inline-block;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.inputFile .input
+{
+	position: relative;
+	display: inline-block;
+}
+
+.inputFile .hidden-input { display: none; }
+
+.inputFile .mask
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	text-align: left;
+	cursor: pointer;
+	padding: 6px;
+	padding-left: 6px;
+}
+
+.inputFile .mask *
+{
+	display: inline-block;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.inputFile .preview
+{
+	display: inline-block;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+}
+
+.inputFile .preview img
+{
+	position: relative;
+	top: -1px;
+}
+
+.inputFile .iframe { display: none; }

@@ -15,18 +15,21 @@ function Option($name, $value, $selected)
 	
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
 	
 	var update = function()
 	{
-		component.removeAllChildren();
-		component.appendChild(utils.createText(name));
-		component.set("value", value);
+		component.innerHTML = dataManager.encodeHTMLEntities(name);
+		component.setAttribute("value", value);
 		
 		if (selected === true)
-			component.set("selected", "selected");
+			component.setAttribute("selected", "selected");
 		else
 			component.removeAttribute("selected");
 	};
@@ -66,6 +69,3 @@ function Option($name, $value, $selected)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("option");

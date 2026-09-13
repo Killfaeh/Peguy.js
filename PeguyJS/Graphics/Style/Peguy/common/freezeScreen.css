@@ -1,5 +1,5 @@
 /*.freezeScreen, .invisibleFreezeScreen*/
-.freezeScreen
+/*.freezeScreen
 {
 	position: absolute;
 }
@@ -16,7 +16,7 @@
 	backdrop-filter: blur(1px);
 	text-align: center;
 	white-space: nowrap;
-}
+}*/
 
 /*
 .invisibleFreezeScreen
@@ -28,7 +28,7 @@
 }
 */
 
-.freezeScreenContent
+/*.freezeScreenContent
 {
 	position: relative;
 	display: inline-block;
@@ -36,6 +36,6 @@
 	background-color: none;
 	vertical-align: middle;
 	white-space: nowrap;
-}
+}*/
 
-.freezeScreen .freezeScreenContent .wall { height: 0px; }
+/*.freezeScreen .freezeScreenContent .wall { height: 0px; }*/

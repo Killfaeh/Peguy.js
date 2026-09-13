@@ -530,6 +530,3 @@ function ColorRamp($colorsList, $length)
 	$this.render();
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("colors");

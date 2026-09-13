@@ -4,7 +4,7 @@ function DropFilesZone($accept)
 	// Attributes //
 	////////////////
 	
-	var accept = $accept;
+	var accept = $accept ? $accept : [];
 	var multiSelect = true;
 	
 	var html = '<div id="dropFilesZone" class="dropFilesZone" >'
@@ -15,12 +15,49 @@ function DropFilesZone($accept)
 					+ '<ul id="filesList" class="filesList" ></ul>'
 				+ '</div>';
 
-	var component = new Component(html);
+	var component = new ListComponent(html);
+	component.setNode(component.getById('filesList'));
 	
+	/*
+// Style
+
+component.addConfigStyle("dropFilesZone", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {
+		".dropFilesZone ul li img": [
+			"border: (function() { return STYLE.dropFilesZoneBorder; })(),
+			"box-Shadow: (function() { return STYLE.dropFilesZoneBoxShadow; })()
+		],
+		".dropFilesZone ul .selected img": [
+			"background-Color: (function() { return STYLE.dropFilesZoneBackgroundColor; })()
+		]
+	},
+	"background": {
+		"border": (function() { return STYLE.dropFilesZoneBorder; })(),
+		"backgroundColor": (function() { return STYLE.dropFilesZoneBackgroundColor; })()
+	},
+	"selected": {
+		"border": (function() { return STYLE.dropFilesZoneBorder; })(),
+		"backgroundColor": (function() { return STYLE.dropFilesZoneBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	var uploadIcon = Loader.getSVG('icons', 'upload-icon', 300, 300);
 	component.getById('message').appendChild(uploadIcon);
-	
-	var previewList = [];
 
 	/////////////
 	// Methods //
@@ -28,108 +65,45 @@ function DropFilesZone($accept)
 
 	this.addPreview = function($preview)
 	{
-		var index = previewList.indexOf($preview);
-
-		if (index < 0)
-		{
-			previewList.push($preview);
-			component.getById('filesList').appendChild($preview);
-			
-			if (utils.isset($preview.setParent))
-				$preview.setParent($this);
-		}
-		
-		$preview.onSelect = function($preview)
-		{
-			if (multiSelect !== true)
-				$this.unselectAll();
-			
-			setTimeout(function() { onSelectFiles(); }, 50);
-		};
-		
-		$preview.onUnselect = function($preview) { onSelectFiles(); };
-		$preview.onDelete = function($preview) { confirmDeleteOneFile($preview); };
-		
-		$preview.createDefaultPreview = function($preview) { $this.createDefaultPreview($preview); };
-		$preview.createTextPreview = function($preview) { $this.createTextPreview($preview); };
-		$preview.createImagePreview = function($preview) { $this.createImagePreview($preview); };
-		$preview.createPDFpreview = function($preview) { $this.createPDFpreview($preview); };
-		$preview.updatePreview();
-		
+		var list = $this.addToList($preview);
 		component.getById('background').style.display = 'none';
 		onSelectFiles();
+		return list;
 	};
 
 	this.insertPreviewInto = function($preview, $index)
 	{
-		var index = previewList.indexOf($preview);
-
-		if (index < 0)
-			previewList.splice(index, 1);
-
-		previewList.splice(index, 0, $preview);
-		component.getById('filesList').insertAt($preview, $index);
-		
-		if (utils.isset($preview.setParent))
-			$preview.setParent($this);
-		
-		$preview.onSelect = function($preview)
-		{
-			if (multiSelect !== true)
-				$this.unselectAll();
-			
-			setTimeout(function() { onSelectFiles(); }, 50);
-		};
-		
-		$preview.onUnselect = function($preview) { onSelectFiles(); };
-		$preview.onDelete = function($preview) { confirmDeleteOneFile($preview); };
-		
-		$preview.createDefaultPreview = function($preview) { $this.createDefaultPreview($preview); };
-		$preview.createTextPreview = function($preview) { $this.createTextPreview($preview); };
-		$preview.createImagePreview = function($preview) { $this.createImagePreview($preview); };
-		$preview.createPDFpreview = function($preview) { $this.createPDFpreview($preview); };
-		$preview.updatePreview();
-		
+		var list = $this.insertElementInto($preview, $index);
 		component.getById('background').style.display = 'none';
 		onSelectFiles();
+		return list;
 	};
 
 	this.removePreview = function($preview)
 	{
-		var index = previewList.indexOf($preview);
+		var list = $this.removeFromList($preview);
 
-		if (index >= 0)
-		{
-			previewList.splice(index, 1);
-
-			if (utils.isset($preview.parentNode))
-				$preview.parentNode.removeChild($preview);
-			
-			if (utils.isset($preview.setParent))
-				$preview.setParent(null);
-		}
-		
-		if (previewList.length > 0)
+		if (component.getList().length > 0)
 			component.getById('background').style.display = 'none';
 		else
 			component.getById('background').style.display = 'block';
 		
 		onSelectFiles();
+
+		return list;
 	};
 
 	this.removeAllPreview = function()
 	{
-		previewList = [];
-		component.getById('filesList').removeAllChildren();
+		var list = $this.removeAllFromList();
 		component.getById('background').style.display = 'block';
 		onSelectFiles();
+		return list;
 	};
 
 	this.unselectAll = function()
 	{
-		for (var i = 0; i < previewList.length; i++)
-			previewList[i].unselect();
-		
+		component.execAll([ 'unselect' ]);
 		onSelectFiles();
 	};
 	
@@ -152,14 +126,8 @@ function DropFilesZone($accept)
 
 	this.removeSelectedFiles = function()
 	{
-		var selectedFiles = [];
-		
-		for (var i = 0; i < previewList.length; i++)
-		{
-			if (previewList[i].isSelected() === true)
-				selectedFiles.push(previewList[i]);
-		}
-		
+		var selectedFiles = component.getList().filter(function($preview) { return $preview.isSelected(); });
+
 		if (selectedFiles.length > 0)
 		{
 			var confirmPopup = new ConfirmPopup('<div>'
@@ -168,12 +136,9 @@ function DropFilesZone($accept)
 			
 			confirmPopup.onOk = function() 
 			{
-				for (var i = 0; i < selectedFiles.length; i++)
-					$this.removePreview(selectedFiles[i]);
-				
+				$this.removePreview(selectedFiles);
 				$this.onRemoveFiles(selectedFiles);
 				onSelectFiles();
-				
 				return true;
 			};
 			
@@ -184,44 +149,16 @@ function DropFilesZone($accept)
 	var onDropFiles = function($event)
 	{
 		console.log("Execute onDropFiles...");
-		
 		Files.accept = accept;
-		
-		Files.drop($event, function($files)
-		{
-			$this.unselectAll();
-			
-			var newPreviews = [];
-			
-			for (var i = 0; i < $files.length; i++)
-				newPreviews.push(new FilePreview($files[i].name, $files[i].type, $files[i].data));
-			
-			for (var i = 0; i < newPreviews.length; i++)
-			{
-				$this.addPreview(newPreviews[i]);
-				newPreviews[i].select();
-			}
-			
-			$this.onAddFiles(newPreviews);
-			onSelectFiles();
-		});
+		Files.drop($event, function($files) { $this.addFiles($files); });
 	};
 	
 	this.addFiles = function($files)
 	{
 		$this.unselectAll();
-		
-		var newPreviews = [];
-		
-		for (var i = 0; i < $files.length; i++)
-			newPreviews.push(new FilePreview($files[i].name, $files[i].type, $files[i].data));
-		
-		for (var i = 0; i < newPreviews.length; i++)
-		{
-			$this.addPreview(newPreviews[i]);
-			newPreviews[i].select();
-		}
-		
+		var newPreviews = $files.map(function($file) { return new FilePreview($file.name, $file.type, $file.data); });
+		$this.addPreview(newPreviews);
+		newPreviews.forEach(function($preview) { $preview.select(); });
 		$this.onAddFiles(newPreviews);
 		onSelectFiles();
 	};
@@ -251,6 +188,37 @@ function DropFilesZone($accept)
 	/////////////////
 	// Init events //
 	/////////////////
+
+	this.initElementEvents = function($preview)
+	{
+		$preview.onSelect = function()
+		{
+			if (multiSelect !== true)
+				$this.unselectAll();
+			
+			setTimeout(function() { onSelectFiles(); }, 50);
+		};
+		
+		$preview.onUnselect = function() { onSelectFiles(); };
+		$preview.onDelete = function($preview2) { confirmDeleteOneFile($preview2); };
+
+		$preview.createDefaultPreview = function($preview2) { $this.createDefaultPreview($preview2); };
+		$preview.createTextPreview = function($preview2) { $this.createTextPreview($preview2); };
+		$preview.createImagePreview = function($preview2) { $this.createImagePreview($preview2); };
+		$preview.createPDFpreview = function($preview2) { $this.createPDFpreview($preview2); };
+		$preview.updatePreview();
+	};
+
+	this.removeElementEvents = function($preview)
+	{
+		$preview.onSelect = function() {};
+		$preview.onUnselect = function() {};
+		$preview.onDelete = function() {};
+		$preview.createDefaultPreview = function() {};
+		$preview.createTextPreview = function() {};
+		$preview.createImagePreview = function() {};
+		$preview.createPDFpreview = function() {};
+	};
 	
 	this.onAddFiles = function($filesList) {};
 	this.onRemoveFiles = function($filesList) {};
@@ -258,14 +226,7 @@ function DropFilesZone($accept)
 	
 	var onSelectFiles = function()
 	{
-		var selectedFiles = [];
-		
-		for (var i = 0; i < previewList.length; i++)
-		{
-			if (previewList[i].isSelected() === true)
-				selectedFiles.push(previewList[i]);
-		}
-		
+		var selectedFiles = component.getList().filter(function($preview) { return $preview.isSelected(); });
 		$this.onSelectFiles(selectedFiles);
 	};
 	
@@ -295,6 +256,3 @@ function DropFilesZone($accept)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("dropFilesZone");

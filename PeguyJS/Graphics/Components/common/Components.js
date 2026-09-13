@@ -3,9 +3,123 @@ var Components =
 	/////////////////////////////////////
 	// Gestion générale des composents //
 	/////////////////////////////////////
+	
+	//tags: {},
+	tags: new Map(),
+	tagConflicts: [],
+	nbComponents: 0,
+	componentsList: [],
+	
+	initTag: function($name)
+	{
+		var className = $name.firstCharToUpperCase();
+		var tagName = $name.toLowerCase();
+
+		if (!SVGTAGS.includes(tagName))
+		{
+			try
+			{
+				var el = document.createElement(tagName);
+
+				if (el instanceof HTMLUnknownElement)
+				{
+					if (typeof window[className] === "function")
+					{
+						var classString = window[className].toString();
+						classString = classString.replaceAll('\n', '').replaceAll('\t', '');
+						
+						var matchParams = classString.match(/^function +[a-zA-Z0-9_]+\(([a-zA-Z0-9_, $=]*)\)/);
+						
+						if (matchParams && utils.isset(matchParams[1]))
+						{
+							var classParamStr = matchParams[1].replaceAll(' ', '').replaceAll('$', '');
+							var paramNames = [];
+							
+							if (classParamStr !== '')
+							{
+								var tmp = classParamStr.split(',');
+								
+								tmp.forEach(function($param)
+								{
+									paramNames.push($param.replace(/=.+/g, ''));
+								});
+							}
+							
+							//Components.tags[className.toUpperCase()] = { className: className, paramNames: paramNames };
+							Components.tags.set(className.toUpperCase(), { className: className, paramNames: paramNames });
+						}
+					}
+					/*
+					else
+						console.log(className + " IS NOT A FUNCTION");
+					//*/
+				}
+				else if (window[className])
+					Components.tagConflicts.push($name);
+			}
+			catch ($error)
+			{
+				//console.log($error);
+			}
+		}
+	},
+	
+	initTags: function($loaderScripts, $loaderComponents)
+	{
+		Object.keys($loaderScripts).forEach(function($key) { Components.initTag($key); });
+		Object.keys($loaderComponents).forEach(function($key) { Components.initTag($key); });
+		//console.log(Components.tags);
+		//console.log(Components.tagConflicts);
+	},
+	
+	createTag: function($node)
+	{
+		var outputNode = null;
 		
-	nbComponents:		0,
-	componentsList:		[],
+		var tagName = $node.tagName.toUpperCase();
+		
+		//if (Components.tags[tagName])
+		if (Components.tags.has(tagName))
+		{
+			//var tagInfo = Components.tags[tagName].paramNames;
+			//var className = Components.tags[tagName].className;
+			var tag = Components.tags.get(tagName);
+			var tagInfo = tag.paramNames;
+			var className = tag.className;
+			var attributes = $node.attributes;
+			var children = [];
+			var childrenUsed = false;
+
+			if ($node.childNodes)
+				children = Array.from($node.childNodes).filter(function($node) { return $node.nodeType !== Node.TEXT_NODE; });
+			
+			var args = [null];
+			
+			tagInfo.forEach(function($attribute)
+			{
+				var attrValue = $node.getAttribute($attribute);
+
+				if (attrValue)
+					args.push($node.getAttribute($attribute));
+				else if (children && children.length > 0 && children[0].tagName === $attribute)
+				{
+					args.push($node.innerHTML);
+					childrenUsed = true;
+				}
+				else
+					args.push(null);
+			});
+			
+			var Factory = window[className].bind.apply(window[className], args);
+  			outputNode =  new Factory();
+
+			if (!childrenUsed && children && children.length > 0 && children[0].tagName === $attribute)
+				outputNode.setChildren($node.innerHTML);
+		}
+		// Eventuellement traiter les cas des classes qui portent les mêmes noms que des balises HTML
+		
+		return outputNode;
+	},
 	
 	getById: function($id)
 	{
@@ -44,6 +158,16 @@ var Components =
 	
 	nbFrames: 0,
 	framesList: [],
+
+	getFrontFrame: function()
+	{
+		var frontFrame = null;
+
+		if (Components.framesList.length > 0)
+			frontFrame = Components.framesList[Components.framesList.length-1];
+
+		return frontFrame;
+	},
 	
 	addFrame: function($frame)
 	{
@@ -79,6 +203,12 @@ var Components =
 		Components.framesList = [];
 		Components.nbFrames = 0;
 	},
+
+	blurAllFrames: function()
+	{
+		for (var i = 0; i < Components.framesList.length; i++)
+			Components.framesList[i].onBlurFrame();
+	},
 	
 	focusFrame: function($frame)
 	{
@@ -108,11 +238,9 @@ var Components =
 				Components.framesList[i].style.zIndex = zIndexMin + i;
 		}
 		
-		for (var i = 0; i < Components.framesList.length; i++)
-			Components.framesList[i].onBlurFrame();
-		
+		Components.blurAllFrames();
 		$frame.onFocusFrame();
-		$frame.focus();
+		//$frame.focus();
 	},
 	
 	focusLastFrame: function()
@@ -127,6 +255,16 @@ var Components =
 	
 	nbPopups: 0,
 	popupsList: [],
+
+	getFrontPopup: function()
+	{
+		var frontPopup = null;
+
+		if (Components.popupsList.length > 0)
+			frontPopup = Components.popupsList[Components.popupsList.length-1];
+
+		return frontPopup;
+	},
 	
 	addPopup: function($popup)
 	{
@@ -239,6 +377,45 @@ var Components =
 	//////////////////////
 	// Gestion du focus //
 	//////////////////////
+
+	focus:
+	{
+		floatPanel: null,
+		openMenu: null,
+		default: document.getElementById('main')
+	},
+
+	getPriorityComponent: function()
+	{
+		//console.log(Components.focus.default);
+		// Ajouter le cas  des menus déroulants
+
+		if (Components.focus.floatPanel)
+			return Components.focus.floatPanel;
+		else if (Components.focus.openMenu)
+			return Components.focus.openMenu;
+		else
+		{
+			var frontPopup = Components.getFrontPopup();
+
+			if (frontPopup)
+				return frontPopup;
+			else
+			{
+				var frontFrame = Components.getFrontFrame();
+
+				if (frontFrame && frontFrame.hasFocus())
+					return frontFrame;
+				else
+				{
+					if (Components.focus.default)
+						return Components.focus.default;
+				}
+			}
+		}
+
+		return null;
+	},
 	
 	focusList: [],
 	
@@ -254,6 +431,26 @@ var Components =
 		
 		if (index >= 0)
 			Components.focusList.splice(index, 1);
+	},
+
+	/////////////////////////////////////////////////////////////////////
+	// Gestion des composants qui écoutent les mouvements de la souris //
+	/////////////////////////////////////////////////////////////////////
+
+	iceRinks: [],
+
+	addIceRink: function($iceRink)
+	{
+		if (!Components.iceRinks.includes($iceRink))
+			Components.iceRinks.push($iceRink);
+	},
+
+	removeIceRink: function($iceRink)
+	{
+		var index = Components.iceRinks.indexOf($iceRink);
+		
+		if (index >= 0)
+			Components.iceRinks.splice(index, 1);
 	},
 	
 	////////////////////////////////////////////////////////////
@@ -272,59 +469,44 @@ var Components =
 			Components.componentsList[i].onEndResize();
 	},
 	
-	onKeyDown: function($event)
+	dispatchEvent: function($eventName, $event)
 	{
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onKeyDown($event);
-	},
-	
-	onKeyUp: function($event)
-	{
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onKeyUp($event);
-	},
+		var processed = false;
+		var component = Components.getPriorityComponent();
 
-	onGamepadConnected: function($event)
-	{
-		console.log('Connect gamepad');
+		if (component && component[$eventName])
+		{
+			if (Array.isArray(component[$eventName]))
+			{
+				for (var i = 0; i < component[$eventName].length; i++)
+				{
+					var tmpProcessed = component[$eventName][i]($event);
 
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onGamepadConnected($event);
-	},
+					if (tmpProcessed)
+						processed = true;
+				}
+			}
+			else
+				processed = component[$eventName]($event);
+		}
 
-	onGamepadDisconnected: function($event)
-	{
-		console.log('Disconnect gamepad');
-
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onGamepadDisconnected($event);
-	},
-
-	onGamepadButtonDown: function($event)
-	{
-		console.log('BUTTON DOWN: ' + $event.buttonCode);
-
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onGamepadButtonDown($event);
+		if (!processed && Components.focus.default && component !== Components.focus.default && Components.focus.default[$eventName])
+		{
+			if (Array.isArray(Components.focus.default[$eventName]))
+			{
+				for (var i = 0; i < Components.focus.default[$eventName].length; i++)
+					Components.focus.default[$eventName][i]($event);
+			}
+			else
+				Components.focus.default[$eventName]($event);
+		}
 	},
 
-	onGamepadButtonUp: function($event)
-	{
-		console.log('BUTTON UP: ' + $event.buttonCode);
-
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onGamepadButtonUp($event);
-	},
-
-	onGamepadAxisChange: function($event)
-	{
-		//console.log('AXIS CHANGE: ' + $event.axisCode + ', ' + $event.value);
-		// Va de -1 à 1
-
-		if (Components.focusList.length > 0)
-			Components.focusList[Components.focusList.length-1].onGamepadAxisChange($event);
-	},
+	onKeyDown: function($event) { Components.dispatchEvent('onKeyDown', $event); },
+	onKeyUp: function($event) { Components.dispatchEvent('onKeyUp', $event); },
+	onGamepadConnected: function($event) { Components.dispatchEvent('onGamepadConnected', $event); },
+	onGamepadDisconnected: function($event) { Components.dispatchEvent('onGamepadDisconnected', $event); },
+	onGamepadButtonDown: function($event) { Components.dispatchEvent('onGamepadButtonDown', $event); },
+	onGamepadButtonUp: function($event) { Components.dispatchEvent('onGamepadButtonUp', $event); },
+	onGamepadAxisChange: function($event) { Components.dispatchEvent('onGamepadAxisChange', $event); },
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("components");

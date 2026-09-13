@@ -16,6 +16,34 @@ function Switch($on)
 	var icon = Loader.getSVG('icons', 'slider-cursor-icon', 20, 20);
 	component.getById('handler').appendChild(icon);
 	
+	/*
+// Style
+
+component.addConfigStyle("switch", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"switchBar": {
+		"backgroundColor": (function() { return STYLE.switchBackgroundColor; })()
+	},
+	"switchBarOn": {
+		"backgroundColor": (function() { return STYLE.switchBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Variables d'animation
 	var maxPosition = 0;
 	var speed = 0;
@@ -151,5 +179,5 @@ function Switch($on)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("switch");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("switch");

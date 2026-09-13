@@ -25,6 +25,10 @@ function FolderItem($html, $sorted)
 
     var component = new Component(html);
     
+    /*
+{{INSERT CODE}}
+	//*/
+
     // Contenu
     
     var parentFolder = null;
@@ -563,5 +567,5 @@ function FolderItem($html, $sorted)
     return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-    Loader.hasLoaded("folderItem");
+//if (Loader !== null && Loader !== undefined)
+//    Loader.hasLoaded("folderItem");

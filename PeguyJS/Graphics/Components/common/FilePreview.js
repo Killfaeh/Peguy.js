@@ -19,6 +19,10 @@ function FilePreview($fileName, $fileType, $fileData)
 
 	var component = new Component(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	var preview = document.createElement('img');
 	//preview.width = 30;
 	preview.height = 200;
@@ -118,6 +122,7 @@ function FilePreview($fileName, $fileType, $fileData)
 	this.getFileData = function() { return fileData; };
 	this.isSelected = function() { return selected; };
 	this.getPreview = function() { return preview; };
+	this.getJSON = function() { return { name: fileName, data: fileData }; };
 
 	// SET
 
@@ -132,6 +137,3 @@ function FilePreview($fileName, $fileType, $fileData)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("filePreview");

@@ -5,26 +5,23 @@ function MenuSeparator()
 	///////////////
 	
 
-	var html = '<li class="menuSeparator" >'
-					+ '<div></div>'
-				+ '</li>';
+	var html = '<li class="menuSeparator" ><div></div></li>';
 				
 	var component = new Component(html);
 	
-	//////////////
-	// Méthodes //
-	//////////////
+	/*
+{{INSERT CODE}}
+	//*/
 
-	////////////////////////////
-	// Gestion des événements //
-	////////////////////////////
-	
 	////////////////
 	// Accesseurs //
 	////////////////
 
 	// GET
 	
+	this.getName = function() { return ''; };
+	this.getByName = function() { return null; };
+
 	// SET
 	
 	//////////////
@@ -34,6 +31,3 @@ function MenuSeparator()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("menuSeparator");

@@ -14,6 +14,10 @@ function InputNumber($placeholder, $value)
 	
 	component.filterNumber();
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -91,5 +95,5 @@ function InputNumber($placeholder, $value)
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputNumber");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputNumber");

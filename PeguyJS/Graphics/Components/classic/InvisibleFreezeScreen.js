@@ -14,6 +14,28 @@ function InvisibleFreezeScreen()
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("invisibleFreezeScreen", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -37,11 +59,14 @@ function InvisibleFreezeScreen()
 	
 	this.display = function($elementToSurround)
 	{
-		$this.style.display = 'block';
+		document.getElementById('main').appendChild($this);
 		$this.resize($elementToSurround);
 	};
 	
-	this.hide = function() { $this.style.display = 'none'; };
+	this.hide = function()
+	{
+		$this.remove();
+	};
 
 	////////////////////////////
 	// Gestion des événements //
@@ -62,6 +87,3 @@ function InvisibleFreezeScreen()
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("invisibleFreezeScreen");

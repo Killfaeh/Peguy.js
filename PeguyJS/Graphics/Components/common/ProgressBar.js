@@ -19,6 +19,35 @@ function ProgressBar($currentValue)
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("progressBar", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"progressBar": {
+		"border": (function() { return STYLE.progressBarBorder; })(),
+		"backgroundColor": (function() { return STYLE.progressBarBackgroundColor; })()
+	},
+	"progressBarBar": {
+		"backgroundColor": (function() { return STYLE.progressBarBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -81,5 +110,5 @@ function ProgressBar($currentValue)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("progressBar");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("progressBar");

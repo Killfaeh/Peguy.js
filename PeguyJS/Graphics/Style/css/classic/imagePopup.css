@@ -1,0 +1,30 @@
+.imagePopup
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	text-align: center;
+	z-index: 100000000;
+	-webkit-backdrop-filter: blur(1px);
+	backdrop-filter: blur(1px);
+}
+
+.imagePopup .img
+{
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 70%;
+	max-height: 70%;
+}
+
+.imagePopup .close
+{
+	position: absolute;
+	right: 7px;
+	top: 7px;
+	cursor: pointer;
+	z-index: 10;
+}

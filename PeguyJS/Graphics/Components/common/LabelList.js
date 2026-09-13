@@ -6,69 +6,47 @@ function LabelList()
 	
 	var html = '<div class="labelList" ></div>';
 
-	var component = new Component(html);
-	
-	var labelList = [];
+	var component = new ListComponent(html);
+
+	var template = '';
+
+	/*
+// Style
+
+component.addConfigStyle("labelList", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"label": {
+		"border": (function() { return STYLE.labelListBorder; })(),
+		"backgroundColor": (function() { return STYLE.labelListBackgroundColor; })()
+	},
+	"closeLabel": {
+		"color": (function() { return STYLE.labelListColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
 
 	/////////////
 	// Methods //
 	/////////////
 
-	this.addLabel = function($label)
-	{
-		var index = labelList.indexOf($label);
-		
-		if (index < 0)
-		{
-			labelList.push($label);
-			component.appendChild($label);
-			$label.setParent($this);
-		}
-		
-		$this.onChange();
-	};
-
-	this.insertLabelInto = function($label, $index)
-	{
-		var index = labelList.indexOf($label);
-		
-		if (index >= 0)
-			labelList.splice(index, 1);
-		
-		labelList.splice($index, 0, $label);
-		component.insertAt($label, $index);
-		$label.setParent($this);
-		$this.onChange();
-	};
-
-	this.removeLabel = function($label)
-	{
-		var index = labelList.indexOf($label);
-		
-		if (index >= 0)
-		{
-			labelList.splice(index, 1);
-			
-			if (utils.isset($label.parentNode))
-				$label.parentNode.removeChild($label);
-			
-			$this.onChange();
-		}
-	};
-
-	this.removeAllLabel = function()
-	{
-		labelList = [];
-		component.removeAllChildren();
-		$this.onChange();
-	};
-	
-
-	/////////////////
-	// Init events //
-	/////////////////
-
-	this.onChange = function() {};
+	this.addLabel = function($label) { return $this.addToList($label); };
+	this.insertLabelInto = function($label, $index) { return $this.insertIntoListAt($label, $index); };
+	this.removeLabel = function($label) { return $this.removeFromList($label); };
+	this.removeAllLabel = function() { return $this.removeAllFromList(); };
 
 	///////////////////////
 	// Getters & Setters //
@@ -76,31 +54,17 @@ function LabelList()
 
 	// GET
 
-	this.getLabelList = function() { return labelList; };
+	this.getLabelList = function() { return component.getList(); };
+	this.getElementJSON = function($label) { return $label.getLabel(); };
 
-	this.getJSON = function()
-	{
-		var jsonTable = [];
-
-		for (var i = 0; i < labelList.length; i++)
-			jsonTable.push(labelList[i].getJSON());
-
-		return jsonTable;
-	};
+	this.getCode = function() { return $this.getList().reduce(function($code, $label) { return $code + template.replaceAll('{{LABEL}}', $label.getLabel()); }, ''); };
 
 	// SET
 
-	this.setLabelList = function($labelList) { labelList = $labelList; };
+	this.setLabelList = function($labelList) { $this.setList($labelList); };
+	this.loadElementFromJSON = function($label) { return new Label($label); };
 
-	this.loadFromJSON = function($json)
-	{
-		for (var i = 0; i < $json.length; i++)
-		{
-			var label = new Label($json[i].label);
-			label.loadFromJSON($json[i]);
-			$this.addLabel(label);
-		}
-	};
+	this.setTemplate = function($template) { template = $template; };
 
 	////////////
 	// Extend //
@@ -109,6 +73,3 @@ function LabelList()
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("labelList");

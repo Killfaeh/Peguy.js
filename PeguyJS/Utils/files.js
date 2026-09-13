@@ -16,6 +16,8 @@ Files =
 		if (effectAllowed === "all")
 		{
 			Files.dropped = $event.dataTransfer.files;
+
+			console.log(Files.dropped);
 			
 			// Filtrage sur les types de fichiers
 			
@@ -33,12 +35,13 @@ Files =
 			{
 				var file = Files.accepted[i];
 				
-				//console.log(file);
-
 				var reader = new FileReader();
 				reader.name = file.name;
 				reader.type = file.type;
-				reader.path = file.path;
+
+				if (window.electronAPI && window.electronAPI.getFilePath)
+					reader.path = window.electronAPI.getFilePath(file);
+
 				reader.file = file;
 				
 				reader.onload = function ($event)
@@ -66,6 +69,3 @@ Files =
 			$callback(Files.ready);
 	}
 };
-
-if (typeof Loader !== 'undefined' && Loader !== undefined && Loader !== null)
-	Loader.hasLoaded("files");

@@ -1,4 +1,4 @@
-function Calendar($date, $autoresize)
+function Calendar($date)
 {
 	///////////////
 	// Attributs //
@@ -7,10 +7,7 @@ function Calendar($date, $autoresize)
 	var dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
 	var today = new Date();
-	var date = $date;
-	
-	if (!utils.isset(date))
-		date = new Date();
+	var date = $date ? $date : new Date();
 	
 	var year = date.getFullYear();
 	var month = date.getMonth();
@@ -19,11 +16,6 @@ function Calendar($date, $autoresize)
 	
 	var start = new Date();
 	var end = new Date();
-	
-	var autoresize = $autoresize;
-	
-	if (!utils.isset(autoresize))
-		autoresize = true;
 	
 	var enable = true;
 	var disableFuture = false;
@@ -34,35 +26,106 @@ function Calendar($date, $autoresize)
 	
 	var html = '<div class="calendar" >'
 					+ '<p><input type="text" id="selectedDate" class="selectedDate" name="selectedDate" autocomplete="off" readonly="readonly" /></p>'
-					+ '<div id="invisibleFreezeScreen" class="invisibleFreezeScreen" ></div>'
-					+ '<div id="panel" class="calendarPanel panel" >'
-						+ '<p id="navigation" class="navigation" >'
-							+ '<span id="previousMonth" class="previousMonth" >◄</span>'
-							+ '<span id="month" ></span>'
-							+ '<span id="nextMonth" class="nextMonth" >►</span>'
-						+ '</p>'
-						+ '<table>'
-							+ '<thead><tr id="week" ></tr></thead>'
-							+ '<tbody id="days" ></tbody>'
-						+ '</table>'
-						+ '<p><input id="today" class="today" type="button" value="' + KEYWORDS.today + '" /></p>'
-					+ '</div>'
 				+ '</div>';
 				
 	var component = new Component(html);
 	
+	var panelHTML = '<p id="navigation" class="navigation" >'
+						+ '<span id="previousMonth" class="previousMonth" >◄</span>'
+						+ '<span id="month" ></span>'
+						+ '<span id="nextMonth" class="nextMonth" >►</span>'
+					+ '</p>'
+					+ '<table>'
+						+ '<thead><tr id="week" ></tr></thead>'
+						+ '<tbody id="days" class="days" ></tbody>'
+					+ '</table>'
+					+ '<p><input id="today" class="today" type="button" value="' + KEYWORDS.today + '" /></p>';
+					
 	var invisibleFreezeScreen = new InvisibleFreezeScreen();
-	component.getById('invisibleFreezeScreen').appendChild(invisibleFreezeScreen);
-	var panel = component.getById('panel');
-	var navigation = component.getById('navigation');
-	var previousMonth = component.getById('previousMonth');
-	var currentMonth = component.getById('month');
-	var nextMonth = component.getById('nextMonth');
-	var week = component.getById('week');
-	var days = component.getById('days');
-	var todayButton = component.getById('today');
 	
-	panel.style.display = 'none';
+	var panel = new FloatingPanel(panelHTML);
+	
+	panel.addClass('panel');
+	panel.addClass('calendarPanel');
+	
+	var navigation = panel.getById('navigation');
+	var previousMonth = panel.getById('previousMonth');
+	var currentMonth = panel.getById('month');
+	var nextMonth = panel.getById('nextMonth');
+	var week = panel.getById('week');
+	var days = panel.getById('days');
+	var todayButton = panel.getById('today');
+	
+	// Style
+
+	panel.addConfigStyle("calendar", function ()
+	{
+	    return {
+	        classic:
+	        {
+				"multi-tag":
+	        	{
+					".calendarPanel td:hover span":
+					[
+						"background-Color: " + (function() { return STYLE.calendarHoverBackgroundColor; })(),
+						"border-radius: " + (function() { return STYLE.calendarRingRadius; })(),
+					],
+					
+					".days td .weekend":
+					[
+						"color: " + (function() { return STYLE.calendarWeekendColor; })(),
+						"background-color: " + (function() { return STYLE.calendarWeekendBackgroundColor; })()
+					],
+					
+					".days td .otherMonth":
+					[
+						"color: " + (function() { return STYLE.calendarOtherMonthColor; })()
+					],
+					
+					".days td .today":
+					[
+						"color: " + (function() { return STYLE.calendarTodayColor; })(),
+						"background-color: " + (function() { return STYLE.calendarTodayBackgroundColor; })(),
+						"border-radius: " + (function() { return STYLE.calendarRingRadius; })(),
+					],
+					
+					".days td .selected":
+					[
+						"color: " + (function() { return STYLE.calendarSelectedColor; })(),
+						"background-color: " + (function() { return STYLE.calendarSelectedBackgroundColor; })(),
+						"border-radius: " + (function() { return STYLE.calendarRingRadius; })(),
+					],
+					
+					".days td:hover .today":
+					[
+						"color: " + (function() { return STYLE.calendarTodayColor; })(),
+						"background-color: " + (function() { return STYLE.calendarTodayBackgroundColor; })(),
+						"border-radius: " + (function() { return STYLE.calendarRingRadius; })(),
+					],
+					
+					".days td:hover .selected":
+					[
+						"color: " + (function() { return STYLE.calendarSelectedColor; })(),
+						"background-color: " + (function() { return STYLE.calendarSelectedBackgroundColor; })(),
+						"border-radius: " + (function() { return STYLE.calendarRingRadius; })(),
+					]
+				},
+
+				"previousMonth":
+				{
+					"color": (function() { return STYLE.calendarArrowsColor; })()
+				},
+				
+				"nextMonth":
+				{
+					"color": (function() { return STYLE.calendarArrowsColor; })()
+				},
+			},
+	    };
+	});
+
+	panel.applyConfigStyle();
+
 	
 	//////////////
 	// Méthodes //
@@ -72,14 +135,26 @@ function Calendar($date, $autoresize)
 	{
 		if (enable === true)
 		{
+			var selectedNode = panel.getElementsByClassName(date.getSQLFormat());
+		
+			if (selectedNode && selectedNode.length > 0)
+				selectedNode[0].removeClass('selected');
+		
 			date = today;
 			
-			if (disableFuture === false || (disableFuture === true && $date <= today.getSQLFormat()))
+			if (!disableFuture || (disableFuture && $date <= today.getSQLFormat()))
 				date = $date.getDate();
 			
 			year = date.getFullYear();
 			month = date.getMonth();
-			buildInterface();
+			
+			selectedNode = panel.getElementsByClassName(date.getSQLFormat());
+		
+			if (selectedNode && selectedNode.length > 0)
+				selectedNode[0].addClass('selected');
+			
+			component.getById('selectedDate').value = date.toLocaleDateString(undefined, dateFormatOptions);
+			
 			$this.onChange(date.getSQLFormat());
 		}
 	};
@@ -94,7 +169,6 @@ function Calendar($date, $autoresize)
 		
 		invisibleFreezeScreen.resize(component.getById('selectedDate'));
 		
-		panel.style.zIndex = "10000000000";
 		panel.style.minWidth = component.getById('selectedDate').offsetWidth + "px";
 		panel.style.left = (componentPosition.x + (componentWidth-panelWidth)/2.0) + 'px';
 		panel.style.top = (componentPosition.y+component.getById('selectedDate').offsetHeight) + 'px';
@@ -112,42 +186,28 @@ function Calendar($date, $autoresize)
 	
 	var autoResize = function()
 	{
-		if (autoresize === true)
+		//if (autoresize === true)
+		/*
 		{
 			var dateContentSize = utils.getInputTextSize(component.getById('selectedDate'));
 			
 			if (dateContentSize.width <= 0)
-				setTimeout(function() { autoResize(); }, 20);
+				requestAnimationFrame(function() { autoResize(); });
 			else
 				component.getById('selectedDate').style.width = (dateContentSize.width+20) + 'px';
 		}
+		//*/
 		
 		invisibleFreezeScreen.resize(component.getById('selectedDate'));
-	};
-	
-	var resizeCircles = function()
-	{
-		var nums = component.getElementsByClassName('today');
-		
-		for (var i = 0; i < nums.length; i++)
-		{
-			if (nums[i].tagName.toLowerCase() !== 'input')
-				nums[i].style.width = (nums[i].offsetHeight)-6 + "px";
-		}
-		
-		nums = component.getElementsByClassName('selected');
-		
-		for (var i = 0; i < nums.length; i++)
-			nums[i].style.width = (nums[i].offsetHeight)-6 + "px";
 	};
 	
 	var buildInterface = function()
 	{
 		//// Réinitialisation ////
 		
-		currentMonth.removeAllChildren();
-		week.removeAllChildren();
-		days.removeAllChildren();
+		currentMonth.empty();
+		week.empty();
+		days.empty();
 		
 		//// Construction ////
 		
@@ -156,35 +216,34 @@ function Calendar($date, $autoresize)
 		var displayedMonth = month+1;
 		year = date.getFullYear();
 		
-		if (displayedDay < 10)
-			displayedDay = "0" + displayedDay;
-			
-		if (displayedMonth < 10)
-			displayedMonth = "0" + displayedMonth;
+		displayedDay = (displayedDay < 10) ? '0'+displayedDay : displayedDay;
+		displayedMonth = (displayedMonth < 10) ? '0'+displayedMonth : displayedMonth;
 		
 		//component.getById('selectedDate').set("value", DAYNAMES[date.getDay()] + ' ' + date.getDate() + ' ' + MONTHNAMES[month] + ' ' + year);
 		
 		if (shortMode === true)
-			component.getById('selectedDate').set("value", date.toLocaleDateString(undefined));
+			component.getById('selectedDate').value = date.toLocaleDateString(undefined);
 		else
-			component.getById('selectedDate').set("value", date.toLocaleDateString(undefined, dateFormatOptions));
+			component.getById('selectedDate').value = date.toLocaleDateString(undefined, dateFormatOptions);
 		
-		currentMonth.appendChild(utils.createText(" " + MONTHNAMES[month] + " " + year + " "));
+		currentMonth.innerHTML = " " + MONTHNAMES[month] + " " + year + " ";
 		
 		// Jours de la semaine
 		
-		for (var i = 0; i < weekLength; i++)
+		var daysArray = [0,1,2,3,4,5,6];
+		
+		week.innerHTML = daysArray.map(function($dayNum)
 		{
-			var dayNum = i + weekStart;
+			var dayNum = $dayNum + weekStart;
 			
 			if (dayNum >= 7)
 				dayNum -= 7;
-				
+			
 			var dayName = DAYNAMES[dayNum].substring(0, 3) + ".";
 			var dayHtml = '<th class="dayName" >' + dayName + '</th>';
-			var dayNode = component.stringToHtml(dayHtml);
-			week.appendChild(dayNode);
-		}
+			
+			return dayHtml;
+		}).join('');
 		
 		//// Jours ////
 		
@@ -192,98 +251,90 @@ function Calendar($date, $autoresize)
 		
 		var startMonth = new Date(year, month, 1);
 		var startNum = startMonth.getDay()-weekStart;
-		
-		if (startNum < 0)
-			startNum += 7;
+		startNum = (startNum < 0) ? startNum+7 : startNum;
 		
 		start = new Date();
 		start.setTime(startMonth.getTime() - DateUtils.dayToTime(startNum));
 		
 		var endMonth = new Date(year, month + 1, 0);
 		var endNum = endMonth.getDay()-weekStart;
+		endNum = (endNum < 0) ? endNum+7 : endNum;
 		
-		if (endNum < 0)
-			endNum += 7;
-			
 		end = new Date();
 		end.setTime(endMonth.getTime() + DateUtils.dayToTime(6-endNum));
 		
 		var weeksNb = Math.round(DateUtils.timeToDay(end.getTime()-start.getTime())/7);
+		var weeksIndex = [];
+		
+		for (var i = 0; i < weeksNb; i++)
+			weeksIndex.push(i);
 		
 		// Affichage des jours 
 		
-		var daysHtml = '<table>';
-		
-		for (var i = 0; i < weeksNb; i++)
+		var daysHtml = weeksIndex.map(function($weekNum)
 		{
 			var displayWeek = false;
-			var dayHtml = '<tr>';
+			var weekHTML = '<tr>';
 			
-			for (var j = 0; j < weekLength; j++)
+			weekHTML += daysArray.map(function($dayNum)
 			{
 				var day = new Date();
-				day.setTime(start.getTime() + DateUtils.dayToTime(i*7 + j) + DateUtils.dayToTime(0.5)); // On prend le jour à midi pour gérer le cas des changements d'heure
+				day.setTime(start.getTime() + DateUtils.dayToTime($weekNum*7 + $dayNum) + DateUtils.dayToTime(0.5)); // On prend le jour à midi pour gérer le cas des changements d'heure
 				var sqlDay = day.getSQLFormat();
 				
-				if ((j <= 0 || j >= weekLength-1) && day.getMonth() === date.getMonth())
+				if (($dayNum <= 0 || $dayNum >= weekLength-1) && day.getMonth() === date.getMonth())
 					displayWeek = true;
 				
-				if (day.getSQLFormat() === today.getSQLFormat() || day.getSQLFormat() === date.getSQLFormat())
-				{
-					dayHtml += '<td date="' + sqlDay + '" >';
-					
-					if (day.getSQLFormat() === today.getSQLFormat())
-						dayHtml +=	 '<span class="today" >';
-					else if (day.getSQLFormat() === date.getSQLFormat())
-						dayHtml +=	 '<span class="selected" >';
-					
-					dayHtml +=		 day.getDate();
-					dayHtml +=	 '</span>';
-					dayHtml += '</td>';
-				}
+				var dayHtml = '<td date="' + sqlDay + '" >';
+				
+				if (day.getMonth() !== month)
+					dayHtml += '<span class="otherMonth ' + sqlDay + '" date="' + sqlDay + '" >';
+				else if (day.getDay() === 0 || day.getDay() === 6)
+					dayHtml += '<span class="weekend ' + sqlDay + '" date="' + sqlDay + '" >';
 				else
-				{
-					if (day.getMonth() !== month)
-						dayHtml += '<td class="otherMonth" date="' + sqlDay + '" >';
-					else if (day.getDay() === 0 || day.getDay() === 6)
-						dayHtml += '<td class="weekend" date="' + sqlDay + '" >';
-					else
-						dayHtml += '<td date="' + sqlDay + '" >';
-					
-					dayHtml += day.getDate();
-					dayHtml += '</td>';
-				}
-			}
+					dayHtml += '<span class="' + sqlDay + '" date="' + sqlDay + '" id="' + sqlDay + '" >';
+				
+				dayHtml += day.getDate();
+				dayHtml += '</span></td>';
+				
+				return dayHtml;
+				
+			}).join('');
 			
-			dayHtml += '</tr>';
+			weekHTML += '</tr>';
 			
 			if (displayWeek === true)
-				daysHtml += dayHtml;
-		}
-		
-		daysHtml += '</table>';
-
-		daysNode = component.stringToHtml(daysHtml);
-		
-		while (daysNode.firstChild)
-			days.appendChild(daysNode.firstChild);
+				return weekHTML;
+			else
+				return '';
 			
+		}).join('');
+		
+		days.innerHTML = daysHtml;
+		
+		var todayNode = panel.getElementsByClassName(today.getSQLFormat());
+		var selectedNode = panel.getElementsByClassName(date.getSQLFormat());
+		
+		if (todayNode && todayNode.length > 0)
+			todayNode[0].addClass('today');
+		
+		if (selectedNode && selectedNode.length > 0)
+			selectedNode[0].addClass('selected');
+		
 		daysNode = days.getElementsByTagName('td');
 		
-		for (var i = 0; i < daysNode.length; i++)
+		Array.from(daysNode).forEach(function($node)
 		{
-			daysNode[i].onClick = function()
+			$node.onClick = function()
 			{
 				var selectedDate = this.getAttribute("date");
 				select(selectedDate);
 				$this.close();
 				changedByUser = true;
 			};
-		}
+		});
 		
-		//resizeSelectedDate();
-		setTimeout(function() { autoResize(); }, 20);
-		resizeCircles();
+		requestAnimationFrame(function() { autoResize(); });
 	};
 	
 	buildInterface();
@@ -295,13 +346,12 @@ function Calendar($date, $autoresize)
 		if (enable === true)
 		{
 			$this.onOpen();
-			panel.setStyle("display", "block");
+			
 			var calendarWidth = component.offsetWidth;
 			var panelWidth = panel.offsetWidth;
+			
 			//panel.style.left = ((calendarWidth-panelWidth)/2) + 'px';
 	
-			resizeCircles();
-			
 			// Gérer le cas où la liste sort de l'écran
 			//var panelHeight = panel.offsetHeight;
 			//var panelPosition = panel.position();
@@ -310,55 +360,32 @@ function Calendar($date, $autoresize)
 				//panel.setStyle("top", (-panelHeight-component.getById('selectedDate').offsetHeight) + "px");
 			
 			invisibleFreezeScreen.display(component.getById('selectedDate'));
-			document.getElementById('main').appendChild(invisibleFreezeScreen);
-			panel.style.display = "block";
-			document.getElementById('main').appendChild(panel);
-			
+			panel.display();
 			resize();
-			
 			open = true;
 		}
 	};
 	
 	this.close = function()
 	{
-		if (utils.isset(panel.parentNode))
-			panel.parentNode.removeChild(panel);
-		
-		panel.removeAttribute('style');
-		panel.style.display = "none";
 		invisibleFreezeScreen.hide();
-		//document.getElementById('main').removeChild(invisibleFreezeScreen);
+		panel.hide();
 		open = false;
 	};
-	
-	/*
-	this.onRemove = function()
-	{
-		var index = document.getElementById('main').onClick.indexOf(this.close);
-		
-		if (index >= 0)
-			document.getElementById('main').onClick.splice(index, 1);
-	};
-	//*/
 	
 	var changeMonth = function($month, $year)
 	{
 		var dayNum = date.getDate();
 		var lastDayOfTheMonth = (new Date($year, $month, 0)).getDate();
 		
-		if (dayNum > lastDayOfTheMonth)
-			dayNum = lastDayOfTheMonth;
-			
-		if (dayNum < 10)
-			dayNum = '0' + dayNum;
+		dayNum = (dayNum > lastDayOfTheMonth) ? lastDayOfTheMonth : dayNum;
+		dayNum = (dayNum < 10) ? '0'+dayNum : dayNum;
 			
 		$month++;
-		
-		if ($month < 10)
-			$month = '0' + $month;
+		$month = ($month < 10) ? '0'+$month : $month;
 		
 		select($year + '-' + $month + '-' + dayNum);
+		buildInterface();
 	};
 	
 	///////////////////////////////////
@@ -369,9 +396,9 @@ function Calendar($date, $autoresize)
 	
 	component.getById('selectedDate').onClick = function()
 	{
-		if (enable === true)
+		if (enable)
 		{
-			if (panel.style.display === 'block')
+			if (open)
 				$this.close();
 			else
 				$this.open();
@@ -380,7 +407,7 @@ function Calendar($date, $autoresize)
 	
 	previousMonth.onClick = function()
 	{
-		if (enable === true)
+		if (enable)
 		{
 			month--;
 			
@@ -424,8 +451,7 @@ function Calendar($date, $autoresize)
 		}
 	};
 	
-	panel.onClick = function() {}; // Pour empêcher la fermeture quand on clique en dehors des boutons
-	//document.getElementById('main').onClick.push(this.close);
+	panel.onClick = function() {};
 	
 	invisibleFreezeScreen.onClick = function() { $this.close(); };
 	
@@ -434,6 +460,7 @@ function Calendar($date, $autoresize)
 	////////////////
 
 	// GET
+
 	this.getDate = function() { return date; };
 	this.isEnable = function() { return enable; };
 	this.isOpen = function() { return open; };
@@ -455,7 +482,7 @@ function Calendar($date, $autoresize)
 	{
 		enable = $enable;
 		
-		if (enable === true)
+		if (enable)
 			component.getById('selectedDate').removeAttribute('disabled');
 		else
 			component.getById('selectedDate').setAttribute('disabled', 'disabled');
@@ -472,6 +499,3 @@ function Calendar($date, $autoresize)
 	var $this = utils.extend(component, this);
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("calendar");

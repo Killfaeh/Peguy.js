@@ -14,6 +14,10 @@ function Textarea($placeholder, $value, $regex)
 
 	var component = new Component(html);
 
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -96,5 +100,5 @@ function Textarea($placeholder, $value, $regex)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("textarea");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("textarea");

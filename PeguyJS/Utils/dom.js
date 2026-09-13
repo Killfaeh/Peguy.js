@@ -1,35 +1,27 @@
-///////////////////////////////
-//// Gestion des attributs ////
-/////////////////////////////// 
+///////////////////////////
+// Gestion des attributs //
+///////////////////////////
 
 // Récupération des attributs 
 Node.prototype.get = function($name)
 {
-	var value = null; 
-	
-	// Cas particuliers en fonction des navigateurs 
-	if ($name === "textContent") 
+	// Cas particuliers en fonction des navigateurs
+	if ($name === "textContent")
 	{
-		var textContent = ""; 
-		
 		if (this.textContent)
-			textContent = this.textContent; 
-		else 
-			textContent = this.innerText; 
-		
-		value = textContent; 
+			return this.textContent;
+		else
+			return this.innerText;
 	}
 	// Cas innerHTML
 	else if ($name === "innerHTML")
-		value = this.innerHTML; 
+		return this.innerHTML;
 	// Cas value
 	else if ($name === "value")
-		value = this.value; 
+		return this.value;
+		 
 	// Cas standard
-	else 
-		value = this.getAttribute($name); 
-	
-	return value; 
+	return this.getAttribute($name);
 }; 
 
 // Affectation d'une valaur à un attribut 
@@ -61,7 +53,6 @@ Node.prototype.set = function($name, $value)
 // Vérifier si un élément appartient à une classe ou non 
 Node.prototype.isClass = function($name)
 {
-	var isClass = false;
 	var className = "";
 	
 	if (utils.isset(this.getAttribute))
@@ -69,18 +60,10 @@ Node.prototype.isClass = function($name)
 	else if (utils.isset(this.getAttributeNS))
 		className = this.getAttributeNS(null, 'class');
 	
-	if (utils.isset(className))
-	{
-		var classes = className.split(" ");
-	
-		for (var i = 0; i < classes.length; i++)
-		{
-			if($name === classes[i])
-				isClass = true;
-		}
-	}
+	if (utils.isset(className) && className.replace(/ +/g, ' ').split(' ').includes($name))
+		return true;
 
-	return isClass;
+	return false;
 };
 
 // Ajouter une classe à un élément 
@@ -150,16 +133,12 @@ Node.prototype.removeClass = function($name)
 // Récupération du style 
 Node.prototype.getStyle = function($name)
 {
-	var value = null; 
-	
-	//console.log(window.getComputedStyle(this, null));
-	
 	if (window.getComputedStyle)
-		value = window.getComputedStyle(this, null).getPropertyValue($name);
+		return window.getComputedStyle(this, null).getPropertyValue($name);
 	else if (this.currentStyle)
-		value =  this.currentStyle[$name]; //IE
+		return  this.currentStyle[$name]; //IE
 	
-	return value;
+	return null;
 }; 
 
 // Affectation d'un style
@@ -168,11 +147,8 @@ Node.prototype.setStyle = function($name, $value)
 	// Opacité 
 	if ($name === 'opacity')
 	{
-		if ($value < 0)
-			$value = 0; 
-		else if ($value > 1)
-			$value = 1; 
-		
+		$value = ($value < 0) ? 0 : $value;
+		$value = ($value > 1) ? 1 : $value;		
 		this.style.filter = "alpha(opacity=" + ($value*100) + ")"; // Cas IE
 		this.style.opacity = $value; // Cas usuel
 	}
@@ -221,9 +197,60 @@ Node.prototype.copyStyleTo = function($target)
 	}
 };
 
+// Appliquer un style à partir d'un JSON
+Node.prototype.applyStyle = function($config)
+{
+	var config = $config;
+
+	if (config.getInstructions)
+		config = config.getInstructions();
+
+	if (config)
+	{
+		for (var key in config)
+			this.setStyle(key, config[key]);
+	}
+};
+
+Node.prototype.getMargin = function()
+{
+	var left = parseInt(this.getStyle('margin-left').replace('px', ''));
+	var right = parseInt(this.getStyle('margin-right').replace('px', ''));
+	var top = parseInt(this.getStyle('margin-top').replace('px', ''));
+	var bottom = parseInt(this.getStyle('margin-bottom').replace('px', ''));
+
+	return { left: left, right: right, top: top, bottom: bottom };
+};
+
+Node.prototype.getPadding = function()
+{
+	var left = parseInt(this.getStyle('padding-left').replace('px', ''));
+	var right = parseInt(this.getStyle('padding-right').replace('px', ''));
+	var top = parseInt(this.getStyle('padding-top').replace('px', ''));
+	var bottom = parseInt(this.getStyle('padding-bottom').replace('px', ''));
+
+	return { left: left, right: right, top: top, bottom: bottom };
+};
+
+Node.prototype.getBorder = function()
+{
+	var left = parseInt(this.getStyle('border-left').replace('px', ''));
+	var right = parseInt(this.getStyle('border-right').replace('px', ''));
+	var top = parseInt(this.getStyle('border-top').replace('px', ''));
+	var bottom = parseInt(this.getStyle('border-bottom').replace('px', ''));
+
+	return { left: left, right: right, top: top, bottom: bottom };
+};
+
 /////////////////////////////
 // Manipulation des noeuds //
 /////////////////////////////
+
+Node.prototype.remove = function()
+{
+	if (this.parentNode)
+		this.parentNode.removeChild(this);
+};
 
 // Récupérer tous les éléments d'une classe donnée 
 Node.prototype.getElementsByClassName = function($name) 
@@ -256,30 +283,66 @@ Node.prototype.getElementsByTagNames = function($tagNames)
 	return nodesToReturn;
 };
 
-// Supprimer tous les noeuds enfants
-Node.prototype.removeAllChildren = function()
+// Ajouter un tableau de noeud
+Node.prototype.appendChildren = function($children)
 {
-	while (this.firstChild)
-		this.removeChild(this.firstChild); 
+	if (document.createDocumentFragment)
+	{
+		var fragment = document.createDocumentFragment();
+
+		for (var i = 0; i < $children.length; i++)
+			fragment.appendChild($children[i]);
+		
+		this.appendChild(fragment);
+	}
+	else
+	{
+		for (var i = 0; i < $children.length; i++)
+			this.appendChild($children[i]);
+	}
+
+	return $children;
 };
 
-Node.prototype.empty = function()
+Node.prototype.insertChildrenBefore = function($children, $refNode)
 {
-	while (this.firstChild)
-		this.removeChild(this.firstChild); 
+	if (document.createDocumentFragment)
+	{
+		var fragment = document.createDocumentFragment();
+
+		for (var i = 0; i < $children.length; i++)
+			fragment.appendChild($children[i]);
+		
+		this.insertBefore(fragment, $refNode);
+	}
+	else
+	{
+		for (var i = 0; i < $children.length; i++)
+			fragment.insertBefore($children[i], $refNode);
+	}
+
+	return $children;
 };
+
+// Supprimer tous les noeuds enfants
+Node.prototype.removeAllChildren = function() { this.innerHTML = ''; };
+Node.prototype.empty = function() { this.innerHTML = ''; };
 
 // Insérer un élément après un autre 
 Node.prototype.insertAfter = function($nodeToInsert, $refNode) 
 {
-	if($refNode.nextSibling) 
-	{
+	if ($refNode.nextSibling) 
 		return this.insertBefore($nodeToInsert, $refNode.nextSibling);
-	} 
 	else 
-	{
 		return this.appendChild($nodeToInsert);
-	}
+}; 
+
+Node.prototype.insertChildrenAfter = function($nodeToInsert, $refNode) 
+{
+	if ($refNode.nextSibling) 
+		return this.insertChildrenBefore($nodeToInsert, $refNode.nextSibling);
+	else 
+		return this.appendChildren($nodeToInsert);
 }; 
 
 // Insérer un élément à une position précise 
@@ -291,6 +354,17 @@ Node.prototype.insertAt = function($element, $index)
 			this.insertBefore($element, this.childNodes[$index]); 
 		else 
 			this.appendChild($element); 
+	}
+};
+
+Node.prototype.insertChildrenAt = function($element, $index)
+{
+	if ($element.parentNode !== this)
+	{
+		if ((this.childNodes.length !== 0) && ($index < this.childNodes.length))
+			this.insertChildrenBefore($element, this.childNodes[$index]);
+		else 
+			this.appendChildren($element);
 	}
 };
 
@@ -309,49 +383,56 @@ Node.prototype.index = function()
 	return i;
 };
 
+Node.prototype.parse = function($callbacks)
+{
+	if (this.nodeType !== Node.TEXT_NODE)
+	{
+		if ($callbacks.onOpenNode)
+			$callbacks.onOpenNode(this);
+		
+		var attributes = this.attributes;
+	
+		if (attributes)
+		{
+			Array.from(attributes).forEach(function($attribute)
+			{
+				if ($callbacks.onAttribute)
+					$callbacks.onAttribute(this, $attribute.name, $attribute.value);
+			});
+		}
+	
+		for (var i = 0; i < this.childNodes.length; i++)
+			this.childNodes[i].parse($callbacks);
+		
+		if ($callbacks.onCloseNode)
+			$callbacks.onCloseNode(this);
+	}
+	else if ($callbacks.onText)
+		$callbacks.onText(this, this.textContent);
+};
+
 /////////////
 // Clonage //
 /////////////
 
-// Cloner une arborescence 
 Node.prototype.clone = function()
 {
-	var clone;
-	
-	if (this.tagName !== undefined)
+	var clone = null;
+
+	if (this.nodeType !== Node.TEXT_NODE)
 	{
-		// Création du clone
 		clone = document.createElement(this.tagName);
-		
-		// Attributs du noeuds
+
 		var attributes = this.attributes;
-		
-		//console.log(this.attributes);
-		
+
 		for (var i = 0; i < attributes.length; i++)
-			clone.setAttribute(attributes[i].name, this.getAttribute(attributes[i].name));
-		
-		// Parcours des enfants du noeud
-		var children = this.childNodes;
-	
-		for (var i = 0; i < children.length; i++)
-		{
-			console.log(children[i].tagName);
-			console.log(children[i].nodeType);
-			
-			clone.appendChild(children[i].clone());
-			
-			/*
-			if (utils.isset(children[i].clone))
-				clone.appendChild(children[i].clone());
-			else
-				clone.appendChild(children[i].cloneNode(true));
-			//*/
-		}
+			clone.setAttribute(attributes[i].name, attributes[i].value);
+
+		clone.innerHTML = this.innerHTML;
 	}
-	else 
+	else
 		clone = document.createTextNode(this.nodeValue);
-	
+
 	return clone;
 };
 
@@ -554,6 +635,15 @@ Node.prototype.removeAllEvents = function()
 	}
 };
 
+if (!Node.prototype.scrollTo)
+{
+	Node.prototype.scrollTo = function($scrollX, $scrollY)
+	{
+		this.scrollLeft = $scrollX;
+		this.scrollTop = $scrollY;
+	};
+}
+
 //Déterminer la position du noeud dans l'écran 
 Node.prototype.position = function()
 {
@@ -699,6 +789,25 @@ Node.prototype.containsInChildren = function($node)
 	}
 	
 	return contains;
+};
+
+Node.prototype.propagate = function($stopCallback)
+{
+	var output = null;
+	var currentNode = this;
+
+	while (currentNode)
+	{
+		if ($stopCallback && $stopCallback(currentNode))
+		{
+			output = currentNode;
+			currentNode = false;
+		}
+		else
+			currentNode = currentNode.parentNode; 
+	}
+
+	return output;
 };
 
 // Permettre de glisser déposer un noeud
@@ -1093,6 +1202,3 @@ Node.prototype.filterNumber = function()
 		this.setCaret(cursorPosition+1);
 	}
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("dom");

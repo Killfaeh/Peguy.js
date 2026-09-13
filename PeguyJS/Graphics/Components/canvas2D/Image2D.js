@@ -65,6 +65,3 @@ function Image2D($sourceImage, $sourceX, $sourceY, $sourceWidth, $sourceHeight, 
 	var $this = utils.extend(object2D, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("image2D");

@@ -19,6 +19,10 @@ function FileItem($html)
 
     var component = new Component(html);
     
+    /*
+{{INSERT CODE}}
+	//*/
+
     var parentFolder = null;
     
     // Drag & drop
@@ -390,5 +394,5 @@ function FileItem($html)
     return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-    Loader.hasLoaded("fileItem");
+//if (Loader !== null && Loader !== undefined)
+//    Loader.hasLoaded("fileItem");

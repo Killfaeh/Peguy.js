@@ -66,5 +66,5 @@ function TestCodePanel()
 	return $this;
 }
 
-if (Loader !== undefined && Loader !== null)
-	Loader.hasLoaded("testCodePanel");
+//if (Loader !== undefined && Loader !== null)
+//	Loader.hasLoaded("testCodePanel");

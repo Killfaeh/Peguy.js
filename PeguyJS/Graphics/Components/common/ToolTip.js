@@ -6,7 +6,7 @@ function ToolTip($callElement, $label)
 
 	var callElement = $callElement;
 	
-	if (utils.isset(callElement.toolTipOpen))
+	if (callElement && utils.isset(callElement.toolTipOpen))
 		return null;
 	
 	var label = $label;
@@ -15,6 +15,40 @@ function ToolTip($callElement, $label)
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("toolTip", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"toolTip": {
+		"border": (function() { return STYLE.toolTipBorder; })(),
+		"backgroundColor": (function() { return STYLE.toolTipBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.toolTipBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"toolTip": {
+		"border": (function() { return STYLE.toolTipBorder; })(),
+		"backgroundColor": (function() { return STYLE.toolTipBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.toolTipBoxShadow; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Gestion de l'animation
 	var opacity = 1.0;
 	var stepOpacity = 0.0;
@@ -159,11 +193,12 @@ function ToolTip($callElement, $label)
 	
 	var $this = utils.extend(component, this);
 	document.getElementById('main').appendChild($this);
-	callElement.toolTipOpen = $this;
-	Components.addToolTip($this);
-	
+
+	if (callElement)
+	{
+		callElement.toolTipOpen = $this;
+		Components.addToolTip($this);
+	}
+
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("toolTip");

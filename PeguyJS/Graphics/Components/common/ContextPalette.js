@@ -4,9 +4,9 @@ function ContextPalette($mouseX, $mouseY, $colorsList)
 	// Attributs //
 	///////////////
 
-	var mouseX = $mouseX;
-	var mouseY = $mouseY;
-	var colorsList = $colorsList;
+	var mouseX = $mouseX ? $mouseX : 0;
+	var mouseY = $mouseY ? $mouseY : 0;
+	var colorsList = $colorsList ? $colorsList : [];
 
 	var html = '<div class="contextPalette" >'
 					+ '<ul id="children-list" class="root-children-list" >'
@@ -15,6 +15,43 @@ function ContextPalette($mouseX, $mouseY, $colorsList)
 				
 	var component = new Component(html);
 	
+	/*
+// Style
+
+component.addConfigStyle("contextPalette", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {
+		".contextPalette .root-children-list li:hover": [
+			"border: (function() { return STYLE.contextPaletteBorder; })()
+		],
+		".contextPalette .root-children-list li span": [
+			"border-Left: (function() { return STYLE.contextPaletteBorderLeft; })(),
+			"border-Top: (function() { return STYLE.contextPaletteBorderTop; })(),
+			"border-Right: (function() { return STYLE.contextPaletteBorderRight; })(),
+			"border-Bottom: (function() { return STYLE.contextPaletteBorderBottom; })()
+		]
+	},
+	"root-children-list": {
+		"border": (function() { return STYLE.contextPaletteBorder; })(),
+		"backgroundColor": (function() { return STYLE.contextPaletteBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.contextPaletteBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -175,10 +212,9 @@ function ContextPalette($mouseX, $mouseY, $colorsList)
 	document.getElementById('main').appendChild($this);
 	component.getById('children-list').style.left = mouseX + 'px';
 	component.getById('children-list').style.top = mouseY + 'px';
-	$this.update();
+
+	if (colorsList)
+		$this.update();
 	
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("contextPalette");

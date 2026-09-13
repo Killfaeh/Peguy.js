@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+	<head id="head" >
+		<meta charset="utf-8" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1" />
+		<meta name="viewport" content="width=device-width, maximum-scale=1" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name=“viewport” content=”initial-scale=1, viewport-fit=cover”>
+
+		<title>Test Frame</title>
+
+		<style>
+
+			#main, #screen
+			{
+				position: absolute;
+				left: 0px;
+				right: 0px;
+				top: 0px;
+				bottom: 0px;
+
+				overflow: hidden;
+
+				margin: 0px;
+				padding: 0px;
+
+				text-align: center;
+				font-family: Arial;
+			}
+
+		</style>
+
+		<!-- Loading the syntax highlighting library. -->
+        <!--<link type="text/css" rel="stylesheet" media="all" href="js/highlight/styles/vs.min.css"></link>-->
+        <!--<script src="js/highlight/highlight.min.js"></script>-->
+        <!--<script>if (typeof hljs !== 'undefined') { hljs.initHighlightingOnLoad(); }</script>-->
+
+	</head>
+
+	<!-- DOM root, “main” id required. -->
+	<body id="main" >
+		<div id="screen">
+			<p>Loading...</p>
+		</div>
+
+		<script src='../../../Loader.js?token=0' ></script>
+
+		<script type='text/javascript' >
+
+            var execCode = function($code)
+            {
+                utils.execCode($code);
+            };
+
+            new Loader('../../../../', 'Peguy');
+
+            Loader.addModules(['all']);
+			
+			Loader.onload = function()
+            {
+                document.getElementById('screen').empty();
+
+                utils.displayExecCodeError = function($error)
+                {
+                    window.parent.displayError($error)
+                };
+
+                utils.emptyExecCodeError = function()
+                {
+                    window.parent.emptyError()
+                };
+
+				window.parent.execTestCode();
+            };
+
+			window.onload = function() { Loader.load(); };
+
+		</script>
+
+	</body>
+</html>

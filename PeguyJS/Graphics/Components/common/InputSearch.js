@@ -31,6 +31,28 @@ function InputSearch($type, $placeholder)
 	var searchDate = new Date();
 	var freeze = false;
 	
+	/*
+// Style
+
+component.addConfigStyle("inputSearch", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -141,5 +163,5 @@ function InputSearch($type, $placeholder)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputSearch");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputSearch");

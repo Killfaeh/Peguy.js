@@ -77,6 +77,3 @@ function SVGradialGradient($cx, $cy, $r, $colorsList)
 	$this.update();
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("svgRadialGradient");

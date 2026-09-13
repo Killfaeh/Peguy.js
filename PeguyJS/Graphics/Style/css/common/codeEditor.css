@@ -1,0 +1,145 @@
+.codeEditor
+{
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	left: 0px;
+	right: -1px;
+	top: -1px;
+	bottom: -1px;
+	overflow: hidden;
+}
+
+.codeEditor code { padding: 10px; }
+
+.codeEditor .editor, .codeEditor .render, .codeEditor .search-layer, .codeEditor .same-layer
+{
+	padding: 15px;
+	font-family: monospace;
+	font-size: 13px;
+	margin: 0px;
+	tab-size: 30px;
+	position: absolute;
+	left: 45px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	text-align: left;
+	overflow: auto;
+}
+
+
+.codeEditor .search-layer .searched
+{
+}
+
+
+.codeEditor .editor
+{
+	white-space: pre;
+	resize: none;
+}
+
+.codeEditor .editor::selection
+{
+}
+
+
+.codeEditor .editor, .codeEditor .render div
+{
+	margin: 0px;
+	padding: 0px;
+	text-align: left;
+}
+
+.codeEditor .num-lines
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	bottom: 0px;
+	width: 45px;
+	text-align: left;
+	overflow: hidden;
+}
+
+.codeEditor .num-lines code
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	padding: 7px;
+	padding-top: 15px;
+	padding-left: 0px;
+	padding-right: 0px;
+	width: 100%;
+	overflow: hidden;
+}
+
+.codeEditor .num-lines code div
+{
+	position: relative;
+	padding: 0px;
+	padding-left: 7px;
+	width: 100%;
+}
+
+.codeEditor p
+{
+	display: inline-block;
+	padding: 0px;
+	margin: 0px;
+	height: 0px;
+	width: 0px;
+	display: none;
+}
+
+.codeEditor .highlighted-line
+{
+	top: -1px;
+}
+
+.codeEditor > .highlighted-line
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: -1000px;
+    height: 0px;
+}
+
+.codeEditor .search-panel
+{
+	display: none;
+	font-family: Arial;
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	top: 0px;
+	padding: 5px;
+	padding-right: 15px;
+}
+
+.codeEditor .search-panel table { width: unset; }
+
+.codeEditor .search-panel td,
+.codeEditor .search-panel th
+{
+	text-align: center;
+}
+
+.codeEditor .search-panel .navigation svg
+{
+	margin-left: 10px;
+	margin-right: 10px;
+	cursor: pointer;
+}
+
+.codeEditor .search-panel .close-search-icon
+{
+	position: absolute;
+	right: 7px;
+	top: 5px;
+	font-size: 1.2em;
+	cursor: pointer;
+}

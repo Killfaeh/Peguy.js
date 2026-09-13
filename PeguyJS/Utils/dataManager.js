@@ -22,6 +22,42 @@ var dataManager =
 		return json;
 	},
 	
+	parse: function($json, $callbacks)
+	{
+		if (Array.isArray($json))
+		{
+			if ($callbacks.onOpenArray)
+				$callbacks.onOpenArray($json);
+		
+			$json.forEach(function($item)
+			{
+				if (Array.isArray($item) || typeof $item === 'object')
+					dataManager.parse($item, $callbacks);
+				else if ($callbacks.onValue)
+					$callbacks.onValue($item);
+			});
+		
+			if ($callbacks.onCloseArray)
+				$callbacks.onCloseArray($json);
+		}
+		else
+		{
+			if ($callbacks.onOpenObject)
+				$callbacks.onOpenObject($json);
+			
+			for (var key in $json)
+			{
+				if (Array.isArray($json[key]) || typeof $json[key] === 'object')
+					dataManager.parse($json[key], $callbacks);
+				else if ($callbacks.onKeyValue)
+					$callbacks.onKeyValue(key, $json[key]);
+			}
+		
+			if ($callbacks.onCloseObject)
+				$callbacks.onCloseObject($json);
+		}
+	},
+	
 	// Transformer une chaîne de caractères en XML
 	StringToXML: function($str)
 	{
@@ -172,7 +208,9 @@ var DataFilter =
 	
 	integer: function($data)
 	{
-		if (Number.isInteger($data) || /[0-9]+/.test($data))
+		if (Number.isInteger($data))
+			return $data;
+		else if (/[0-9]+/.test($data))
 			return parseInt($data); 
 		else
 			return null;
@@ -182,12 +220,10 @@ var DataFilter =
 	{
 		if (typeof $data === "boolean")
 			return $data;
-		else if ($data <= 0)
-			return false
-		else if ($data > 0)
+		else if ($data)
 			return true;
 		else
-			return null;
+			return false;
 	},
 	
 	string: function($data)
@@ -276,6 +312,3 @@ var DataFilter =
 			return null;
 	}
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("dataManager");

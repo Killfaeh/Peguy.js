@@ -1215,6 +1215,3 @@ Vectors =
 		return vertex;
 	},
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("vectors");

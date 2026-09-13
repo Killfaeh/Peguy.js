@@ -19,6 +19,49 @@ function FileSystem($sorted)
 
     var component = new Component(html);
 
+    /*
+// Style
+
+component.addConfigStyle("fileSystem", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"column": {
+		"borderRight": (function() { return STYLE.fileSystemBorderRight; })()
+	},
+	"arrow": {
+		"color": (function() { return STYLE.fileSystemColor; })()
+	},
+	"selected": {
+		"backgroundColor": (function() { return STYLE.fileSystemBackgroundColor; })(),
+		"color": (function() { return STYLE.fileSystemColor; })()
+	},
+	"drag-over": {
+		"boxShadow": (function() { return STYLE.fileSystemBoxShadow; })()
+	},
+	"virtual-fileSystemItem": {
+		"backgroundColor": (function() { return STYLE.fileSystemBackgroundColor; })(),
+		"color": (function() { return STYLE.fileSystemColor; })()
+	},
+	"ghost-fileSystemItem": {
+		"backgroundColor": (function() { return STYLE.fileSystemBackgroundColor; })(),
+		"color": (function() { return STYLE.fileSystemColor; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
     //////////////
     // Méthodes //
     //////////////
@@ -286,5 +329,5 @@ function FileSystem($sorted)
     return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-    Loader.hasLoaded("fileSystem");
+//if (Loader !== null && Loader !== undefined)
+//    Loader.hasLoaded("fileSystem");

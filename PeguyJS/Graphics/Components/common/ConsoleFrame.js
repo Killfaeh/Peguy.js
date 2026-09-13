@@ -44,6 +44,40 @@ function ConsoleFrame()
 	var closeIcon = Loader.getSVG('icons', 'close-icon', 20, 20);
 	component.getById('closeIcon').appendChild(closeIcon);
 	
+	/*
+// Style
+
+component.addConfigStyle("consoleFrame", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {},
+	"consoleFrame": {
+		"border": (function() { return STYLE.consoleFrameBorder; })(),
+		"backgroundColor": (function() { return STYLE.consoleFrameBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.consoleFrameBoxShadow; })()
+	}
+},
+		
+		mobile:
+		{
+	"multi-tag": {},
+	"consoleFrame": {
+		"border": (function() { return STYLE.consoleFrameBorder; })(),
+		"backgroundColor": (function() { return STYLE.consoleFrameBackgroundColor; })(),
+		"boxShadow": (function() { return STYLE.consoleFrameBoxShadow; })()
+	}
+},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Drag & drop
 	var clicked = false;
 	var moved = false;
@@ -385,6 +419,3 @@ function ConsoleFrame()
 	
 	return $this;
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("consoleFrame");

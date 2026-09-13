@@ -1,17 +1,13 @@
 function Tree($ordered)
 {
-	//console.log("Current value : " + $currentValue);
-	//console.log($options); 
-	
 	///////////////
 	// Attributs //
 	///////////////
 	
 	this.isTree = true;
 	
-	var ordered = $ordered;
+	var ordered = ($ordered === "true" || $ordered === true) ? true : false;
 	var editMode = false;
-	var elementsList = [];
 	var selectedElement = null;
 	
 	var html = '<ul id="tree" class="tree" ><div class="mask" ></div></ul>';
@@ -19,7 +15,51 @@ function Tree($ordered)
 	if (ordered === true)
 		html = '<ol id="tree" class="tree" ><div class="mask" ></div></ol>';
 
-	var component = new Component(html);
+	var component = new ListComponent(html);
+
+	/*
+// Style
+
+component.addConfigStyle("tree", function ()
+{
+	return {
+		common:
+		{},
+		
+		classic:
+		{
+	"multi-tag": {
+		".tree .virtual-item div": [
+			"background-Color: (function() { return STYLE.treeBackgroundColor; })(),
+			"border: (function() { return STYLE.treeBorder; })()
+		]
+	},
+	"element-label:hover": {
+		"backgroundColor": (function() { return STYLE.treeBackgroundColor; })()
+	},
+	"element-label": {
+		"border": (function() { return STYLE.treeBorder; })()
+	},
+	"arrow": {
+		"color": (function() { return STYLE.treeColor; })()
+	},
+	"virtual-item": {
+		"color": (function() { return STYLE.treeColor; })()
+	},
+	"ghost-item": {
+		"border": (function() { return STYLE.treeBorder; })(),
+		"backgroundColor": (function() { return STYLE.treeBackgroundColor; })(),
+		"color": (function() { return STYLE.treeColor; })()
+	}
+},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
 
 	//////////////
 	// Méthodes //
@@ -29,14 +69,7 @@ function Tree($ordered)
 
 	var deselectAll = function()
 	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].deselectAll))
-				elementsList[i].deselectAll();
-			else if (utils.isset(elementsList[i].deselect))
-				elementsList[i].deselect();
-		}
-		
+		component.execAll([ 'deselectAll', 'deselect' ]);
 		selectedElement = null;
 	};
 	
@@ -47,14 +80,7 @@ function Tree($ordered)
 	this.dragOutAll = function()
 	{
 		component.removeClass('drag-over');
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].dragOutAll))
-				elementsList[i].dragOutAll();
-			else if (utils.isset(elementsList[i].dragOut))
-				elementsList[i].dragOut();
-		}
+		component.execAll([ 'dragOutAll', 'dragOut' ]);
 	};
 	
 	//// Ajouter un élément ////
@@ -62,10 +88,10 @@ function Tree($ordered)
 	this.addElement = function($element)
 	{
 		// Si un élément est déjà sélectionné on ajoute le nouvel élément à celui déjà sélectionné
-		if (utils.isset(selectedElement))
+		if (selectedElement)
 		{
 			// Si l'élément sélectionné est une brache, on lui ajoute le nouvel élément
-			if (utils.isset(selectedElement.addElement))
+			if (selectedElement.addElement)
 			{
 				selectedElement.addElement($element);
 				$element.setParentBranch(selectedElement);
@@ -77,153 +103,54 @@ function Tree($ordered)
 
 				if (parentBranch === $this)
 				{
-					elementsList.push($element);
-					$this.appendChild($element);
-					$element.setParentBranch($this);
-					$element.setEditMode(editMode);
+					$this.addToList($element);
+
+					if (Array.isArray($element))
+						$element.forEach(function($el) { $el.setParentBranch($this); });
+					else
+						$element.setParentBranch($this);
 				}
 				else
 				{
 					parentBranch.addElement($element);
-					$element.setParentBranch(parentBranch);
+
+					if (Array.isArray($element))
+						$element.forEach(function($el) { $el.setParentBranch($this); });
+					else
+						$element.setParentBranch($this);
 				}
 			}
 		}
 		// Sinon on l'ajoute à la racine
 		else
 		{
-			elementsList.push($element);
-			$this.appendChild($element);
-			$element.setParentBranch($this);
-			$element.setEditMode(editMode);
+			$this.addToList($element);
+
+			if (Array.isArray($element))
+				$element.forEach(function($el) { $el.setParentBranch($this); });
+			else
+				$element.setParentBranch($this);
 		}
-		
-		//// Initialisation des événements du nouvel élément ////
-		
-		// Quand l'élément est sélectionné
 
-		$element.onSelect = function($selectedElement)
-		{
-			deselectAll();
-			selectedElement = $selectedElement;
-			$this.onSelect(selectedElement);
-
-			return true;
-		};
-		
-		$element.onChange = function($element2) { onChange($element2); };
-		
-		// Quand l'élément est déplacé
-		// On vérifie si on passe au dessus d'un autre élément et si oui on déclenche la fonction de survole
-		
-		$element.onDrag = function($x, $y)
-		{
-			var overLayer = null;
-			
-			if (editMode === true)
-			{
-				$this.dragOutAll();
-				
-				for (var i = 0; i < elementsList.length; i++)
-				{
-					if (elementsList[i] !== $element)
-					{
-						overLayer = elementsList[i].getOverLayer($x, $y, $element);
-						
-						if (utils.isset(overLayer))
-						{
-							i = elementsList.length;
-							//overLayer.dragOver();
-						}
-					}
-				}
-				
-				if (!utils.isset(overLayer))
-					overLayer = $this;
-			}
-		
-			return overLayer;
-		};
-		
-		// Quand l'élément est lâché après un déplacement
-		
-		$element.onRelease = function($element2, $index)
-		{
-			if (editMode === true)
-			{
-				var oldParentBranch = $element2.getParentBranch();
-				var newParentBranch = $element2.getParentNode().parentNode;
-				
-				if (newParentBranch.tagName.toLowerCase() !== 'li')
-					newParentBranch = $this;
-				
-				// Retirer l'élément déplacé de l'ancien parent
-				
-				if (utils.isset(oldParentBranch.setParentBranch))
-					oldParentBranch.removeElement($element2);
-				else
-				{
-					$this.removeElement($element2);
-
-					/*
-					var index = elementsList.indexOf($element2);
-					
-					if (index > -1)
-						elementsList.splice(index, 1);
-					//*/
-				}
-				
-				// Ajouter l'élément déplacé au nouveau parent
-				
-				if (utils.isset(newParentBranch.insertElementInto))
-					newParentBranch.insertElementInto($element2, $index);
-				else
-				{
-					//elementsList.push($element2);
-					console.log($index);
-					elementsList.splice($index-1, 0, $element2);
-					console.log(elementsList);
-					$this.insertAt($element2, $index);
-				}
-				
-				$element2.setParentBranch(newParentBranch);
-				
-				$this.dragOutAll();
-				
-				onChange($element2);
-			}
-		};
-		
-		// Quand l'élément est modifié
-		
-		$element.onChange = function($data) { onChange($data); };
-		
-		$element.setEditMode(editMode);
-		
-		$element.select();
-
-		onChange();
+		if (Array.isArray($element))
+			$element.forEach(function($el) { initElementEvents($el); });
+		else
+			initElementEvents($element);
 	};
 	
 	//// Supprimer un élément ////
-	
+
 	this.removeElement = function($element)
 	{
-		var index = elementsList.indexOf($element);
-
-		if (index < 0)
-		{
-			for (var i = 0; i < elementsList.length; i++)
-			{
-				if (utils.isset(elementsList[i].removeElement))
-					elementsList[i].removeElement($element);
-			}
-		}
+		var index = component.getList().indexOf($element);
 		
+		if (index < 0)
+			component.execAll([ 'removeElement' ], [$element]);
+
 		while (index >= 0)
 		{
-			elementsList.splice(index, 1);
-			index = elementsList.indexOf($element);
+			component.getList().splice(index, 1);
+			index = component.getList().indexOf($element);
 		}
 		
 		var parent = $element.parentNode;
@@ -231,18 +158,12 @@ function Tree($ordered)
 		if (parent === component.getById('tree'))
 			component.getById('tree').removeChild($element);
 		
-		onChange();
+		return $element;
 	};
 	
 	//// Supprimer tous les éléments ////
-	
-	this.empty = function()
-	{
-		while (elementsList.length > 0)
-			$this.removeElement(elementsList[0]);
-		
-		onChange();
-	};
+
+	this.empty = function() { return $this.removeAllFromList(); };
 
 	//// Supprimer tous les éléments d'une branche ////
 	
@@ -254,81 +175,145 @@ function Tree($ordered)
 	
 	//// Ouvrir tous les éléments ////
 	
-	this.openAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].openAll))
-				elementsList[i].openAll();
-		}
-	};
+	this.openAll = function() { component.execAll([ 'openAll' ]); };
 	
 	//// Fermer tous les éléments ////
 	
-	this.closeAll = function()
-	{
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].closeAll))
-				elementsList[i].closeAll();
-		}
-	};
+	this.closeAll = function() { component.execAll([ 'closeAll' ]); };
 
 	this.refresh = function()
 	{
 		$this.onRefresh($this);
-		
-		for (var i = 0; i < elementsList.length; i++)
-		{
-			if (utils.isset(elementsList[i].refresh))
-				elementsList[i].refresh();
-		}
+		component.execAll([ 'refresh' ]);
 	};
 
 	///////////////////////////////////
 	// Initialisation des événements //
 	///////////////////////////////////
+
+	var initElementEvents = function($element)
+	{
+		// Quand l'élément est sélectionné
+
+		$element.onSelect = function($selectedElement)
+		{
+			deselectAll();
+			selectedElement = $selectedElement;
+			$this.onSelect(selectedElement);
+
+			return true;
+		};
+		
+		//$element.onChange = function($element2) { onChange($element2); };
+		
+		// Quand l'élément est déplacé
+		// On vérifie si on passe au dessus d'un autre élément et si oui on déclenche la fonction de survole
+		
+		$element.onDrag = function($x, $y)
+		{
+			var overLayer = null;
+			
+			if (editMode === true)
+			{
+				$this.dragOutAll();
+				overLayer = component.testAll('getOverLayer', [$x, $y, $element], function($overLayer) { return $overLayer; });
+				
+				if (!overLayer)
+					overLayer = $this;
+			}
+		
+			return overLayer;
+		};
+		
+		// Quand l'élément est lâché après un déplacement
+		
+		$element.onRelease = function($element2, $index, $oldIndex)
+		{
+			if (editMode === true)
+			{
+				var oldParentBranch = $element2.getParentBranch();
+				var newParentBranch = $element2.getParentNode().parentNode;
+				
+				if (newParentBranch.tagName.toLowerCase() !== 'li')
+					newParentBranch = $this;
+				
+				var moved = $this.onRelease($element2, oldParentBranch, newParentBranch);
+
+				console.log(moved);
+
+				if (moved === true)
+				{
+					// Retirer l'élément déplacé de l'ancien parent
+					
+					if (oldParentBranch.setParentBranch)
+						oldParentBranch.removeElement($element2);
+					else
+						$this.removeElement($element2);
+					
+					// Ajouter l'élément déplacé au nouveau parent
+					
+					if (newParentBranch.insertElementInto)
+						newParentBranch.insertElementInto($element2, $index);
+					else
+					{
+						component.getList().splice($index-1, 0, $element2);
+						$this.insertAt($element2, $index);
+					}
+					
+					$element2.setParentBranch(newParentBranch);
+					
+					$this.dragOutAll();
+					
+					onChange($element2);
+				}
+				// Si quelque chose interdit le déplacement, on remet l'élément à sa place
+				else
+				{
+					if (oldParentBranch.setParentBranch)
+						oldParentBranch.removeElement($element2);
+					else
+						$this.removeElement($element2);
+
+					if (oldParentBranch.insertElementInto)
+						oldParentBranch.insertElementInto($element2, $oldIndex);
+					else
+					{
+						component.getList().splice($oldIndex-1, 0, $element2);
+						$this.insertAt($element2, $oldIndex);
+					}
+					
+					$element2.setParentBranch(oldParentBranch);
+
+					$this.dragOutAll();
+				}
+			}
+		};
+		
+		$element.onChange = function($data) { onChange($data); };
+		$element.setEditMode(editMode);
+		$element.select();
+		onChange();
+	};
+
+	var removeElementEvents = function($element)
+	{
+		$element.onSelect = function() {};
+		$element.onDrag = function() {};
+		$element.onRelease = function() {};
+		$element.onChange = function() {};
+	};
+
+	this.initElementEvents = function($element) { initElementEvents($element); };
+	this.removeElementEvents = function($element) { removeElementEvents($element); };
 	
 	this.onSelect = function($data) {};
+	this.onRelease = function($element, $oldParent, $newParent) { return true; };
 	this.onChange = function($data) {};
 	var onChange = function($data) { $this.onChange($data); };
 	this.onRefresh = function($element) {};
 	
 	this.onClick = function() { deselectAll(); };
-	
-	var onMouseMove = function($event)
-	{
-		if (editMode === true)
-		{
-			for (var i = 0; i < elementsList.length; i++)
-			{
-				if (utils.isset(elementsList[i].mouseMove))
-					elementsList[i].mouseMove($event);
-			}
-		}
-	};
-	
-	document.getElementById('main').onMouseMove.push(onMouseMove);
-	
-	var onMouseUp = function($event)
-	{
-		if (editMode === true)
-		{
-			for (var i = 0; i < elementsList.length; i++)
-			{
-				if (utils.isset(elementsList[i].mouseUp))
-					elementsList[i].mouseUp($event);
-			}
-		}
-	};
-	
-	document.getElementById('main').onMouseUp.push(onMouseUp);
-	
-	this.onKeyUp = function($event)
-	{
-		for (var i = 0; i < elementsList.length; i++)
-			elementsList[i].onKeyUp($event);
-	};
+	this.onKeyUp = function($event) { component.execAllEvents([ 'onKeyUp' ], $event); };
 	
 	////////////////
 	// Accesseurs //
@@ -336,17 +321,14 @@ function Tree($ordered)
 
 	// GET
 
-	this.getBranches = function() { return elementsList; };
+	this.getBranches = function() { return component.getList(); };
 	this.getElementsList = this.getBranches;
     this.getSelectedElement = function() { return selectedElement; };
 
 	this.getJSON = function()
 	{
 		var jsonData = { "type": "tree", "ordered": ordered, "elementsList": [] };
-
-		for (var i = 0; i < elementsList.length; i++)
-			jsonData.elementsList.push(elementsList[i].getJSON());
-
+		jsonData.elementsList = component.getList().map(function($element) { return $element.getJSON(); });
 		return jsonData;
 	};
 
@@ -361,25 +343,26 @@ function Tree($ordered)
 		else
 			$this.removeClass('edit-mode');
 		
-		for (var i = 0; i < elementsList.length; i++)
-			elementsList[i].setEditMode(editMode);
+		component.execAll([ 'setEditMode' ], [editMode]);
 	};
 
-	this.loadFromJSON = function($json)
+	this.loadFromJSON = function($json, $callback)
 	{
 		ordered = $json.ordered;
 
-		for (var i = 0; i < $json.elementsList.length; i++)
+		$this.addElement($json.elementsList.map(function($element)
 		{
-			var item = new TreeLeaf(json.elementsList[i].label);
+			var item = new TreeLeaf($element.label);
 
-			if ($json.type === "branch")
-				item = new TreeBranch(json.elementsList[i].label, ordered);
+			if ($callback)
+				item = $callback($element);
+			else if ($element.type === "branch")
+				item = new TreeBranch($element.label, ordered);
 
-			item.loadFromJSON($json.elementsList[i]);
+			item.loadFromJSON($element, $callback);
 			$this.deselectAll();
-			$this.addElement(item);
-		}
+			return item;
+		}));
 	};
 
 	//////////////
@@ -389,6 +372,3 @@ function Tree($ordered)
 	var $this = utils.extend(component, this);
 	return $this; 
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("tree");

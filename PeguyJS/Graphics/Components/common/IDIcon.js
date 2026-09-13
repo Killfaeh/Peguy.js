@@ -4,8 +4,8 @@ function IDIcon($firstname, $name, $img)
 	// Attributes //
 	////////////////
 
-	var firstname = $firstname;
-	var name = $name;
+	var firstname = $firstname ? $firstname : 'No';
+	var name = $name ? $name : 'Name';
 	var img = $img;
 
 	var html = '<div class="idIcon" >'
@@ -15,6 +15,32 @@ function IDIcon($firstname, $name, $img)
 				+ '</div>';
 
 	var component = new Component(html);
+
+	/*
+// Style
+
+component.addConfigStyle("iDIcon", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"idIcon": {
+		"backgroundColor": (function() { return STYLE.iDIconBackgroundColor; })(),
+		"color": (function() { return STYLE.iDIconColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
 
 	/////////////
 	// Methods //
@@ -86,5 +112,5 @@ function IDIcon($firstname, $name, $img)
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("iDIcon");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("iDIcon");

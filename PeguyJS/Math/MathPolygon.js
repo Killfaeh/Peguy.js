@@ -371,6 +371,3 @@ function MathPolygon($verticesList)
 	//concave = orientation.concave;
 	$this.updateIndices(true);
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("math-polygon");

@@ -44,6 +44,3 @@ function ConicGradient2D($colors, $startAngle, $x, $y)
 	this.setX = function($x) { x = $x; };
 	this.setY = function($y) { y = $y; };
 }
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("conicGradient2D");

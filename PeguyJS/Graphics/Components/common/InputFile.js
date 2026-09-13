@@ -63,6 +63,37 @@ function InputFile($accept, $capture, $placeholder, $name, $multiple, $autoResiz
 	
 	var pdfIcon = Loader.getSVG('icons', 'pdf-icon', 30, 30);
 	
+	/*
+// Style
+
+component.addConfigStyle("inputFile", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"inputFile": {
+		"color": (function() { return STYLE.inputFileColor; })(),
+		"backgroundColor": (function() { return STYLE.inputFileBackgroundColor; })(),
+		"backgroundImage": (function() { return STYLE.inputFileBackgroundImage; })(),
+		"border": (function() { return STYLE.inputFileBorder; })()
+	},
+	"mask": {
+		"backgroundColor": (function() { return STYLE.inputFileBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -319,5 +350,5 @@ function InputFile($accept, $capture, $placeholder, $name, $multiple, $autoResiz
 	return $this;
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("inputFile");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("inputFile");

@@ -17,6 +17,10 @@ function SavePopup($content)
 	
 	var popup = new Popup(html);
 	
+	/*
+{{INSERT CODE}}
+	//*/
+
 	//////////////
 	// Méthodes //
 	//////////////
@@ -72,5 +76,5 @@ function SavePopup($content)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("savePopup");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("savePopup");

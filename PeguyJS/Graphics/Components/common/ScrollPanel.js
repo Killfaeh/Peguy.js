@@ -45,6 +45,65 @@ function ScrollPanel($content)
 	component.getById('leftRightArrow').appendChild(leftRightArrow);
 	component.getById('rightRightArrow').appendChild(rightRightArrow);
 	
+	/*
+// Style
+
+component.addConfigStyle("scrollPanel", function ()
+{
+	return {
+		common:
+		{
+	"multi-tag": {},
+	"corner": {
+		"borderRight": (function() { return STYLE.scrollPanelBorderRight; })(),
+		"borderBottom": (function() { return STYLE.scrollPanelBorderBottom; })(),
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"up-down-scrollBar": {
+		"border": (function() { return STYLE.scrollPanelBorder; })(),
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"up-down-container": {
+		"borderTop": (function() { return STYLE.scrollPanelBorderTop; })(),
+		"borderBottom": (function() { return STYLE.scrollPanelBorderBottom; })()
+	},
+	"up-down-bar": {
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"left-right-scrollBar": {
+		"border": (function() { return STYLE.scrollPanelBorder; })(),
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"left-right-container": {
+		"borderLeft": (function() { return STYLE.scrollPanelBorderLeft; })(),
+		"borderRight": (function() { return STYLE.scrollPanelBorderRight; })()
+	},
+	"left-right-bar": {
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"canvas": {
+		"borderLeft": (function() { return STYLE.scrollPanelBorderLeft; })(),
+		"borderTop": (function() { return STYLE.scrollPanelBorderTop; })()
+	},
+	"downArrow": {
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	},
+	"downContainer": {
+		"backgroundColor": (function() { return STYLE.scrollPanelBackgroundColor; })()
+	}
+},
+		
+		classic:
+		{},
+		
+		mobile:
+		{},
+	};
+});
+
+component.applyConfigStyle();
+	//*/
+
 	// Paramètres
 	
 	var maxWidth = 0;
@@ -621,5 +680,5 @@ function ScrollPanel($content)
 	return $this; 
 }
 
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("scrollPanel");
+//if (Loader !== null && Loader !== undefined)
+//	Loader.hasLoaded("scrollPanel");

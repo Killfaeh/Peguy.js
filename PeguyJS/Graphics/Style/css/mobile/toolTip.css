@@ -1,0 +1,11 @@
+.toolTip
+{
+	position: absolute;
+	margin: 0px;
+	padding: 0px;
+	padding: 5px;
+	padding-left: 7px;
+	padding-right: 7px;
+	font-size: 0.8em;
+	z-index: 1000000000;
+}

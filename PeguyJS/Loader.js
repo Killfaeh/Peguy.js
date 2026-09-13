@@ -1,3 +1,6 @@
+var KEYWORDS = {};
+var STYLE = {};
+var LANGUAGES_TEMPLATE = {};
 
 ///////////////////////
 // Chargeur d'images //
@@ -12,6 +15,7 @@ function ImgLoader($url, $name)
 	var url = $url;
 	var name = $name;
 	var loaded = false;
+	var failed = false;
 
 	//////////////
 	// Méthodes //
@@ -21,7 +25,7 @@ function ImgLoader($url, $name)
 
 	var onload = function()
 	{
-		console.log("Has loaded image : " + name);
+		//console.log("Has loaded image : " + name);
 		
 		if (loaded === false)
 			loaded = true;
@@ -31,8 +35,12 @@ function ImgLoader($url, $name)
 	
 	var onError = function()
 	{
-		url = url.replace(Loader.getStyle(), 'Default');
-		$this.load();
+		if (!failed)
+		{
+			failed = true;
+			url = url.replace(Loader.getStyle(), 'Default');
+			$this.load();
+		}
 	};
 
 	this.load = function()
@@ -84,6 +92,7 @@ function SVGLoader($url, $name)
 	var url = $url;
 	var name = $name;
 	var loaded = false;
+	var failed = false;
 	var source = document.createElement('object');
 	source.setAttribute('type', 'image/svg+xml');
 	
@@ -97,7 +106,7 @@ function SVGLoader($url, $name)
 
 	var onload = function()
 	{
-		console.log("Has loaded SVG : " + name);
+		//console.log("Has loaded SVG : " + name);
 		
 		if (loaded === false)
 			loaded = true;
@@ -107,9 +116,13 @@ function SVGLoader($url, $name)
 	
 	var onError = function()
 	{
-		console.log("Erreur SVG");
-		url = url.replace(Loader.getStyle(), 'Default');
-		$this.load();
+		if (!failed)
+		{
+			failed = true;
+			console.log("Erreur SVG");
+			url = url.replace(Loader.getStyle(), 'Default');
+			$this.load();
+		}
 	};
 
 	this.load = function()
@@ -148,17 +161,23 @@ function SVGLoader($url, $name)
 	{
 		var svgDoc = source.contentDocument.getElementsByTagName('svg')[0];
 		var group = svgDoc.getElementById($id).cloneNode(true);
+		group.removeAttributeNS(null, 'id');
 		var newSVG = svgDoc.cloneNode();
 		newSVG.appendChild(group);
 		newSVG.setAttribute("viewBox", group.getAttribute('viewBox'));
 		newSVG.setAttribute("width", $width);
 		newSVG.setAttribute("height", $height);
+
+		//console.log(newSVG);
+		//console.log('SVG id : ' + $id);
+		var invisibleRect = new Component('<rect x="0" y="0" width="' + $width + '" height="' + $height + '" style="fill:rgba(0, 0, 0, 0); " />');
+		newSVG.appendChild(invisibleRect);
 		
 		newSVG.position = function()
 		{
 			var element = this;
-			var x	   = 0;
-			var y	   = 0;
+			var x = 0;
+			var y = 0;
 			var scrollX = 0;
 			var scrollY = 0;
 		
@@ -195,8 +214,8 @@ function SVGLoader($url, $name)
 		newSVG.mousePosition = function($event)
 		{
 			var element = this;
-			var x	   = $event.clientX;
-			var y	   = $event.clientY;
+			var x = $event.clientX;
+			var y = $event.clientY;
 			var scrollX = 0;
 			var scrollY = 0;
 		
@@ -305,6 +324,8 @@ function SVGLoader($url, $name)
 				newSVG.setAttribute("height", $height);
 				newSVG.setAttribute("file", name);
 				newSVG.setAttribute("name", groups[i].getAttribute('id'));
+				var invisibleRect = new Component('<rect x="0" y="0" width="' + $width + '" height="' + $height + '" style="fill:rgba(0, 0, 0, 0); " />');
+				newSVG.appendChild(invisibleRect);
 				svgList.push(newSVG);
 			}
 		}
@@ -342,6 +363,7 @@ function StyleLoader($url, $name)
 	var url = $url;
 	var name = $name;
 	var loaded = false;
+	var failed = false;
 
 	//////////////
 	// Méthodes //
@@ -351,7 +373,7 @@ function StyleLoader($url, $name)
 
 	var onload = function()
 	{
-		console.log("Has loaded CSS : " + name);
+		//console.log("Has loaded CSS : " + name);
 		
 		if (loaded === false)
 			loaded = true;
@@ -361,8 +383,12 @@ function StyleLoader($url, $name)
 	
 	var onError = function()
 	{
-		url = url.replace(Loader.getStyle(), 'Default');
-		$this.load();
+		if (!failed)
+		{
+			failed = true;
+			url = url.replace(Loader.getStyle(), 'Default');
+			$this.load();
+		}
 	};
 
 	this.load = function()
@@ -424,7 +450,7 @@ function StyleLoader($url, $name)
 
 	// SET
 	this.setName = function($name) { name = $name; };
-	this.setURL = function($url) { url = $url; };
+	this.setURL = function($url) { url = $url; console.log(url); };
 
 	var $this = this;
 }
@@ -451,7 +477,8 @@ function ScriptLoader($url, $name)
 
 	var onload = function()
 	{
-		console.log("Has loaded script : " + name);
+		if (loaded)
+			console.log("Has loaded script : " + name);
 		
 		if (loaded === false)
 			loaded = true;
@@ -464,6 +491,7 @@ function ScriptLoader($url, $name)
 		if (loaded !== true)
 		{
 			var script = document.createElement("script");
+			script.onload = function() { Loader.hasLoaded(name); };
 			script.setAttribute('id', 'script-file-' + name);
 			script.src = url + "?token=" + Loader.getToken();
 			document.getElementById('main').appendChild(script);
@@ -537,7 +565,7 @@ function ComponentLoader($name, $scriptURL, $styleURL)
 	{
 		if (script.isLoaded() && style.isLoaded())
 		{
-			console.log("Has loaded component : " + name);
+			//console.log("Has loaded component : " + name);
 			loaded = true;
 			$this.onload();
 		}
@@ -577,8 +605,6 @@ function ComponentLoader($name, $scriptURL, $styleURL)
 
 function Loader($root, $style)
 {
-	KEYWORDS = {};
-	
 	///////////////
 	// Attributs //
 	///////////////
@@ -634,17 +660,7 @@ function Loader($root, $style)
 						'teashark', 'teleca', 'uzard', 'uzardweb', 'meego', 
 						'nokia', 'bb10', 'playbook'];
 
-	var chaineRegex = ""; 
-	
-	for (var i = 0; i < terminauxMobiles.length; i++)
-	{
-		if (i > 0)
-			chaineRegex += "|";
-		
-		chaineRegex += terminauxMobiles[i];
-	}
-	
-	var userAgentRegex = new RegExp('(' + chaineRegex + ')');
+	var userAgentRegex = new RegExp('(' + terminauxMobiles.join('|') + ')');
 
 	//console.log("Useragent : " + navigator.userAgent);
 
@@ -676,7 +692,7 @@ function Loader($root, $style)
 	
 	var styles = {}; 
 
-	styles['init'] = new StyleLoader(root + 'PeguyJS/Graphics/Style/' + style + '/common/init.css', 'init');
+	styles['init'] = new StyleLoader(root + 'PeguyJS/Graphics/Style/css/common/init.css', 'init');
 
 	//// Tableaux des scripts ////
 
@@ -685,32 +701,50 @@ function Loader($root, $style)
 	// Utils/
 	
 	scripts['utils'] = new ScriptLoader(root + 'PeguyJS/Utils/utils.js', 'utils');
+	scripts['tests'] = new ScriptLoader(root + 'PeguyJS/Utils/tests.js', 'tests');
 	scripts['peguy'] = new ScriptLoader(root + 'PeguyJS/Utils/Peguy.js', 'peguy');
+	scripts['bridge'] = new ScriptLoader(root + 'PeguyJS/Utils/Bridge.js', 'bridge');
 	scripts['dataManager'] = new ScriptLoader(root + 'PeguyJS/Utils/dataManager.js', 'dataManager');
+	scripts['object'] = new ScriptLoader(root + 'PeguyJS/Utils/object.js', 'object');
 	scripts['dom'] = new ScriptLoader(root + 'PeguyJS/Utils/dom.js', 'dom');
+	scripts['array'] = new ScriptLoader(root + 'PeguyJS/Utils/array.js', 'array');
 	scripts['events'] = new ScriptLoader(root + 'PeguyJS/Utils/events.js', 'events');
 	scripts['date'] = new ScriptLoader(root + 'PeguyJS/Utils/date.js', 'date');
 	scripts['string'] = new ScriptLoader(root + 'PeguyJS/Utils/string.js', 'string');
 	scripts['debug'] = new ScriptLoader(root + 'PeguyJS/Utils/debug.js', 'debug');
 	scripts['colors'] = new ScriptLoader(root + 'PeguyJS/Utils/colors.js', 'colors');
 	scripts['files'] = new ScriptLoader(root + 'PeguyJS/Utils/files.js', 'files');
-	//scripts['array'] = new ScriptLoader('/Public/Common/scripts/utils/array.js', 'array');
 	//scripts['loop'] = new ScriptLoader('/Public/Common/scripts/utils/loop.js', 'loop');
+
+	// Utils/ES6
+
+	scripts['es6-object'] = new ScriptLoader(root + 'PeguyJS/Utils/ES6/object.js', 'es6-object');
+	scripts['es6-string'] = new ScriptLoader(root + 'PeguyJS/Utils/ES6/string.js', 'es6-string');
+	scripts['es6-array'] = new ScriptLoader(root + 'PeguyJS/Utils/ES6/array.js', 'es6-array');
+	scripts['es6-map'] = new ScriptLoader(root + 'PeguyJS/Utils/ES6/Map.js', 'es6-map');
+	scripts['es6-set'] = new ScriptLoader(root + 'PeguyJS/Utils/ES6/Set.js', 'es6-set');
 
 	// Graphics/
 	
 	// Graphics/Components
 	
-	scripts['components'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Components.js', 'components');
+	scripts['style'] = new ScriptLoader(root + 'PeguyJS/Graphics/Style/' + style + '.js', 'style');
+
+	scripts['application'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Application.js', 'application');
+
+	scripts['styleManager'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Style.js', 'styleManager');
 	scripts['component'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Component.js', 'component');
+	scripts['draggableComponent'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/DraggableComponent.js', 'draggableComponent');
+	scripts['listComponent'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/ListComponent.js', 'listComponent');
+	scripts['components'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Components.js', 'components');
 	scripts['screen'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Screen.js', 'screen');
 	scripts['view'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/View.js', 'view');
-	scripts['application'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Application.js', 'application');
+	
 	scripts['infoPopup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/InfoPopup.js', 'infoPopup');
+	scripts['confirmPopup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/ConfirmPopup.js', 'confirmPopup');
 	scripts['inputRadio'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/InputRadio.js', 'inputRadio');
 	scripts['inputCheckBox'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/InputCheckBox.js', 'inputCheckBox');
 	scripts['option'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Option.js', 'option');
-	scripts['confirmPopup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/ConfirmPopup.js', 'confirmPopup');
 	scripts['savePopup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/SavePopup.js', 'savePopup');
 	scripts['canvas2D'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Canvas2D.js', 'canvas2D');
 	scripts['treeBranch'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/TreeBranch.js', 'treeBranch');
@@ -730,6 +764,9 @@ function Loader($root, $style)
 	scripts['fileItem'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/' + mode + '/FileItem.js', 'fileItem');
 	scripts['label'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Label.js', 'label');
 	scripts['filePreview'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/FilePreview.js', 'filePreview');
+	scripts['formListItem'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/FormListItem.js', 'formListItem');
+	scripts['formInlineListItem'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/FormInlineListItem.js', 'formInlineListItem');
+	scripts['icon'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/Icon.js', 'icon');
 	
 	if (mode === 'classic')
 	{
@@ -754,21 +791,26 @@ function Loader($root, $style)
 
 	var components = {};
 
-	components['popup'] = new ComponentLoader('popup', root + 'PeguyJS/Graphics/Components/common/Popup.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/popup.css');
-	components['freeze-screen'] = new ComponentLoader('freeze-screen', root + 'PeguyJS/Graphics/Components/common/FreezeScreen.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/freezeScreen.css');
-	components['radioList'] = new ComponentLoader('radioList', root + 'PeguyJS/Graphics/Components/common/RadioList.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/radioList.css');
-	components['checkBoxList'] = new ComponentLoader('checkBoxList', root + 'PeguyJS/Graphics/Components/common/CheckBoxList.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/checkBoxList.css');
-	components['select'] = new ComponentLoader('select', root + 'PeguyJS/Graphics/Components/common/Select.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/select.css');
-	components['comboBox'] = new ComponentLoader('comboBox', root + 'PeguyJS/Graphics/Components/' + mode + '/ComboBox.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/comboBox.css');
-	components['autoComplete'] = new ComponentLoader('autoComplete', root + 'PeguyJS/Graphics/Components/' + mode + '/AutoComplete.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/autoComplete.css');
+	components['accordion'] = new ComponentLoader('accordion', root + 'PeguyJS/Graphics/Components/common/Accordion.js', root + 'PeguyJS/Graphics/Style/css/common/accordion.css'); // Conversion OK
+	components['autoComplete'] = new ComponentLoader('autoComplete', root + 'PeguyJS/Graphics/Components/' + mode + '/AutoComplete.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/autoComplete.css'); // Conversion OK
+	components['button'] = new ComponentLoader('button', root + 'PeguyJS/Graphics/Components/common/Button.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/button.css'); // Conversion OK
+	components['buttonsMenu'] = new ComponentLoader('buttonsMenu', root + 'PeguyJS/Graphics/Components/common/ButtonsMenu.js', root + 'PeguyJS/Graphics/Style/css/common/buttonsMenu.css');
+	components['checkBox'] = new ComponentLoader('checkBox', root + 'PeguyJS/Graphics/Components/common/CheckBox.js', root + 'PeguyJS/Graphics/Style/css/common/checkBox.css'); // Conversion OK
+	components['colorPalette'] = new ComponentLoader('colorPalette', root + 'PeguyJS/Graphics/Components/common/ColorPalette.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/colorPalette.css');
+	components['comboBox'] = new ComponentLoader('comboBox', root + 'PeguyJS/Graphics/Components/' + mode + '/ComboBox.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/comboBox.css'); // Conversion OK
+	components['imagePopup'] = new ComponentLoader('imagePopup', root + 'PeguyJS/Graphics/Components/common/ImagePopup.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/imagePopup.css'); // Conversion OK
+	components['popup'] = new ComponentLoader('popup', root + 'PeguyJS/Graphics/Components/common/Popup.js', root + 'PeguyJS/Graphics/Style/css/' + mode + '/popup.css'); // Conversion OK
+
+	components['freeze-screen'] = new ComponentLoader('freeze-screen', root + 'PeguyJS/Graphics/Components/common/FreezeScreen.js', root + 'PeguyJS/Graphics/Style/css/common/freezeScreen.css'); // Conversion OK
+	components['radioList'] = new ComponentLoader('radioList', root + 'PeguyJS/Graphics/Components/common/RadioList.js', root + 'PeguyJS/Graphics/Style/css/common/radioList.css'); // Conversion OK
+	components['checkBoxList'] = new ComponentLoader('checkBoxList', root + 'PeguyJS/Graphics/Components/common/CheckBoxList.js', root + 'PeguyJS/Graphics/Style/css/common/checkBoxList.css'); // Conversion OK
+	components['select'] = new ComponentLoader('select', root + 'PeguyJS/Graphics/Components/common/Select.js', root + 'PeguyJS/Graphics/Style/css/common/select.css');
 	//components['contentEditable'] = new ComponentLoader('contentEditable', root + 'PeguyJS/Graphics/Components/common/ContentEditable.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/contentEditable.css');
 	components['tree'] = new ComponentLoader('tree', root + 'PeguyJS/Graphics/Components/common/Tree.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/tree.css');
 	components['colorPicker'] = new ComponentLoader('colorPicker', root + 'PeguyJS/Graphics/Components/common/ColorPicker.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/colorPicker.css');
 	components['selectColorPopup'] = new ComponentLoader('selectColorPopup', root + 'PeguyJS/Graphics/Components/common/SelectColorPopup.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/selectColorPopup.css');
-	components['colorPalette'] = new ComponentLoader('colorPalette', root + 'PeguyJS/Graphics/Components/common/ColorPalette.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/colorPalette.css');
 	components['inputFile'] = new ComponentLoader('inputFile', root + 'PeguyJS/Graphics/Components/common/InputFile.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/inputFile.css');
 	components['imagesManager'] = new ComponentLoader('imagesManager', root + 'PeguyJS/Graphics/Components/common/ImagesManager.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/imagesManager.css');
-	components['imagePopup'] = new ComponentLoader('imagePopup', root + 'PeguyJS/Graphics/Components/common/ImagePopup.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/imagePopup.css');
 	components['inputSearch'] = new ComponentLoader('inputSearch', root + 'PeguyJS/Graphics/Components/common/InputSearch.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/inputSearch.css');
 	components['notificationsManager'] = new ComponentLoader('notificationsManager', root + 'PeguyJS/Graphics/Components/common/NotificationsManager.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/notificationsManager.css');
 	components['contextMenu'] = new ComponentLoader('contextMenu', root + 'PeguyJS/Graphics/Components/common/ContextMenu.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/contextMenu.css');
@@ -776,14 +818,11 @@ function Loader($root, $style)
 	components['contextPanel'] = new ComponentLoader('contextPanel', root + 'PeguyJS/Graphics/Components/common/ContextPanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/contextPanel.css');
 	components['toolTip'] = new ComponentLoader('toolTip', root + 'PeguyJS/Graphics/Components/common/ToolTip.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/toolTip.css');
 	components['editCommandsBar'] = new ComponentLoader('editCommandsBar', root + 'PeguyJS/Graphics/Components/common/EditCommandsBar.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/editCommandsBar.css');
-	components['checkBox'] = new ComponentLoader('checkBox', root + 'PeguyJS/Graphics/Components/common/CheckBox.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/checkBox.css');
 	components['horizontalSlide'] = new ComponentLoader('horizontalSlide', root + 'PeguyJS/Graphics/Components/common/HorizontalSlide.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/horizontalSlide.css');
 	components['verticalSlide'] = new ComponentLoader('verticalSlide', root + 'PeguyJS/Graphics/Components/common/VerticalSlide.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/verticalSlide.css');
 	components['consoleFrame'] = new ComponentLoader('consoleFrame', root + 'PeguyJS/Graphics/Components/common/ConsoleFrame.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/consoleFrame.css');
 	components['menuBar'] = new ComponentLoader('menuBar', root + 'PeguyJS/Graphics/Components/common/MenuBar.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/menuBar.css');
-	components['button'] = new ComponentLoader('button', root + 'PeguyJS/Graphics/Components/common/Button.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/button.css');
 	components['tabManager'] = new ComponentLoader('tabManager', root + 'PeguyJS/Graphics/Components/common/TabManager.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/tabManager.css');
-	components['accordion'] = new ComponentLoader('accordion', root + 'PeguyJS/Graphics/Components/common/Accordion.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/accordion.css');
 	components['slider'] = new ComponentLoader('slider', root + 'PeguyJS/Graphics/Components/common/Slider.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/slider.css');
 	components['switch'] = new ComponentLoader('switch', root + 'PeguyJS/Graphics/Components/common/Switch.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/switch.css');
 	components['listBox'] = new ComponentLoader('listBox', root + 'PeguyJS/Graphics/Components/common/ListBox.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/listBox.css');
@@ -795,8 +834,9 @@ function Loader($root, $style)
 	components['labelList'] = new ComponentLoader('labelList', root + 'PeguyJS/Graphics/Components/common/LabelList.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/labelList.css');
 	components['dropFilesZone'] = new ComponentLoader('dropFilesZone', root + 'PeguyJS/Graphics/Components/common/DropFilesZone.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/dropFilesZone.css');
 	components['iconsMenu'] = new ComponentLoader('iconsMenu', root + 'PeguyJS/Graphics/Components/common/IconsMenu.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/iconsMenu.css');
-	components['buttonsMenu'] = new ComponentLoader('buttonsMenu', root + 'PeguyJS/Graphics/Components/common/ButtonsMenu.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/buttonsMenu.css');
 	components['toolsBar'] = new ComponentLoader('toolsBar', root + 'PeguyJS/Graphics/Components/common/ToolsBar.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/toolsBar.css');
+	components['formPanel'] = new ComponentLoader('formPanel', root + 'PeguyJS/Graphics/Components/common/FormPanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/formPanel.css');
+	components['formInline'] = new ComponentLoader('formInline', root + 'PeguyJS/Graphics/Components/common/FormInline.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/formInline.css');
 	
 	if (mode === 'mobile')
 	{
@@ -806,9 +846,11 @@ function Loader($root, $style)
 	}
 	else
 	{
-		components['calendar'] = new ComponentLoader('calendar', root + 'PeguyJS/Graphics/Components/classic/Calendar.js', root + 'PeguyJS/Graphics/Style/' + style + '/classic/calendar.css');
-		components['frame'] = new ComponentLoader('frame', root + 'PeguyJS/Graphics/Components/classic/Frame.js', root + 'PeguyJS/Graphics/Style/' + style + '/classic/frame.css');
-		components['invisibleFreezeScreen'] = new ComponentLoader('frame', root + 'PeguyJS/Graphics/Components/classic/InvisibleFreezeScreen.js', root + 'PeguyJS/Graphics/Style/' + style + '/classic/invisibleFreezeScreen.css');
+		components['floatingPanel'] = new ComponentLoader('floatingPanel', root + 'PeguyJS/Graphics/Components/classic/FloatingPanel.js', root + 'PeguyJS/Graphics/Style/css/classic/floatingPanel.css'); // OK
+		components['calendar'] = new ComponentLoader('calendar', root + 'PeguyJS/Graphics/Components/classic/Calendar.js', root + 'PeguyJS/Graphics/Style/css/classic/calendar.css'); // Conversion OK
+		components['frame'] = new ComponentLoader('frame', root + 'PeguyJS/Graphics/Components/classic/Frame.js', root + 'PeguyJS/Graphics/Style/css/classic/frame.css'); // Conversion OK
+		components['invisibleFreezeScreen'] = new ComponentLoader('invisibleFreezeScreen', root + 'PeguyJS/Graphics/Components/classic/InvisibleFreezeScreen.js', root + 'PeguyJS/Graphics/Style/css/classic/invisibleFreezeScreen.css'); // Conversion OK
+
 		components['dock'] = new ComponentLoader('dock', root + 'PeguyJS/Graphics/Components/' + mode + '/Dock.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/dock.css');
 		components['testCodePanel'] = new ComponentLoader('testCodePanel', root + 'PeguyJS/Graphics/Components/' + mode + '/TestCodePanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/testCodePanel.css');
 	}
@@ -821,6 +863,14 @@ function Loader($root, $style)
 
 	var onload = function()
 	{
+		/*
+		console.log('imgLoaded : ' + imgLoaded + '/' + nbImg);
+		console.log('svgLoaded : ' + svgLoaded + '/' + nbSvg);
+		console.log('cssLoaded : ' + cssLoaded + '/' + nbCSS);
+		console.log('scriptLoaded : ' + scriptLoaded + '/' + nbScripts);
+		console.log('componentLoaded : ' + componentLoaded + '/' + nbComponents);
+		//*/
+
 		if (loaded === false && imgLoaded >= nbImg && svgLoaded >= nbSvg && cssLoaded >= nbCSS && scriptLoaded >= nbScripts && componentLoaded >= nbComponents)
 		{
 			loaded = true;
@@ -828,9 +878,17 @@ function Loader($root, $style)
 			setTimeout(function()
 			{
 				console.log("END LOADING ! ");
+				console.log('imgLoaded : ' + imgLoaded + '/' + nbImg);
+				console.log('svgLoaded : ' + svgLoaded + '/' + nbSvg);
+				console.log('cssLoaded : ' + cssLoaded + '/' + nbCSS);
+				console.log('scriptLoaded : ' + scriptLoaded + '/' + nbScripts);
+				console.log('componentLoaded : ' + componentLoaded + '/' + nbComponents);
+				
+				Components.initTags(scripts, components);
 				
 				if (init === false)
 				{
+					STYLE.init();
 					Events.init();
 					init = true;
 					
@@ -889,33 +947,67 @@ function Loader($root, $style)
 		{
 			// Module kanban
 			
-			if (additionnalModules.indexOf('kanban') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('kanban'))
 			{
-				scripts['kanbanColumn'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/KanbanColumn.js', 'kanbanColumn');
-				scripts['kanbanCard'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/KanbanCard.js', 'kanbanCard');
-				components['kanban'] = new ComponentLoader('kanban', root + 'PeguyJS/Graphics/Components/common/Kanban.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/kanban.css');
+				scripts['kanbanColumn'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/kanban/KanbanColumn.js', 'kanbanColumn');
+				scripts['kanbanCard'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/kanban/KanbanCard.js', 'kanbanCard');
+				components['kanban'] = new ComponentLoader('kanban', root + 'PeguyJS/Graphics/Components/kanban/Kanban.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/kanban.css');
 			}
 			
 			// Module contentEditable
-			
-			if (additionnalModules.indexOf('contentEditable') >= 0)
+
+			if (additionnalModules.includes('all') || additionnalModules.includes('contentEditable') || additionnalModules.includes('codeEditor'))
 			{
-				components['contentEditable'] = new ComponentLoader('contentEditable', root + 'PeguyJS/Graphics/Components/common/ContentEditable.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/contentEditable.css');
+				scripts['contentEditor'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/contentEditor/ContentEditor.js', 'contentEditor');
+			}
+			
+			if (additionnalModules.includes('all') || additionnalModules.includes('contentEditable'))
+			{
+				components['contentEditable'] = new ComponentLoader('contentEditable', root + 'PeguyJS/Graphics/Components/contentEditor/ContentEditable.js', root + 'PeguyJS/Graphics/Style/' + style + '/' + mode + '/contentEditable.css');
 			}
 
 			// Module codeEditor
 			
-			if (additionnalModules.indexOf('codeEditor') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('codeEditor'))
 			{
-				components['codeEditor'] = new ComponentLoader('codeEditor', root + 'PeguyJS/Graphics/Components/common/CodeEditor.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/codeEditor.css');
+				components['codeEditor'] = new ComponentLoader('codeEditor', root + 'PeguyJS/Graphics/Components/contentEditor/CodeEditor.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/codeEditor.css');
+				scripts['pluginLanguagesTemplates'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/contentEditor/PluginLanguagesTemplates.js', 'pluginLanguagesTemplates');
+				scripts['devJavascript'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/contentEditor/languages/javascript.js', 'devJavascript');
+				scripts['devPHP'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/contentEditor/languages/php.js', 'devPHP');
+				scripts['devPython'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/contentEditor/languages/python.js', 'devPython');
+			}
+
+			// Module de mes outils de dev
+
+			if (additionnalModules.includes('all') || additionnalModules.includes('peguyDev'))
+			{
+				scripts['peguyDevUtils'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyDevUtils.js', 'peguyDevUtils');
+				scripts['peguyViewManager'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyViewManager.js', 'peguyViewManager');
+				scripts['PeguyDevViewManager'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyDevViewManager.js', 'PeguyDevViewManager');
+				scripts['peguyProceduralDocument'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyProceduralDocument.js', 'peguyProceduralDocument');
+				scripts['peguyDevGeneratorDocument'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyDevGeneratorDocument.js', 'peguyDevGeneratorDocument');
+				scripts['peguyMappingDocument'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyMappingDocument.js', 'peguyMappingDocument');
+				scripts['peguyOnlineDocFrame'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyOnlineDocFrame.js', 'peguyOnlineDocFrame');
+				components['quickCodePanel'] = new ComponentLoader('quickCodePanel', root + 'PeguyJS/Graphics/Components/peguyDev/QuickCodePanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/quickCodePanel.css');
+				components['peguyIconsQuickCodePanel'] = new ComponentLoader('peguyIconsQuickCodePanel', root + 'PeguyJS/Graphics/Components/peguyDev/PeguyIconsQuickCodePanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/peguyIconsQuickCodePanel.css');
+				components['peguyHelpFrame'] = new ComponentLoader('peguyHelpFrame', root + 'PeguyJS/Graphics/Components/peguyDev/PeguyHelpFrame.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/peguyHelpFrame.css');
+				scripts['peguyTestLibrary'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyTestLibrary.js', 'peguyTestLibrary');
+				scripts['peguyTestLibraryConfigs'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyTestLibraryConfigs.js', 'peguyTestLibraryConfigs');
+				//scripts['peguyTestCodePanel'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/PeguyTestCodePanel.js', 'peguyTestCodePanel');
+
+				// Jargon
+				scripts['jargon'] = new ScriptLoader(root + 'PeguyJS/Utils/Jargon/Jargon.js', 'jargon');
+				scripts['jargonSource'] = new ScriptLoader(root + 'PeguyJS/Utils/Jargon/JargonSource.js', 'jargonSource');
+				scripts['jargonTarget'] = new ScriptLoader(root + 'PeguyJS/Utils/Jargon/JargonTarget.js', 'jargonTarget');
+				scripts['jargonPanel'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/peguyDev/JargonPanel.js', 'jargonPanel');
 			}
 			
 			// Module math
 			
-			if (additionnalModules.indexOf('canvas3D') >= 0 && additionnalModules.indexOf('math') < 0)
+			if (additionnalModules.includes('canvas3D') && !additionnalModules.includes('math'))
 				additionnalModules.push('math');
 
-			if (additionnalModules.indexOf('math') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('math'))
 			{
 				scripts['math'] = new ScriptLoader(root + 'PeguyJS/Math/Math.js', 'math');
 				scripts['polynomial'] = new ScriptLoader(root + 'PeguyJS/Math/Polynomial.js', 'polynomial');
@@ -937,7 +1029,7 @@ function Loader($root, $style)
 			
 			// Module chart
 		
-			if (additionnalModules.indexOf('charts') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('charts'))
 			{
 				scripts['chart'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/charts/Chart.js', 'chart');
 				scripts['columnChart'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/charts/ColumnChart.js', 'columnChart');
@@ -949,19 +1041,19 @@ function Loader($root, $style)
 			
 			// Module nodes
 			
-			if (additionnalModules.indexOf('nodes') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('nodes'))
 			{
-				scripts['nodeItem'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/NodeItem.js', 'nodeItem');
-				scripts['nodeInput'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/NodeInput.js', 'nodeInput');
-				scripts['nodeOutput'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/NodeOutput.js', 'nodeOutput');
-				scripts['nodesLink'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/NodesLink.js', 'nodesLink');
-				scripts['nodesGroup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/common/NodesGroup.js', 'nodesLink');
-				components['nodesPanel'] = new ComponentLoader('nodesPanel', root + 'PeguyJS/Graphics/Components/common/NodesPanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/nodesPanel.css');
+				scripts['nodeItem'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/nodes/NodeItem.js', 'nodeItem');
+				scripts['nodeInput'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/nodes/NodeInput.js', 'nodeInput');
+				scripts['nodeOutput'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/nodes/NodeOutput.js', 'nodeOutput');
+				scripts['nodesLink'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/nodes/NodesLink.js', 'nodesLink');
+				scripts['nodesGroup'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/nodes/NodesGroup.js', 'nodesLink');
+				components['nodesPanel'] = new ComponentLoader('nodesPanel', root + 'PeguyJS/Graphics/Components/nodes/NodesPanel.js', root + 'PeguyJS/Graphics/Style/' + style + '/common/nodesPanel.css');
 			}
 			
 			// Module canvas2D
 			
-			if (additionnalModules.indexOf('canvas2D') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('canvas2D'))
 			{
 				scripts['object2D'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/canvas2D/Object2D.js', 'object2D');
 				scripts['group2D'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/canvas2D/Group2D.js', 'group2D');
@@ -976,7 +1068,7 @@ function Loader($root, $style)
 
 			// Module canvas3D
 
-			if (additionnalModules.indexOf('canvas3D') >= 0)
+			if (additionnalModules.includes('all') || additionnalModules.includes('canvas3D'))
 			{
 				scripts['canvas3D'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/canvas3D/Canvas3D.js', 'canvas3D');
 				scripts['canvas3DEditor'] = new ScriptLoader(root + 'PeguyJS/Graphics/Components/canvas3D/Canvas3DEditor.js', 'canvas3DEditor');
@@ -1052,79 +1144,85 @@ function Loader($root, $style)
 		componentLoaded = 0;
 
 		// Initialisation des nombres de ressources
-		for (var key in images)
-			nbImg++;
-		
-		for (var key in svgFiles)
-			nbSvg++;
-
-		for (var key in styles)
-			nbCSS++;
-
-		for (var key in scripts)
-			nbScripts++;
-
-		for (var key in components)
-			nbComponents++; 
+		nbImg = Object.keys(images).length;
+		nbSvg = Object.keys(svgFiles).length;
+		nbCSS = Object.keys(styles).length;
+		nbScripts = Object.keys(scripts).length;
+		nbComponents = Object.keys(components).length;
 
 		// Charger les images initiales
 		for (var key in images)
 		{
-			images[key].onload = function()
+			if (typeof images[key] !== 'function')
 			{
-				imgLoaded++;
-				onload();
-			};
+				images[key].onload = function()
+				{
+					imgLoaded++;
+					onload();
+				};
 
-			images[key].load();
+				images[key].load();
+			}
 		}
 		
 		// Charger les fichiers SVG initiaux
 		for (var key in svgFiles)
 		{
-			svgFiles[key].onload = function()
+			if (typeof svgFiles[key] !== 'function')
 			{
-				svgLoaded++;
-				onload();
-			};
+				svgFiles[key].onload = function()
+				{
+					svgLoaded++;
+					onload();
+				};
 
-			svgFiles[key].load();
+				svgFiles[key].load();
+			}
 		}
 
 		// Charger les feuilles de style initiales
 		for (var key in styles)
 		{
-			styles[key].onload = function()
+			if (typeof styles[key] !== 'function')
 			{
-				cssLoaded++;
-				onload();
-			};
+				styles[key].onload = function()
+				{
+					cssLoaded++;
+					onload();
+				};
 
-			styles[key].load();
+				styles[key].load();
+			}
 		}
 
 		// Charger les scripts initiaux
 		for (var key in scripts)
 		{
-			scripts[key].onload = function()
+			if (typeof scripts[key] !== 'function')
 			{
-				scriptLoaded++;
-				onload();
-			};
+				scripts[key].onload = function()
+				{
+					scriptLoaded++;
+					onload();
+				};
 
-			scripts[key].load();
+				scripts[key].load();
+			}
 		}
 
 		// Charger les composents initiaux
 		for (var key in components)
 		{
-			components[key].onload = function()
+			if (typeof components[key] !== 'function')
 			{
-				componentLoaded++;
-				onload();
-			};
+				components[key].onload = function()
+				{
+					componentLoaded++;
+					onload();
+				};
 
-			components[key].load();
+				components[key].load();
+			}
 		}
 
 		loadedOnce = true;
@@ -1289,6 +1387,8 @@ function Loader($root, $style)
 	this.getMode = function() { return mode; };
 	this.getLanguage = function() { return language; };
 	this.getStyle = function() { return style; };
+	this.getScripts = function() { return scripts; };
+	this.getComponents = function() { return components; };
 	
 	this.getImg = function($id)
 	{
@@ -1313,10 +1413,13 @@ function Loader($root, $style)
 		
 		for (var name in svgFiles)
 		{
-			var subList = svgFiles[name].getAll($width, $height);
-			
-			for (var i = 0; i < subList.length; i++)
-				svgList.push(subList[i]);
+			if (typeof svgFiles[name] !== 'function')
+			{
+				var subList = svgFiles[name].getAll($width, $height);
+				
+				for (var i = 0; i < subList.length; i++)
+					svgList.push(subList[i]);
+			}
 		}
 		
 		return svgList;
@@ -1329,4 +1432,5 @@ function Loader($root, $style)
 	this.setStyle = function($style) { style = $style; };
 	
 	var $this = this;
+	Loader = $this;
 }

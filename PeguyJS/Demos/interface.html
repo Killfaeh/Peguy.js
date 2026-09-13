@@ -441,6 +441,7 @@
 						var frame = new Frame('', 'This is an empty frame');
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenEmptyFrame);
@@ -467,6 +468,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(tabManager);
+						frame.display();
 						
 						tabManager.onContextMenu = function($event)
 						{
@@ -509,6 +511,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(accordion);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenAccordionFrame);
@@ -545,6 +548,7 @@
 						};
 						
 						frame.connect('onGetSelectedDesktopItems', onDropItems);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenListBoxFrame);
@@ -566,6 +570,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(390, 200);
 						frame.appendContent(radioList);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenRadioListFrame);
@@ -594,6 +599,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(450, 200);
 						frame.appendContent(checkBoxList);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenCheckBoxListFrame);
@@ -626,6 +632,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(frameContent);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenScrollPanelFrame);
@@ -711,6 +718,8 @@
 								nodesContextMenu.addElement(groupNodesItem);
 							}
 						};
+
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenNodesPanelFrame);
@@ -758,6 +767,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(fileSystem);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenFileSystemFrame);
@@ -793,6 +803,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(kanban);
+						frame.display();
 					};
 
 					menuBarFrameTestItem.addElement(menuBarOpenKanbanFrame);
@@ -808,6 +819,7 @@
 						frame.setPosition(500, 200);
 						frame.setDimensions(800, 600);
 						frame.appendContent(dropFilesZone);
+						frame.display();
 					};
 					
 					menuBarFrameTestItem.addElement(menuBarOpenDropFilesZoneFrame);

@@ -63,6 +63,3 @@ var DateUtils =
 		return hours;
 	}
 };
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("date");

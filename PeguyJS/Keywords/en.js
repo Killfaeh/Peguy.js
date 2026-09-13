@@ -227,9 +227,13 @@ KEYWORDS.otherChoice = "Other choice";
 KEYWORDS.addList = "Add list";
 KEYWORDS.listTitle = "List title";
 KEYWORDS.addTheList = "Add the list";
+KEYWORDS.removeTheList = "Remove the list";
+KEYWORDS.confirmRemoveTheList = "Are you sure you want remove this list?";
 KEYWORDS.addCard = "Add card";
 KEYWORDS.cardTitle = "Card title";
 KEYWORDS.addTheCard = "Add the card";
+KEYWORDS.removeTheCard = "Remove the card";
+KEYWORDS.confirmRemoveTheCard = "Are you sure you want remove this card?";
 
 KEYWORDS.dropFilesInThisArea = "Drop files in this area.";
 KEYWORDS.areYouSureYouWantToRemoveThisFileFromTheList = "Are you sure you want to remove this file from the list? ";
@@ -237,6 +241,3 @@ KEYWORDS.areYouSureYouWantToRemoveSelectedFilesFromTheList = "Are you sure you w
 
 var MONTHNAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 var DAYNAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-if (Loader !== null && Loader !== undefined)
-	Loader.hasLoaded("keywords");
