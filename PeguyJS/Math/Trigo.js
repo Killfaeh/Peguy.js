@@ -1,10 +1,50 @@
 Trigo =
 {
-	rad: function($input) { return $input/180.0*Math.PI; },
-	deg: function($input) { return $input/Math.PI*180.0; },
+	rad_table: new Float32Array(360),
+	sin_table: new Float32Array(360),
+	cos_table: new Float32Array(360),
+	tan_table: new Float32Array(360),
 	
-	isometricAngle: Math.atan(0.5)/Math.PI*180,
-
+	degToRadRatio: Math.PI/180.0,
+	
+	rad: function($input)
+	{
+		if (Number.isInteger($input))
+			return Trigo.rad_table[Trigo.normalizeDeg($input)];
+		
+		return $input*Trigo.degToRadRatio;
+	},
+	
+	deg: function($input) { return $input/Trigo.degToRadRatio; },
+	
+	normalizeDeg: function($theta) { return (($theta % 360) + 360) % 360; }
+	
+	isometricAngle: Math.atan(0.5)/Trigo.degToRadRatio,
+	
+	sin: function($theta)
+	{
+		if (Number.isInteger($theta))
+			return Trigo.sin_table[Trigo.normalizeDeg($theta)];
+		
+		return Math.sin($theta * Trigo.degToRadRatio);
+	},
+	
+	cos: function($theta)
+	{
+		if (Number.isInteger($theta))
+			return Trigo.cos_table[Trigo.normalizeDeg($theta)];
+		
+		return Math.cos($theta * Trigo.degToRadRatio);
+	},
+	
+	tan: function($theta)
+	{
+		if (Number.isInteger($theta))
+			return Trigo.tan_table[Trigo.normalizeDeg($theta)];
+		
+		return Math.tan($theta * Trigo.degToRadRatio);
+	},
+	
 	cartesian: function($r, $theta, $phi)
 	{
 		var x = $r*Math.cos($theta);
@@ -74,3 +114,12 @@ Trigo =
 		return output; 
 	},
 };
+
+for (var deg = 0; deg < 360; deg++)
+{
+	var rad = deg * Trigo.degToRadRatio;
+	Trigo.rad_table[deg] = rad;
+	Trigo.sin_table[deg] = Math.sin(rad);
+	Trigo.cos_table[deg] = Math.cos(rad);
+	Trigo.tan_table[deg] = Math.tan(rad);
+}

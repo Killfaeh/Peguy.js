@@ -1019,6 +1019,11 @@ function Loader($root, $style)
 				scripts['ellipseArc'] = new ScriptLoader(root + 'PeguyJS/Math/Curves/EllipseArc.js', 'ellipseArc');
 				scripts['math-polygon'] = new ScriptLoader(root + 'PeguyJS/Math/MathPolygon.js', 'math-polygon');
 				scripts['math-plane'] = new ScriptLoader(root + 'PeguyJS/Math/MathPlane.js', 'math-plane');
+				
+				scripts['preComputeMatrix'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/PreComputeMatrix.js', 'preComputeMatrix');
+				scripts['matrix3'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/Matrix3.js', 'matrix3');
+				scripts['matrix4'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/Matrix4.js', 'matrix4');
+				
 				scripts['matrix'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/Matrix.js', 'matrix');
 				scripts['orthoMatrix'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/OrthoMatrix.js', 'orthoMatrix');
 				scripts['perspectiveMatrix'] = new ScriptLoader(root + 'PeguyJS/Math/Matrix/PerspectiveMatrix.js', 'perspectiveMatrix');
